@@ -7,6 +7,7 @@ import threading
 import unittest
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 from PIL import Image
 
@@ -54,6 +55,13 @@ class FakeProvider:
         self.next_number += count
         return {"concepts": concepts}
 
+    def review(self, prompt):
+        payload = json.loads(prompt.split("CONTEXT CẦN DUYỆT\n", 1)[1].split("\n\nChỉ trả JSON", 1)[0])
+        return {"reviews": [
+            {"index": item["index"], "decision": "keep", "reason": "Cảnh hợp lý."}
+            for item in payload
+        ]}
+
     def generate(self, prompt, directory):
         call = len(self.generate_calls) + 1
         self.generate_calls.append(prompt)
@@ -100,6 +108,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(3, finished["planned"])
         self.assertEqual(3, len(provider.generate_calls))
         self.assertEqual(1, len(provider.plan_calls))
+        self.assertTrue(any("giữ nguyên 3, sửa 0, loại 0" in event["message"] for event in self.store.events(batch["id"])))
         for item in items:
             self.assertEqual("completed", item["status"])
             with Image.open(item["image_path"]) as image:
@@ -350,6 +359,27 @@ class HTTPPipelineTests(unittest.TestCase):
         )
         self.assertEqual(400, status, payload)
         self.assertIn("model ảnh", payload["error"])
+
+    def test_http_saves_antigravity_settings_separately(self):
+        status, _, payload = self.decoded(
+            "PUT", "/api/settings",
+            {
+                "provider": "antigravity",
+                "text_model": "gpt-codex",
+                "antigravity_text_model": "gemini-antigravity",
+                "image_model": "",
+            },
+        )
+        self.assertEqual(200, status, payload)
+
+        with mock.patch("app.shutil.which", side_effect=lambda name: "/usr/bin/agy" if name == "agy" else None):
+            status, _, settings = self.decoded("GET", "/api/settings")
+        self.assertEqual(200, status, settings)
+        self.assertEqual("antigravity", settings["provider"])
+        self.assertEqual("gpt-codex", settings["text_model"])
+        self.assertEqual("gemini-antigravity", settings["antigravity_text_model"])
+        self.assertTrue(settings["antigravity_available"])
+        self.assertFalse(settings["codex_available"])
 
     def test_data_directory_allows_only_one_server(self):
         with self.assertRaisesRegex(RuntimeError, "đang dùng thư mục dữ liệu"):

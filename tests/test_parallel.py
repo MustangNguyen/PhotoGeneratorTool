@@ -128,6 +128,13 @@ class ControlledProvider:
         count = int(match.group(1))
         return {"concepts": [make_concept(number) for number in range(count)]}
 
+    def review(self, prompt):
+        payload = json.loads(prompt.split("CONTEXT CẦN DUYỆT\n", 1)[1].split("\n\nChỉ trả JSON", 1)[0])
+        return {"reviews": [
+            {"index": item["index"], "decision": "keep", "reason": "Cảnh hợp lý."}
+            for item in payload
+        ]}
+
     def generate(self, prompt, directory):
         return self.control.generate(self, prompt, directory)
 

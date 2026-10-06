@@ -176,7 +176,9 @@ def _fingerprint(concept: dict[str, Any]) -> str:
     scene = _clean(str(concept.get("scene", "")))[:55]
     composition = _clean(str(concept.get("composition", "")))[:45]
     semantic = " ".join(sorted(_tokens(" ".join(str(concept.get(name, "")) for name in ("subject", "scene", "story", "composition")))))
-    return f"{category} | {title} | {key or semantic[:90]} | S:{subject} | C:{scene} | B:{composition}"
+    palette = _clean(str(concept.get("palette", "")))[:45]
+    materials = _clean(str(concept.get("materials", "")))[:35]
+    return f"{category} | {title} | {key or semantic[:90]} | S:{subject} | C:{scene} | B:{composition} | Màu:{palette} | Chất:{materials}"
 
 
 def _phrase_present(text: str, *phrases: str) -> bool:
@@ -454,15 +456,30 @@ def make_planning_prompt(
     if not category_counts:
         counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
     count_text = ", ".join(f"{name}:{counts.get(name, 0)}" for name in CATEGORIES)
-    fingerprints = "\n".join(f"- {_fingerprint(item)}" for item in _history_sample([x for x in history if isinstance(x, dict)]))
+    # Bound text sent to the model; duplicate checks still use the entire history.
+    history_lines = []
+    history_chars = 0
+    for item in _history_sample([x for x in history if isinstance(x, dict)]):
+        line = f"- {_fingerprint(item)}"
+        if history_chars + len(line) + 1 > 10000:
+            break
+        history_lines.append(line)
+        history_chars += len(line) + 1
+    fingerprints = "\n".join(history_lines)
     if not fingerprints:
         fingerprints = "- (chưa có concept trước đó)"
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
+CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
+- Chọn tình huống đời thực đơn giản: vật gì, ở đâu, đặt/tựa/treo thế nào, vì sao các vật cùng xuất hiện.
+- title gọi đúng vật/cảnh có trong ảnh; story không bắt buộc có đạo cụ hay dấu vết. Không có người thì không đặt tiêu đề như đang có vũ công.
+- subject/scene xác định cấu tạo, tỷ lệ và điểm tựa cần thiết; composition chọn góc máy/cắt khung, không ép vật tạo chữ X hoặc hình trang trí.
+- Viết prompt ngắn, cụ thể, theo thứ tự cảnh → vị trí/cấu tạo → máy ảnh → ánh sáng/mảng màu. Không nối lại toàn bộ quy tắc chung; ứng dụng sẽ thêm một lần.
+
 MỤC TIÊU ĐA DẠNG
 - Mỗi concept phải khác về chủ thể chính, môi trường, câu chuyện qua đồ vật và cấu trúc bố cục; tạo một cảnh mạch lạc, không ghép ngẫu nhiên nhiều thứ.
 - Đổi loại trái cây, màu sắc, giống hoa hoặc vật trang trí trong cùng kiểu cảnh KHÔNG tạo thành concept mới. Cùng họ chủ thể chính + cùng môi trường là gần trùng và phải tránh.
-- Tự cân bằng nhóm ít dùng dựa trên thống kê. Không cần ép concept hợp lệ vào taxonomy; nếu có nhóm thực sự mới, đặt tên nhóm rõ ràng.
+- Thống kê category chỉ để tham khảo; ưu tiên đa dạng nội dung tranh, bố cục, chất liệu và mảng màu theo hướng dẫn hiện tại. Không bù category ít dùng bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
 - Hãy tự nghĩ thêm phương án dự phòng khi suy luận để thay thế concept trùng, nhưng chỉ xuất đúng {count} concept tốt nhất.
 
 NHÓM GỢI Ý
@@ -483,7 +500,8 @@ title, category, subject, scene, story, composition, palette, materials, key, pr
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.
 - title tối đa 100 ký tự; category 70; subject/scene/story/composition/materials mỗi trường tối đa 200 ký tự; palette 150; key 150; prompt 1800 ký tự.
 - key là khóa ngữ nghĩa chuẩn bằng tiếng Anh, mô tả họ chủ thể + môi trường + câu chuyện; không dùng số thứ tự.
-- prompt là prompt ảnh hoàn chỉnh bằng tiếng Anh.
+- palette mô tả màu chủ đạo, màu phụ, điểm nhấn và vùng tương ứng; composition nêu cách phân bố các mảng lớn và mốc nối. Không chỉ liệt kê tên màu.
+- prompt là prompt ảnh hoàn chỉnh bằng tiếng Anh, thể hiện đúng bố cục, chất liệu và palette đã chọn.
 
 HƯỚNG DẪN NỘI DUNG HIỆN TẠI — ÁP DỤNG NGAY KHI CHỌN CONCEPT
 {content_direction("vi")}

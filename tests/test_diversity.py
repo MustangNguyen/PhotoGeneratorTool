@@ -171,6 +171,8 @@ class DiversityTests(unittest.TestCase):
         self.assertIn("S:", prompt)
         self.assertIn("C:", prompt)
         self.assertIn("B:", prompt)
+        self.assertIn("Màu:", prompt)
+        self.assertIn("Chất:", prompt)
         self.assertLess(len(prompt), 25000)
         for category in CATEGORIES:
             self.assertIn(category, prompt)

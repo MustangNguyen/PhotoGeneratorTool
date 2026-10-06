@@ -26,6 +26,13 @@ class AntigravityTests(unittest.TestCase):
         self.last_child = child
         return answer, process
 
+    def test_status_checks_local_setup_without_slow_model_request(self):
+        with mock.patch.object(self.provider, '_check_account_mode'), mock.patch('studio.providers.subprocess.run') as run:
+            status = self.provider.status()
+        self.assertTrue(status['ready'])
+        self.assertIn('kiểm tra khi chạy', status['message'])
+        run.assert_not_called()
+
     def test_stream_protocol_and_account_environment(self):
         self.provider.settings['antigravity_text_model'] = 'context-only'
         with mock.patch.dict('os.environ', {'GEMINI_API_KEY': 'secret', 'AGY_ADC_AUTH': 'true'}):
@@ -119,6 +126,17 @@ class AntigravityTests(unittest.TestCase):
         with mock.patch('studio.providers.Path.home', return_value=self.root):
             with self.assertRaisesRegex(RuntimeError, 'có 2 ảnh'):
                 self.provider._collect_image({'conversation_id': conversation}, self.root)
+
+    def test_collects_final_reported_image_when_cli_refines(self):
+        conversation = '33333333-3333-3333-3333-333333333333'
+        artifacts = self.root / '.gemini/antigravity-cli/brain' / conversation
+        artifacts.mkdir(parents=True)
+        (artifacts / 'draft.jpg').write_bytes(b'draft')
+        final = artifacts / 'final.jpg'
+        final.write_bytes(b'final raster')
+        with mock.patch('studio.providers.Path.home', return_value=self.root):
+            target = self.provider._collect_image({'conversation_id': conversation, 'response': f'Saved: `{final}`'}, self.root)
+        self.assertEqual(b'final raster', target.read_bytes())
 
     def test_review_uses_plain_object_schema_without_mutating_shared_schema(self):
         from studio.review import REVIEW_SCHEMA

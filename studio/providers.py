@@ -164,13 +164,10 @@ class AntigravityProvider(CodexProvider):
             if not self.executable:
                 raise RuntimeError('Chưa tìm thấy Antigravity CLI (agy). Cài CLI và đăng nhập tài khoản Google Pro.')
             self._check_account_mode()
-            result = subprocess.run([self.executable, 'models'], capture_output=True, text=True, timeout=15, env=self._environment())
-            if result.returncode or not result.stdout.strip():
-                raise RuntimeError('Không đọc được model Antigravity. Chạy agy trong terminal để đăng nhập, rồi tải lại trạng thái.')
         except (RuntimeError, OSError, subprocess.TimeoutExpired) as error:
             message = str(error) if isinstance(error, RuntimeError) else 'Không kết nối được Antigravity CLI; thử agy models trong terminal.'
             return {'name': name, 'ready': False, 'text_ready': False, 'message': message}
-        return {'name': name, 'ready': True, 'text_ready': True, 'message': 'Antigravity dùng hạn mức tài khoản Google; không bật dùng thêm AI credits trong cấu hình CLI. Đăng nhập/quota và tạo ảnh được kiểm tra khi chạy.'}
+        return {'name': name, 'ready': True, 'text_ready': True, 'message': 'Antigravity CLI sẵn sàng dùng hạn mức tài khoản Google. Đăng nhập/quota được kiểm tra khi chạy; không bật thêm AI credits trong cấu hình CLI.'}
 
     @staticmethod
     def _environment():
@@ -271,6 +268,13 @@ class AntigravityProvider(CodexProvider):
         images = [path for path in artifacts.iterdir()
                   if path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.webp'}
                   and not path.is_symlink() and path.is_file() and path.stat().st_size]
+        # The built-in image subagent may refine an image. Use its final
+        # reported artifact, never an arbitrary latest file or another run.
+        if len(images) > 1:
+            response = result.get('response', '')
+            selected = [path for path in images if str(path) in response] if isinstance(response, str) else []
+            if len(selected) == 1:
+                images = selected
         if len(images) != 1:
             raise RuntimeError(f'Antigravity có {len(images)} ảnh trong lượt này; cần đúng một ảnh. Kiểm tra artifact, không tự tạo lại.')
         target = Path(directory) / ('source' + images[0].suffix.lower())

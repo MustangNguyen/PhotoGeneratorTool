@@ -8,6 +8,8 @@ from tests.test_diversity import concept
 
 # Concrete scene descriptions, kept independent of the phrase lists in the catalogue.
 CASES = [
+    ('animal-drinking-shore', 'Con hươu cúi uống nước', 'Bờ suối trong', 'Trung cảnh ngang tầm mắt'),
+    ('animal-resting-shore', 'Con hải cẩu nằm nghỉ', 'Bờ vịnh yên', 'Cận vừa ngang mặt đá'),
     ('bouquet-books-window', 'Bình hoa hồng trong veo', 'Bàn có sách mở cạnh cửa sổ', 'Cận cảnh tĩnh vật'),
     ('dessert-glass-window', 'Ly kem nhiều lớp', 'Quầy gỗ bên cửa sổ nhìn biển', 'Cận cảnh một ly'),
     ('pastry-coffee-table', 'Bánh sừng bò và tách cà phê', 'Bàn ăn sáng', 'Nhìn nghiêng'),
@@ -59,6 +61,8 @@ class FinalMotifCatalogueTests(unittest.TestCase):
 
     def test_different_setting_or_background_prop_is_not_same_formula(self):
         scenes = [
+            ('Con hươu đi qua đồng cỏ', 'Đồi cỏ sáng', 'Trung cảnh', 'động vật cúi uống nước cạnh bờ'),
+            ('Con cáo nằm nghỉ', 'Trong hốc cây khô', 'Cận vừa', 'động vật nghỉ cạnh mặt nước'),
             ('Chim bay', 'Trên biển rộng', 'Chim nhỏ phía xa', 'chim đậu giữa cành hoa'),
             ('Tách trà', 'Bàn gỗ trống bên bếp', 'Cận cảnh', 'tách trà cùng hoa trên bàn'),
             ('Bình gốm rỗng', 'Có bình hoa cạnh sách ở cửa sổ phía xa', 'Chủ thể lớn', 'bình hoa cạnh sách bên cửa sổ'),

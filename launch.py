@@ -19,7 +19,7 @@ def running():
     try:
         with urllib.request.urlopen(URL + '/api/settings', timeout=1) as response:
             data = json.load(response)
-        return isinstance(data, dict) and 'codex_available' in data and data.get('provider') in {'codex', 'openai'}
+        return isinstance(data, dict) and 'codex_available' in data and data.get('provider') in {'codex', 'antigravity', 'openai'}
     except (OSError, ValueError):
         return False
 

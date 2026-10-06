@@ -192,17 +192,21 @@
       <form id="settingsForm">
         <span class="eyebrow">Thiết lập một lần</span>
         <h2 id="settingsTitle">Dịch vụ tạo ảnh</h2>
-        <p class="settings-intro">Khóa API chỉ được gửi về máy chủ khi bạn lưu và không được trả lại trình duyệt.</p>
+        <p class="settings-intro">Chọn CLI để dùng hạn mức tài khoản đã đăng nhập, hoặc OpenAI API để tính phí qua API key.</p>
         <div class="settings-status" id="settingsStatus"></div>
         <label for="providerSelect">Nhà cung cấp</label>
         <select id="providerSelect" name="provider">
           <option value="codex">Codex cục bộ</option>
+          <option value="antigravity">Antigravity cục bộ</option>
           <option value="openai">OpenAI API</option>
         </select>
+        <small id="providerHint"></small>
         <label for="textModelInput">Model lên context</label>
         <input id="textModelInput" name="text_model" type="text" autocomplete="off">
+        <small id="textModelHint">Để trống để CLI dùng model mặc định.</small>
         <label for="imageModelInput">Model tạo ảnh</label>
         <input id="imageModelInput" name="image_model" type="text" autocomplete="off">
+        <small id="imageModelHint">Chỉ dùng khi chọn OpenAI API; CLI dùng công cụ tạo ảnh tích hợp.</small>
         <label for="concurrencyInput">Số ảnh tạo đồng thời</label>
         <input id="concurrencyInput" name="concurrency" type="number" inputmode="numeric" min="1" max="8" value="4" required aria-describedby="concurrencyHint">
         <small id="concurrencyHint">Mặc định 4, tối đa 8. Tăng số này có thể tạo nhanh hơn nếu dịch vụ hỗ trợ.</small>

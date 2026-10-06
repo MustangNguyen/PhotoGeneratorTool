@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Puzzle Atelier — tạo bộ ảnh ghép đa dạng theo lô.">
+    <title>Puzzle Atelier</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Puzzle Atelier — trang chính">
+          <span class="brand-mark" aria-hidden="true">PA</span>
+          <span>
+            <strong>Puzzle Atelier</strong>
+            <small>Xưởng ảnh ghép</small>
+          </span>
+        </a>
+        <div class="topbar-actions">
+          <div class="provider-pill" id="providerPill" role="status">
+            <span class="status-dot"></span>
+            <span id="providerLabel">Đang kiểm tra dịch vụ…</span>
+          </div>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="Mở cài đặt" title="Cài đặt">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3v-4h.08A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10.04 3V3h4v.08a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.44 9a1.7 1.7 0 0 0 1.56 1.03h.08v4H21A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="sidebar" aria-label="Các lô ảnh">
+          <div class="sidebar-heading">
+            <div>
+              <span class="eyebrow">Thư viện</span>
+              <h2>Các lô ảnh</h2>
+            </div>
+            <span class="count-badge" id="batchCount">0</span>
+          </div>
+          <nav class="batch-list" id="batchList" aria-label="Danh sách lô">
+            <div class="sidebar-empty">Chưa có lô ảnh nào.</div>
+          </nav>
+          <div class="sidebar-stats" aria-label="Thống kê kho ảnh">
+            <div><strong id="imageCount">0</strong><span>ảnh đã tạo</span></div>
+            <div><strong id="conceptCount">0</strong><span>context đã lưu</span></div>
+          </div>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+          <section class="create-panel" aria-labelledby="createTitle">
+            <div class="create-copy">
+              <span class="eyebrow">Tạo nội dung tự động</span>
+              <h1 id="createTitle">Một con số. Nhiều thế giới để khám phá.</h1>
+              <p>Atelier tự lên context, kiểm tra độ trùng và tạo nhiều ảnh đồng thời theo tiêu chuẩn đã duyệt.</p>
+            </div>
+            <form class="create-form" id="createForm">
+              <label for="countInput">Số lượng ảnh</label>
+              <div class="count-control">
+                <button type="button" class="step-button" data-step="-10" aria-label="Giảm 10 ảnh">−</button>
+                <input id="countInput" name="count" type="number" inputmode="numeric" min="1" max="1000" value="20" required aria-describedby="countHint">
+                <button type="button" class="step-button" data-step="10" aria-label="Tăng 10 ảnh">+</button>
+              </div>
+              <span id="countHint">Từ 1 đến 1.000 ảnh</span>
+              <button class="primary-button" id="createButton" type="submit">
+                <span>Tạo lô ảnh</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
+              </button>
+            </form>
+          </section>
+
+          <section id="emptyState" class="empty-state" aria-labelledby="emptyTitle">
+            <div class="reference-frame">
+              <img src="/sample.png" alt="Ảnh tham chiếu đã được đội content duyệt">
+              <span class="approved-label"><span aria-hidden="true">✓</span> Mẫu đã duyệt</span>
+            </div>
+            <div class="empty-copy">
+              <span class="eyebrow">Chuẩn hình ảnh</span>
+              <h2 id="emptyTitle">Sáng, giàu chi tiết, sinh ra để ghép</h2>
+              <p>Mỗi ảnh giữ chung chất lượng thị giác, nhưng có bối cảnh, câu chuyện, góc máy và bảng màu riêng.</p>
+              <ul class="principles">
+                <li><span>01</span><div><strong>Context đa dạng</strong><small>Không chỉ đổi vài vật thể trên cùng một cảnh.</small></div></li>
+                <li><span>02</span><div><strong>Đủ chi tiết nhận diện</strong><small>Mỗi mảnh cắt vẫn có dấu hiệu để tìm.</small></div></li>
+                <li><span>03</span><div><strong>Kiểm tra gần trùng</strong><small>Lọc ý tưởng trước khi tạo ảnh.</small></div></li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="batchView" class="batch-view" hidden aria-live="polite">
+            <div class="batch-header">
+              <div>
+                <button class="back-link" id="mobileBackButton" type="button">← Các lô ảnh</button>
+                <span class="eyebrow" id="batchDate">Lô ảnh</span>
+                <h2 id="batchTitle">Lô ảnh</h2>
+                <p id="batchSummary">Đang tải thông tin…</p>
+              </div>
+              <div class="batch-actions">
+                <button class="secondary-button" id="pauseButton" type="button" hidden>Tạm dừng</button>
+                <a class="secondary-button" id="exportButton" href="#" download>Tải ảnh đã duyệt</a>
+                <a class="secondary-button" id="exportAllButton" href="#" download>Tải tất cả đã tạo</a>
+              </div>
+            </div>
+            <div class="progress-panel">
+              <div class="progress-meta">
+                <span id="progressText">0 / 0 hoàn thành</span>
+                <strong id="progressPercent">0%</strong>
+              </div>
+              <div class="progress-track" role="progressbar" aria-label="Tiến độ lô ảnh" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progressBar"></span></div>
+              <div class="progress-stages" id="progressStages"></div>
+            </div>
+            <div class="notice error-notice" id="batchError" role="alert" hidden></div>
+            <section class="live-activity" id="liveActivity" aria-labelledby="liveActivityTitle" hidden>
+              <div class="live-activity-heading">
+                <div>
+                  <span class="eyebrow">Hoạt động trực tiếp</span>
+                  <h3 id="liveActivityTitle">Các ảnh đang được xử lý</h3>
+                </div>
+                <span id="liveActivitySummary">Đang cập nhật…</span>
+              </div>
+              <p class="feed-note" id="liveFeedNote" role="status" hidden></p>
+              <div class="live-activity-list" id="liveActivityList"></div>
+            </section>
+            <div class="gallery-toolbar">
+              <div class="filter-tabs" id="filterTabs" role="group" aria-label="Lọc ảnh">
+                <button class="filter-tab active" type="button" data-filter="all">Tất cả</button>
+                <button class="filter-tab" type="button" data-filter="completed">Đã tạo</button>
+                <button class="filter-tab" type="button" data-filter="approved">Đã duyệt</button>
+                <button class="filter-tab" type="button" data-filter="attention">Cần xử lý</button>
+              </div>
+              <span id="galleryCount">0 ảnh</span>
+            </div>
+            <div class="image-gallery" id="imageGallery"></div>
+            <div class="event-log" id="eventLog" hidden>
+              <button type="button" id="eventLogToggle" aria-expanded="false">Nhật ký hoạt động <span>⌄</span></button>
+              <ol id="eventList" hidden></ol>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog class="modal image-modal" id="imageModal" aria-labelledby="modalTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Đóng xem ảnh">×</button>
+      <div class="modal-image-column">
+        <div class="puzzle-preview" id="puzzlePreview">
+          <canvas id="previewCanvas" aria-label="Xem trước ảnh được chia thành các mảnh ghép"></canvas>
+          <div class="image-placeholder" id="modalImagePlaceholder">Ảnh chưa sẵn sàng</div>
+        </div>
+        <div class="preview-controls">
+          <label for="gridSize">Khảo sát lưới <span class="sr-only">không mô phỏng gameplay</span></label>
+          <input id="gridSize" type="range" min="4" max="8" value="4">
+          <output id="gridOutput" for="gridSize">4 × 4</output>
+          <button class="text-button" id="shuffleButton" type="button">Xáo mảnh</button>
+        </div>
+      </div>
+      <div class="modal-details">
+        <span class="eyebrow" id="modalCategory">Context</span>
+        <h2 id="modalTitle">Chi tiết ảnh</h2>
+        <span class="status-badge" id="modalStatus"></span>
+        <div class="modal-live-progress" id="modalLiveProgress" hidden>
+          <div>
+            <strong id="modalPhase">Đang chuẩn bị</strong>
+            <time id="modalElapsed"></time>
+          </div>
+          <p id="modalProgressMessage">Đang cập nhật trạng thái…</p>
+          <small id="modalFeedNote" hidden></small>
+        </div>
+        <dl class="context-list">
+          <div><dt>Bối cảnh</dt><dd id="modalScene">—</dd></div>
+          <div><dt>Câu chuyện</dt><dd id="modalStory">—</dd></div>
+          <div><dt>Bố cục</dt><dd id="modalComposition">—</dd></div>
+          <div><dt>Bảng màu</dt><dd id="modalPalette">—</dd></div>
+          <div id="modalSimilarityRow" hidden><dt>Độ tương đồng</dt><dd id="modalSimilarity">—</dd></div>
+        </dl>
+        <div class="notice error-notice" id="modalError" role="alert" hidden></div>
+        <details class="prompt-details">
+          <summary>Prompt tạo ảnh</summary>
+          <p id="modalPrompt">—</p>
+        </details>
+        <div class="modal-actions" id="modalActions">
+          <button class="reject-button" id="rejectButton" type="button">Loại ảnh</button>
+          <button class="approve-button" id="approveButton" type="button">Duyệt ảnh</button>
+          <button class="secondary-button" id="retryButton" type="button" hidden>Tạo lại</button>
+          <a class="secondary-button" id="downloadButton" href="#" download hidden>Tải ảnh</a>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="modal settings-modal" id="settingsModal" aria-labelledby="settingsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Đóng cài đặt">×</button>
+      <form id="settingsForm">
+        <span class="eyebrow">Thiết lập một lần</span>
+        <h2 id="settingsTitle">Dịch vụ tạo ảnh</h2>
+        <p class="settings-intro">Khóa API chỉ được gửi về máy chủ khi bạn lưu và không được trả lại trình duyệt.</p>
+        <div class="settings-status" id="settingsStatus"></div>
+        <label for="providerSelect">Nhà cung cấp</label>
+        <select id="providerSelect" name="provider">
+          <option value="codex">Codex cục bộ</option>
+          <option value="openai">OpenAI API</option>
+        </select>
+        <label for="textModelInput">Model lên context</label>
+        <input id="textModelInput" name="text_model" type="text" autocomplete="off">
+        <label for="imageModelInput">Model tạo ảnh</label>
+        <input id="imageModelInput" name="image_model" type="text" autocomplete="off">
+        <label for="concurrencyInput">Số ảnh tạo đồng thời</label>
+        <input id="concurrencyInput" name="concurrency" type="number" inputmode="numeric" min="1" max="8" value="4" required aria-describedby="concurrencyHint">
+        <small id="concurrencyHint">Mặc định 4, tối đa 8. Tăng số này có thể tạo nhanh hơn nếu dịch vụ hỗ trợ.</small>
+        <div id="apiKeyField">
+          <label for="apiKeyInput">OpenAI API key</label>
+          <input id="apiKeyInput" name="api_key" type="password" autocomplete="new-password" placeholder="Để trống nếu không thay đổi">
+          <small id="apiKeyHint">Khóa hiện tại chưa được thiết lập.</small>
+        </div>
+        <div class="settings-actions">
+          <button class="secondary-button" type="button" data-close-modal>Hủy</button>
+          <button class="primary-button" id="saveSettingsButton" type="submit">Lưu cài đặt</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

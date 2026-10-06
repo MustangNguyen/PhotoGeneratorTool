@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+/data/
+/Final/
+/output/
+/analysis/
+/.omx/
+/.codex/
+/Puzzle Atelier.desktop
+/IMPLEMENTATION.md
+/DESIGN.md
+*.sqlite3*
+*.log

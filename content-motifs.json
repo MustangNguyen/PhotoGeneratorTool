@@ -1,0 +1,1013 @@
+{
+  "version": 1,
+  "source": "Manually reviewed contact sheets and 96-image stratified-by-path sample from Final; not a full semantic index or approval list.",
+  "motifs": [
+    {
+      "id": "bouquet-books-window",
+      "label": "bình hoa cạnh sách bên cửa sổ",
+      "evidence": [
+        "Final/Chap45/1103-4x4.jpg",
+        "Final/Chap76/1899-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "bình hoa",
+            "lọ hoa",
+            "bó hoa",
+            "flower vase",
+            "bouquet"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "sách",
+            "book",
+            "books"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cửa sổ",
+            "window",
+            "windowsill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dessert-glass-window",
+      "label": "ly tráng miệng nhiều lớp bên cửa sổ",
+      "evidence": [
+        "Final/Chap41/1008-6x6.jpg",
+        "Final/Chap61/1508-6x6.jpg",
+        "Final/Chap8/181-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "ly kem",
+            "ly tráng miệng",
+            "parfait",
+            "sundae",
+            "dessert glass",
+            "ice cream"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cửa sổ",
+            "window",
+            "windowsill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pastry-coffee-table",
+      "label": "bánh ngọt và cà phê bày trên bàn",
+      "evidence": [
+        "Final/Chap79/1957-5x5.jpg",
+        "Final/Chap82/2027-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "bánh sừng bò",
+            "bánh ngọt",
+            "bánh nướng",
+            "croissant",
+            "croissants",
+            "pastry",
+            "pastries"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cà phê",
+            "coffee",
+            "espresso"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bàn",
+            "table",
+            "tabletop",
+            "plate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coffee-beans-still-life",
+      "label": "bộ pha cà phê cạnh hạt rang",
+      "evidence": [
+        "Final/Chap2/41-4x4.png",
+        "Final/Chap6/138-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "cà phê",
+            "coffee",
+            "espresso",
+            "moka"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "hạt rang",
+            "hạt cà phê",
+            "coffee beans",
+            "roasted beans"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bàn",
+            "table",
+            "tabletop",
+            "counter"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plated-meal-overhead",
+      "label": "đĩa món chính nhìn từ trên xuống",
+      "evidence": [
+        "Final/Chap36/891-4x4.jpg",
+        "Final/Chap48/1198-6x6.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "đĩa thức ăn",
+            "đĩa cơm",
+            "đĩa mì",
+            "đĩa thịt",
+            "đĩa gà",
+            "đĩa món chính",
+            "meal plate",
+            "plated meal",
+            "chicken plate",
+            "steak plate",
+            "rice plate",
+            "noodle plate"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "từ trên xuống",
+            "nhìn từ trên",
+            "góc cao",
+            "overhead",
+            "top down",
+            "top view"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bird-flowering-branch",
+      "label": "chim đậu giữa cành hoa",
+      "evidence": [
+        "Final/Chap60/1484-6x6.jpg",
+        "Final/Chap66/1641-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "chim",
+            "vẹt",
+            "bird",
+            "parrot",
+            "cockatiel",
+            "finch"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cành hoa",
+            "cành đào",
+            "cành anh đào",
+            "cành nở hoa",
+            "flowering branch",
+            "blossom branch",
+            "blossoming branch",
+            "flowering branches"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "door-flower-frame",
+      "label": "cửa ra vào được hoa leo bao quanh",
+      "evidence": [
+        "Final/Chap1/10-3x3.jpg",
+        "Final/Chap13/325-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "cửa ra vào",
+            "cánh cửa",
+            "cửa gỗ",
+            "cửa vòm",
+            "doorway",
+            "front door",
+            "arched door"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "hoa leo",
+            "hoa giấy",
+            "hoa hồng leo",
+            "flowering vines",
+            "bougainvillea",
+            "climbing roses"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mediterranean-arched-stair",
+      "label": "cầu thang ngoài trời giữa các vòm Địa Trung Hải",
+      "evidence": [
+        "Final/Chap42/1032-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "cầu thang",
+            "bậc thang",
+            "staircase",
+            "stairs",
+            "steps"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cửa vòm",
+            "mái vòm",
+            "vòm tường",
+            "archway",
+            "arches",
+            "arched doorway"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "Địa Trung Hải",
+            "Mediterranean",
+            "Santorini",
+            "terracotta",
+            "tường trắng"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vintage-car-seaside",
+      "label": "xe cổ đỗ bên biển",
+      "evidence": [
+        "Final/Chap32/792-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "xe cổ",
+            "ô tô cổ",
+            "xe hơi cổ",
+            "vintage car",
+            "classic car",
+            "retro car",
+            "vintage scooter"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bờ biển",
+            "ven biển",
+            "bãi biển",
+            "biển xanh",
+            "seaside",
+            "seafront",
+            "beach",
+            "coastal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sunny-laundry-plants",
+      "label": "máy giặt trong phòng sáng có cây xanh",
+      "evidence": [
+        "Final/Chap80/1980-5x5.jpg",
+        "Final/Chap10/232-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "máy giặt",
+            "phòng giặt",
+            "washing machine",
+            "laundry room"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cây xanh",
+            "cây cảnh",
+            "chậu cây",
+            "plants",
+            "potted plants"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cửa sổ",
+            "mái kính",
+            "window",
+            "glass roof",
+            "sunroom"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "succulent-shelves",
+      "label": "chậu xương rồng và sen đá xếp trên kệ",
+      "evidence": [
+        "Final/Chap21/513-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "xương rồng",
+            "sen đá",
+            "cacti",
+            "cactus",
+            "succulent",
+            "succulents"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "kệ",
+            "giá gỗ",
+            "shelves",
+            "shelf",
+            "shelving"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bath-window-plants",
+      "label": "bồn tắm bên cửa sổ và cây xanh",
+      "evidence": [
+        "Final/Chap25/608-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "bồn tắm",
+            "bathtub",
+            "bath tub"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cửa sổ",
+            "window"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cây xanh",
+            "cây cảnh",
+            "chậu cây",
+            "plants",
+            "potted plant"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stationery-desk",
+      "label": "góc bàn học với sổ và dụng cụ viết",
+      "evidence": [
+        "Final/Chap31/773-4x4.jpg",
+        "Final/Chap58/1438-6x6.jpg",
+        "Final/Daily/85-8x8.png"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "bàn học",
+            "bàn làm việc",
+            "văn phòng phẩm",
+            "góc học tập",
+            "study desk",
+            "writing desk",
+            "stationery",
+            "workspace"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "sổ tay",
+            "quyển sổ",
+            "notebook",
+            "notebooks",
+            "journal"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bút",
+            "bút chì",
+            "pen",
+            "pens",
+            "pencils"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vintage-audio-table",
+      "label": "thiết bị nghe nhạc cổ bày trên bàn",
+      "evidence": [
+        "Final/Chap83/2075-5x5.jpg",
+        "Final/Chap72/1778-6x6.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "radio cổ",
+            "máy cassette",
+            "máy hát đĩa",
+            "gramophone",
+            "record player",
+            "vintage radio",
+            "cassette player",
+            "boombox"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bàn",
+            "kệ gỗ",
+            "table",
+            "tabletop",
+            "wooden shelf"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "globe-bookshelf",
+      "label": "quả địa cầu cạnh tủ sách",
+      "evidence": [
+        "Final/Chap10/230-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "quả địa cầu",
+            "globe",
+            "terrestrial globe"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "tủ sách",
+            "kệ sách",
+            "thư viện",
+            "bookshelf",
+            "bookcase",
+            "library"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "train-interior-seats",
+      "label": "nội thất toa tàu với dãy ghế trống",
+      "evidence": [
+        "Final/Chap39/962-5x5.jpg",
+        "Final/Chap65/1603-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "nội thất toa tàu",
+            "bên trong toa tàu",
+            "toa tàu",
+            "toa xe điện",
+            "train interior",
+            "tram interior",
+            "subway interior",
+            "train carriage"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "ghế trống",
+            "hàng ghế",
+            "dãy ghế",
+            "empty seats",
+            "seating row",
+            "bench seats"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lighthouse-cliff",
+      "label": "hải đăng trên mỏm đá ven biển",
+      "evidence": [
+        "Final/Chap46/1127-5x5.jpg",
+        "Final/Chap62/1532-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "hải đăng",
+            "lighthouse"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "mỏm đá",
+            "vách đá",
+            "ghềnh đá",
+            "cliff",
+            "clifftop",
+            "rocky headland",
+            "coastal rocks"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "biển",
+            "đại dương",
+            "sea",
+            "ocean",
+            "coastal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cottage-floral-facade",
+      "label": "mặt tiền nhà cổ với hoa ở ban công",
+      "evidence": [
+        "Final/Chap47/1151-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "nhà cổ",
+            "ngôi nhà",
+            "mặt tiền nhà",
+            "cottage",
+            "half timbered house",
+            "house facade"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "ban công hoa",
+            "bồn hoa cửa sổ",
+            "hoa ở ban công",
+            "flower boxes",
+            "flowering balcony",
+            "window boxes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "open-window-coast",
+      "label": "khung cửa sổ mở nhìn xuống phố biển",
+      "evidence": [
+        "Final/Chap38/939-4x4.jpg",
+        "Final/Chap44/1080-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "cửa sổ mở",
+            "khung cửa sổ",
+            "open window",
+            "window frame"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "phố biển",
+            "làng ven biển",
+            "thị trấn ven biển",
+            "coastal town",
+            "seaside village",
+            "seaside town",
+            "coastal village"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tea-flowers-table",
+      "label": "tách trà cùng hoa trên bàn",
+      "evidence": [
+        "Final/Chap66/1627-5x5.jpg",
+        "Final/Chap73/1815-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "tách trà",
+            "chén trà",
+            "bộ trà",
+            "tea cup",
+            "teacup",
+            "tea set"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bình hoa",
+            "bó hoa",
+            "hoa hồng",
+            "flower vase",
+            "bouquet",
+            "roses"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "bàn",
+            "khay",
+            "table",
+            "tabletop",
+            "tray"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tallship-ocean",
+      "label": "tàu buồm nhiều cột giữa biển",
+      "evidence": [
+        "Final/Chap63/1555-5x5.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "tàu buồm",
+            "thuyền buồm nhiều cột",
+            "tall ship",
+            "sailing ship"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "cánh buồm",
+            "buồm trắng",
+            "sails",
+            "white sails"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "biển",
+            "đại dương",
+            "sea",
+            "ocean"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "resort-pool",
+      "label": "hồ bơi giữa khu nghỉ dưỡng",
+      "evidence": [
+        "Final/Chap20/489-6x6.jpg",
+        "Final/Chap6/136-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "hồ bơi",
+            "bể bơi",
+            "swimming pool",
+            "resort pool"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "khách sạn",
+            "khu nghỉ dưỡng",
+            "biệt thự",
+            "motel",
+            "hotel",
+            "resort",
+            "villa"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sleeping-pet-blanket",
+      "label": "thú cưng ngủ cuộn trong chăn",
+      "evidence": [
+        "Final/lv5/animal_5.png"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "chó",
+            "mèo",
+            "cún",
+            "thú cưng",
+            "puppy",
+            "kitten",
+            "dog",
+            "cat",
+            "pet"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "ngủ",
+            "sleeping",
+            "asleep",
+            "napping"
+          ]
+        },
+        {
+          "fields": [
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "chăn",
+            "blanket",
+            "quilt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stained-glass-nature",
+      "label": "ô kính màu với hoa hoặc chim",
+      "evidence": [
+        "Final/Chap67/1674-6x6.jpg",
+        "Final/Chap68/1698-6x6.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "kính màu",
+            "tranh kính",
+            "stained glass"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition"
+          ],
+          "phrases": [
+            "hoa",
+            "chim",
+            "hoa ly",
+            "hoa sen",
+            "flower",
+            "flowers",
+            "bird",
+            "hummingbird",
+            "lily",
+            "lilies"
+          ]
+        }
+      ]
+    }
+  ]
+}

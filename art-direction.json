@@ -1,0 +1,58 @@
+{
+  "version": 4,
+  "updated_at": "2026-10-06",
+  "planning_rules": [
+    "Ưu tiên vẻ đẹp của ảnh nguyên: cảnh sáng đẹp, sạch sẽ, dễ chịu, chủ thể hấp dẫn và bố cục có điểm nhấn. Chọn màu trong, tươi tự nhiên; tránh bảng màu xám bẩn, nâu xỉn, xanh xỉn bao trùm ảnh. Không dùng tăng bão hòa gắt để chữa một cảnh vốn bẩn hoặc kém hấp dẫn. Hướng ảnh biên tập đẹp mắt, không phải ảnh phóng sự bùn đất.",
+    "Yêu cầu đã được người dùng xác nhận: KHÔNG dùng ảnh có bùn đất. Không đề xuất cảnh có bùn lầy, nền đất trơ, đất bẩn, vũng bùn, nước đục màu bùn hoặc công việc làm bùn đất thành chi tiết chính.",
+    "Không lấy ruộng mới cấy ngập bùn, dòng lũ vừa rút để lộ bùn, bờ kênh đất hoặc công trường đào đất làm concept. Với cây, vườn và nông thôn, chọn bố cục không lộ đất: cây cỏ phủ kín nền, lối lát sạch, mặt đá sạch, sàn gỗ hoặc chậu đặt sao cho không thấy mặt đất trong chậu. Nước nếu có phải trong/sạch.",
+    "Điều kiện không bùn đất áp dụng đồng bộ vào subject, scene, story, composition, palette, materials và prompt; không chỉ thêm câu phủ định cuối prompt đang mô tả bùn.",
+    "Vẫn giữ đa dạng 24 nhóm; không cấm toàn bộ phong cảnh, thiên nhiên hay nông thôn. Không giải quyết bằng cách chuyển mọi ảnh sang hoa, trái cây hoặc bếp. Giữ màu tươi sáng và các cụm chi tiết dễ phân biệt để ghép hình.",
+    "Feedback game design: ảnh quá nhiều chi tiết nhỏ và chưa đủ chill. Ưu tiên cảm giác thư giãn, thanh bình, ấm áp, muốn ngắm lâu; chọn khoảnh khắc nghỉ ngơi và cảnh đẹp giản dị. Tránh lấy hoạt động sửa chữa, phòng kỹ thuật, khai quật, đổ nát hoặc cơ cấu máy lộ thiên làm trọng tâm; không cần câu chuyện phức tạp mới tạo được chủ đề khác nhau.",
+    "Bố cục chill nhưng dễ ghép: một chủ thể chính và vài cụm phụ lớn, phân bố hợp lý khắp khung. Khoảng nghỉ mắt phải có đường viền, chuyển mảng hoặc mốc dễ đọc; không để nhiều mảnh liền nhau chỉ toàn cỏ, trời, nước hay tường đơn sắc. Không nhồi chi tiết vụn để chữa mảng trống.",
+    "Hạn chế blur hết mức: giữ tiền cảnh, chủ thể và hậu cảnh đủ nét để nhận ra khi cắt mảnh nhỏ; tránh bokeh, xóa phông, shallow depth of field, motion blur, sương mù che chi tiết. Ánh sáng mềm không có nghĩa là ảnh mờ. Giữ nét tự nhiên, không dùng HDR hoặc tăng sharpening/texture gắt. Tránh thảm lá nhỏ, sỏi vụn và hoa văn lặp sít nhau.",
+    "Ánh sáng mềm, bóng nhẹ, màu tươi dịu hài hòa với vài điểm nhấn; tránh HDR gắt, tăng độ nét/texture quá mức, tương phản chói và quá nhiều màu cạnh tranh. Chill không đồng nghĩa với màu xám xỉn.",
+    "Ưu tiên khả năng ghép mảnh đồng thời giữ cảm giác chill: chủ thể và cảnh nền đọc được, vài mốc lớn thay vì đồ vật vụn. Hướng dẫn này thay các yêu cầu cũ về hậu cảnh mờ, nền tối giản trống hoặc bỏ độ nét hậu cảnh. Không làm mọi cảnh thành tĩnh vật giống nhau.",
+    "Đa dạng phải nhìn thấy trong ảnh, không chỉ trong title/key/category/story. Không lặp lại cùng công thức chủ thể + khung cảnh + bố cục bằng cách đổi loài cây, vật liệu ghế, loại thuyền, nhạc cụ hoặc màu sơn. Không thay vật chính nhỏ rồi giữ nguyên phông nền chiếm phần lớn ảnh.",
+    "Trước khi viết concept, tự lập bản phân bổ khác nhau về họ chủ thể, không gian, địa hình, khoảng cách máy ảnh và hình khối bố cục. Mỗi concept mới cần khác các concept đã có ở ít nhất hai trục thị giác quan trọng; chỉ đổi ánh sáng, mùa, màu hoặc câu chuyện vô hình không được tính. Không ép chọn đủ một ảnh mỗi category qua từng lượt 20; category chỉ để tham khảo, không phải chu kỳ mẫu.",
+    "Không dùng danh sách ví dụ cố định làm catalogue. Tự khám phá chủ đề mới nhưng giữ vẻ đẹp thư giãn, đơn giản. Đọc cả lịch sử và các motif đã dùng; tránh lặp cảnh ghế-cửa sổ, thuyền-bến hồ, kính thiên văn-sân quan sát, nhà nhỏ-cuối lối cỏ, vật bay-thung lũng sông, nhạc cụ-ghế-cửa sổ hoặc cửa tiệm-mái hiên chỉ bằng thay phụ kiện. Một motif đã dùng cần nhường chỗ cho cảnh thực sự khác.",
+    "Kiểm tra chéo toàn bộ đề xuất trong cùng lượt trước khi trả JSON: mô tả ảnh trong một câu bỏ tên riêng, màu sắc và câu chuyện; nếu hai câu còn diễn tả cùng cảnh thì thay một concept bằng chủ đề mới. Tránh để nước xanh, cửa sổ ngập nắng, phố pastel hoặc vườn cỏ thành nền mặc định cho mọi chủ đề.",
+    "Ngay trong composition và prompt, xử lý mảng trống theo cảnh: bãi cỏ rộng có thể thêm xe đạp dựng vững, một con vật đúng môi trường, ghế hoặc lối lát sạch; trời xanh rộng thêm vài cụm mây có hình dáng rõ, không lặp đều. Chỉ chọn chi tiết phù hợp, đủ lớn để tạo mốc qua các mảnh, không thêm tất cả và không dùng cùng bộ phụ kiện cho mọi ảnh. Cây không phải vật lấp chỗ trống mặc định; nếu cảnh vẫn quá rộng hãy đổi góc/cắt khung gần hơn.",
+    "Chỉ mô tả thành phần có thật và cấu tạo hợp lý ngoài đời: đúng giải phẫu/số chi động vật, bánh xe và khung xe nối đúng, đồ vật có điểm tựa, tỷ lệ/kết cấu/ánh sáng/phản chiếu hợp lý. Không vật thể lai, đồ vật biến dạng, vật lơ lửng hay kiến trúc bất khả thi. Giữ đồ vật đơn giản nếu không thể mô tả cấu tạo rõ.",
+    "Tự kiểm tra bố cục bằng cách hình dung cắt lưới 4x4 và 8x8: tránh vùng nhiều ô chỉ có màu đồng nhất hoặc blur, dùng đường nét lớn liên tục và cụm vật nhận biết để gợi mối nối. Đây là kiểm tra khi soạn, KHÔNG vẽ đường lưới, đường cắt hay mảnh ghép lên ảnh."
+  ],
+  "image_rules": [
+    "Create an inviting, beautiful, clean editorial scene with a clear focal point. Use luminous, fresh natural colors and balanced composition. Avoid dingy gray, dull brown or murky olive palettes dominating the frame, dirty documentary aesthetics and unattractive muddy settings. Do not compensate with unnatural oversaturation or cartoon styling.",
+    "Mandatory: no mud, muddy ground, bare soil, exposed earth, dirt-covered surfaces, muddy puddles, silt deposits or brown turbid water anywhere in the image.",
+    "Do not depict newly flooded muddy paddies, exposed planting beds, post-flood mud or excavation ground. If the earlier scene brief includes these elements, recompose the scene so they are entirely absent: show fully grass-covered ground, clean paving, clean rock or wooden decking, and clean clear water. Hide exposed potting soil from view. Do not merely brighten or recolor mud.",
+    "Keep the main subject and varied scene identity wherever compatible with these restrictions. Outdoor, nature and rural scenes remain allowed without exposed mud or soil; do not turn every scene into a floral still life. Preserve believable materials, cheerful varied colors and distinct puzzle landmarks.",
+    "Game-design priority: a calm, relaxing, inviting scene that feels pleasant to linger over. Favor quiet leisure and simple scenic beauty over repair work, exposed machinery, laboratories, excavation, decay or operational drama.",
+    "Use one clear focal subject and a few large supporting groups distributed across the frame. Calm breathing room must still have readable contours, gentle region boundaries or landmarks. Avoid contiguous areas spanning several puzzle pieces with only uniform lawn, blank sky, plain water or wall. Do not replace these with dense microdetail.",
+    "Minimize blur: use broad depth of field so foreground, main subject and background remain legible in small puzzle crops. No deliberate bokeh, defocused background, shallow depth of field, motion blur or detail-obscuring haze. Soft light must not mean soft focus. Keep natural crispness without harsh sharpening, HDR, tiny foliage carpets, gravel clutter or tightly repeating patterns.",
+    "Use soft daylight, gentle shadows and harmonious fresh but soft colors with restrained accents. No harsh contrast, competing saturated colors or gloomy desaturation. Maintain all no-mud/no-soil rules.",
+    "Puzzle legibility and calm composition take precedence over earlier instructions for blurred backgrounds, empty minimalist space or suppressing background focus. Keep varied scene identities, readable background structure and a few large connected forms; do not turn every scene into the same still life.",
+    "Respect the distinct setting and camera framing specified in each brief. Do not automatically add the same sunny window, pastel storefront, flower pots, mountain lake or winding river background to unrelated subjects. Keep the calm art style while preserving each scene identity.",
+    "Break up a broad lawn with a few context-appropriate, well-supported large landmarks such as a bicycle, a plausible animal, a bench or a clean paved path. Break up broad blue sky with distinct naturally varied cloud groups. Choose only what belongs in that scene; do not add every prop, repeat the same accessories across images or default to more trees. Reframe closer if the view remains too empty. Preserve the no-soil rule.",
+    "Only physically plausible real-world subjects and constructions: correct animal anatomy and limb count, correctly connected bicycle wheels and frame, supported objects, believable scale, architecture, light and reflections. No invented hybrid objects, malformed components, floating props or impossible structures. Favor simpler believable objects over speculative intricate mechanisms.",
+    "Mentally preview 4x4 and 8x8 puzzle crops: avoid runs of tiles containing only blur or uniform color; use readable continuous contours and distinct large shapes to suggest joins. This is a composition check only. Never draw a grid, cut lines, tile borders or puzzle pieces on the image."
+  ],
+  "feedback": [
+    {
+      "verdict": "rejected",
+      "confirmed_rule": "Không dùng các ảnh có bùn đất.",
+      "confirmed_reason": "Màu xỉn, nước bùn, cảnh chưa đẹp."
+    },
+    {
+      "verdict": "rejected",
+      "confirmed_reason": "Game design: ảnh quá nhiều chi tiết nhỏ và ảnh không đủ chill."
+    },
+    {
+      "verdict": "content_revision",
+      "confirmed_reason": "Chất lượng ảnh tốt, nhưng nội dung giống nhau ngay trong batch 50 chưa hoàn tất."
+    },
+    {
+      "verdict": "content_revision",
+      "confirmed_reason": "Hạn chế blur hết mức; mảng cỏ/trời quá rộng thiếu mối nối khi cắt mảnh cần thêm chi tiết lớn phù hợp; có thành phần không thật; tránh chủ yếu cây và nhiều khoảng trống.",
+      "implementation": "Cập nhật hướng dẫn planner và prompt ảnh, thay yêu cầu cũ có thể khuyến khích blur. Không tự thay context hoặc ảnh đã lưu; chưa có bộ kiểm định pixel/tính thật tự động."
+    }
+  ]
+}

@@ -21,7 +21,7 @@ Trên Linux, `python launch.py` tự mở trình duyệt và khởi động serv
 Mặc định dùng **Codex CLI đã đăng nhập trên máy**. CLI phải hỗ trợ image generation; bản đã kiểm tra ở môi trường này là 0.160.1. Nếu chưa đăng nhập, chạy `codex login` trong terminal. Không lấy hoặc chuyển tiếp OAuth token vào API riêng.
 
 1. Nhập 1–1.000 ảnh và bấm tạo.
-2. Tool lập context theo nhóm 20, đối chiếu lịch sử, rồi mặc định tạo 4 ảnh đồng thời.
+2. Tool viết bản nháp theo nhóm tối đa 20, lọc trùng, rồi gọi một lượt AI duyệt cả nhóm. Mục tốt giữ nguyên; mục lỗi được sửa hoặc loại và bù ở lượt tiếp. Chỉ context qua duyệt và kiểm tra lại mới được lưu để tạo ảnh. Sau khi đủ context, mặc định tạo 4 ảnh đồng thời.
 3. Trong cài đặt, có thể chọn từ 1 đến 8 ảnh đồng thời. Đây là số tác vụ chạy cùng lúc, không phải gửi toàn bộ lô 1.000 ảnh trong một lần.
 4. Bảng hoạt động trực tiếp cho biết từng ảnh đang chuẩn bị, chờ dịch vụ trả ảnh, lưu file hay kiểm tra gần trùng, kèm thời gian đã chạy. Đây là trạng thái thực, không phải phần trăm ước đoán.
 5. Khi bấm tạm dừng, các ảnh đang tạo sẽ hoàn tất rồi lô mới dừng; tiếp tục vẫn giữ nguyên ảnh đã xong.
@@ -82,3 +82,24 @@ Bộ lọc trước khi tạo ảnh xét thêm các công thức cảnh dễ l�
 ## Model và cài đặt
 
 Trong Cài đặt, nhập `gpt-6-luna` ở model context nếu tài khoản hỗ trợ. Bước lập context dùng reasoning `medium`; để trống model thì dùng model mặc định của Codex CLI. Tạo ảnh vẫn dùng imagegen tích hợp trong CLI. Cài đặt từng máy, API key, database và log nằm trong `data/` hoặc biến môi trường, không đưa vào Git.
+
+
+## Luồng context có duyệt
+
+Bản nháp mô tả cảnh đời thực trước: chủ thể, nơi chốn, vị trí, cấu tạo/điểm tựa và tình huống; sau đó mới chọn góc máy và tổ chức mảng màu. Không ép vật thể thành hình trang trí hoặc thêm đạo cụ để kể chuyện.
+
+Mỗi nhóm tối đa 20 bản nháp hợp lệ có một lượt review bằng text model hiện tại (Codex dùng mức medium). Review trả quyết định theo từng mục: giữ nguyên, sửa kèm lý do, hoặc loại. Bộ kiểm tra yêu cầu đủ mục, không trùng chỉ số; dữ liệu review sai hoặc lỗi provider sẽ dừng batch trước khi tạo ảnh. Bản sửa phải qua kiểm tra schema và chống trùng lại; việc loại mục có thể phát sinh thêm lượt lập/duyệt để bù đủ số lượng. Lịch sử sự kiện hiển thị bước duyệt; context lưu thông tin quyết định để đối chiếu.
+
+Review kiểm tra tính hợp lý, đồng nhất tiêu đề/nội dung, sự đa dạng của cả nhóm và khả năng ghép. Không có bước tự động tra cứu/xác minh nguồn bên ngoài: khi cần độ chính xác của mẫu đặc trưng mà chưa có căn cứ, chọn vật quen thuộc hoặc loại concept. Đây là kiểm tra văn bản, không bảo đảm ảnh sinh ra không có lỗi hình học. Giữ duyệt ảnh cuối và không tự tạo lại ảnh lỗi. Batch đã có context từ phiên bản trước không bị tự viết lại.
+
+`art-direction.json` hiện chứa bộ tiêu chí ngắn dùng chung; lịch sử feedback chỉ để tham khảo, không được nối toàn bộ vào prompt. Bộ lọc 35 công thức vẫn hỗ trợ chống lặp, không thay thế review AI.
+
+### Antigravity (thử nghiệm, hạn mức Google AI Pro)
+
+Trong **Cài đặt → Nhà cung cấp**, chọn **Antigravity cục bộ**, rồi lưu. Chuyển lại **Codex cục bộ** để dùng Codex. Model context Antigravity được lưu riêng (`antigravity_text_model`); để trống dùng mặc định của `agy`. Model ảnh API chỉ áp dụng cho OpenAI API.
+
+Cài [Antigravity CLI](https://www.antigravity.google/docs/cli/install/) và chạy `agy` để đăng nhập đúng tài khoản Google có gói Pro. Trong `/settings`, tắt **Use G1 Credits** nếu chỉ muốn dùng hạn mức gói. Adapter từ chối cấu hình bật `useG1Credits` hoặc provider API/ADC, loại biến API key khỏi tiến trình con, và không tự chuyển sang API tính phí. CLI lưu cấu hình thưa nên giá trị boolean `false` có thể bị lược bỏ khi ghi lại file. Có thể xem quota bằng `/usage` và credits bằng `/credits` trong CLI.
+
+Adapter dùng [headless stream-json](https://www.antigravity.google/docs/cli/headless/), JSON schema cho bước lập/duyệt context, và công cụ tạo ảnh tích hợp. Nó không dùng SDK/API Gemini. Mỗi lượt ảnh có thư mục riêng; chỉ tiếp nhận `source.png` được tạo trong lượt đó. Lỗi, timeout hoặc không có file ảnh sẽ dừng lượt mà không tự gọi lại. CLI chạy ở chế độ accept-edits trong sandbox, không bật tự động chấp thuận mọi quyền CLI; nếu CLI từ chối công cụ, xem `process.log`/`events.jsonl` trong thư mục lượt chạy để cấu hình quyền phù hợp.
+
+Nên thử **1 context, 1 ảnh, concurrency 1** trước khi chạy batch. Trạng thái CLI/model khả dụng không chứng minh quota hoặc quyền tạo ảnh còn hiệu lực. Kiểm tra trên máy ngày 2026-10-06: `agy models` đọc được model, nhưng smoke test thật bị chặn ở bước kiểm tra tài khoản bởi lỗi kết nối `daily-cloudcode-pa.googleapis.com` (IPv6 `network is unreachable`); chưa xác nhận ảnh đầu ra thực tế. Unit/integration tests dùng CLI giả, không tiêu quota.

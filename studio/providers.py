@@ -105,6 +105,16 @@ class CodexProvider:
         directory = Path(tempfile.mkdtemp(prefix='plan-', dir=self.work_root))
         return self._exec('Return only the requested JSON. This is a text-only planning task; do not generate images, browse, execute commands, or modify files.\n\n' + prompt, directory, structured=True, timeout=300)
 
+    def review(self, prompt):
+        directory = Path(tempfile.mkdtemp(prefix='review-', dir=self.work_root))
+        return self._exec(
+            'Return only the requested JSON. This is a text-only editorial review; do not generate images, browse, execute commands, or modify files.\n\n' + prompt,
+            directory,
+            structured=True,
+            timeout=300,
+            output_schema=REVIEW_SCHEMA,
+        )
+
     def generate(self, prompt, directory):
         directory = Path(directory).resolve()
         directory = Path(tempfile.mkdtemp(prefix='attempt-', dir=directory))
@@ -313,6 +323,13 @@ class OpenAIProvider:
         text = ''.join(content.get('text', '') for output in result.get('output', []) for content in output.get('content', []) if content.get('type') == 'output_text')
         if not text:
             raise RuntimeError('Model không trả về context dạng JSON.')
+        return text
+
+    def review(self, prompt):
+        result = self._post('responses', {'model': self.settings['text_model'], 'input': prompt, 'text': {'format': {'type': 'json_schema', 'name': 'puzzle_context_review', 'strict': True, 'schema': REVIEW_SCHEMA}}}, 300)
+        text = ''.join(content.get('text', '') for output in result.get('output', []) for content in output.get('content', []) if content.get('type') == 'output_text')
+        if not text:
+            raise RuntimeError('Model không trả về kết quả duyệt context dạng JSON.')
         return text
 
     def generate(self, prompt, directory):

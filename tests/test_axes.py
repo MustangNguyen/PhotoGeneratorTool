@@ -114,6 +114,33 @@ class AxisTests(unittest.TestCase):
         accepted, errors = validate_concepts({'concepts': [item]}, [], 1, seeds)
         self.assertEqual(with_axes['axes'], accepted[0]['axes'], errors)
 
+    def test_required_axis_follows_group_shares(self):
+        self.with_catalogue(catalogue(per_concept={'min': 0, 'max': 0}, axes=[
+            {'id': 'shot', 'label': 'Kiểu ảnh', 'required': True, 'values': [
+                {'value': 'gần', 'shares': {'food': 3}},
+                {'value': 'xa', 'shares': {'food': 1, 'coast': 1}},
+                {'value': 'phòng', 'shares': {'interior': 1}},
+            ]},
+        ]))
+        food = axes.assign_axes(['Ẩm thực và bàn ăn'] * 40, [], random.Random(1))
+        self.assertEqual(Counter({'gần': 30, 'xa': 10}), Counter(item['shot'] for item in food))
+        coast = axes.assign_axes(['Biển và nghỉ dưỡng ven biển'] * 5, [], random.Random(1))
+        self.assertEqual({'xa'}, {item['shot'] for item in coast})
+
+    def test_repo_shot_types_keep_distant_views_rare(self):
+        rng = random.Random(6)
+        slots = [rng.choice(CATEGORIES) for _ in range(2000)]
+        result = axes.assign_axes(slots, [], rng)
+        self.assertTrue(all('shot' in item for item in result))
+        vista = sum(axes.is_vista_shot(item['shot']) for item in result) / len(result)
+        self.assertLess(vista, 0.2)
+
+    def test_seed_caption_agrees_with_shot(self):
+        seeds = pick_seeds(40, [], rng=random.Random(3))
+        vista = __import__('studio.diversity', fromlist=['_VISTA_CAPTION'])._VISTA_CAPTION
+        agree = sum(bool(vista.search(seed['caption'].lower())) == axes.is_vista_shot(seed['axes']['shot']) for seed in seeds)
+        self.assertGreaterEqual(agree, 38)
+
     def test_slots_exist_without_final_index(self):
         with patch('studio.final.load_index', return_value=()):
             seeds = pick_seeds(4, [], rng=random.Random(1))

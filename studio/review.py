@@ -106,7 +106,7 @@ TIÊU CHÍ
 - Vật thể phải có cấu tạo, tỷ lệ, điểm tựa, cách sử dụng và quan hệ không gian hợp lý ngoài đời.
 - Không ép vật thể tạo chữ, biểu tượng hay hình trang trí; không thêm đạo cụ chỉ để kể chuyện nếu không có lý do tự nhiên.
 - Không dùng sơ đồ kỹ thuật, mặt cắt, mô hình lai hoặc thiết bị/công trình khó nhận biết. Với đặc trưng địa danh/văn hóa/kỹ thuật, chỉ giữ khi là mẫu quen thuộc có thật; không khẳng định tên riêng chưa được kiểm chứng. Nếu mơ hồ, dùng vật quen thuộc hoặc reject.
-- required_axes là trục đa dạng đã gán; khi revise phải giữ các trục đó thể hiện rõ, không đổi về cảnh phổ thông.
+- required_axes là các trục đã gán. "Kiểu ảnh" là bắt buộc: kiểu ảnh không có tầm nhìn xa mà concept lại mở cửa sổ/cửa/hiên/ban công ra phong cảnh thì revise bỏ tầm nhìn đó. Các trục khác chỉ là gợi ý: nếu concept gượng ép theo trục (đồ vật đặt sai chỗ, kết hợp không ai làm ngoài đời, vật lạ thêm vào chỉ để thể hiện vùng/dịp/chất liệu) thì revise bỏ trục đó cho tự nhiên, hoặc reject.
 - Đánh giá cả nhóm: tránh lặp chủ thể, loại cảnh, bố cục và cách chia mảng màu. Mỗi cảnh vẫn phải bình tĩnh, rõ nét và có các mốc ghép hình tự nhiên.
 - reason phải ngắn, cụ thể. Trả đúng mọi index từ 0 đến {len(concepts) - 1}, mỗi index đúng một lần.
 

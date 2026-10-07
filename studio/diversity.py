@@ -589,26 +589,33 @@ def pick_seeds(
     if not category_counts:
         counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
     used = {str(item.get("final_seed", "")) for item in history if isinstance(item, dict)}
+    slots = [category for category, number in category_plan(count, counts).items() for _ in range(number)]
+    rng.shuffle(slots)
+    assigned_axes = axes.assign_axes(slots, history, rng)
+    taken: set[str] = set()
     seeds: list[dict[str, Any]] = []
-    for category, number in category_plan(count, counts).items():
+    for category, assigned in zip(slots, assigned_axes):
         theme = final.CATEGORY_TO_THEME.get(category)
-        pool = [
-            (index, item) for index, item in enumerate(items)
-            if item.get("theme") == theme and not item.get("people") and item["path"] not in used
-        ]
-        if len(pool) < number:  # Every seed in this theme was used: allow repeats rather than stall.
-            pool = [(index, item) for index, item in enumerate(items) if item.get("theme") == theme and not item.get("people")]
-        picked = rng.sample(pool, min(number, len(pool)))
-        for slot in range(number):
-            if slot < len(picked):
-                index, item = picked[slot]
-                seeds.append({"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]})
-            else:  # No Final index on this machine: the slot still carries category and axes.
-                seeds.append({"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""})
-    rng.shuffle(seeds)
-    for seed, assigned in zip(seeds, axes.assign_axes([seed["category"] for seed in seeds], history, rng)):
+        themed = [(index, item) for index, item in enumerate(items) if item.get("theme") == theme and not item.get("people")]
+        pool = [(index, item) for index, item in themed if item["path"] not in used and item["path"] not in taken]
+        if not pool:  # Every seed in this theme was used: allow repeats rather than stall.
+            pool = [(index, item) for index, item in themed if item["path"] not in taken] or themed
+        # Prefer a sample whose framing agrees with the assigned shot type, so a close still
+        # life is not seeded with "paella by the sea".
+        wants_vista = axes.is_vista_shot(assigned.get("shot", ""))
+        matching = [entry for entry in pool if bool(_VISTA_CAPTION.search(entry[1]["caption"].lower())) == wants_vista]
+        if pool:
+            index, item = rng.choice(matching or pool)
+            taken.add(item["path"])
+            seed = {"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]}
+        else:  # No Final index on this machine: the slot still carries category and axes.
+            seed = {"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""}
         seed["axes"] = assigned
+        seeds.append(seed)
     return seeds
+
+
+_VISTA_CAPTION = re.compile(r"nhìn ra|nhìn xuống|bên biển|ven biển|bên hồ|ven hồ|cửa sổ biển|hoàng hôn|vịnh|trên đồi|bãi biển")
 
 
 def _seed_line(seed: dict[str, Any]) -> str:
@@ -679,7 +686,8 @@ GỢI Ý PHÂN BỔ {count} CONCEPT LẦN NÀY
 CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL VÀ TRỤC ĐA DẠNG — MỖI CONCEPT DÙNG ĐÚNG MỘT DÒNG, KHÔNG DÙNG LẠI DÒNG
 {seed_text}
 - Mỗi concept ghi seed_id là mã dòng (ví dụ F12). Lấy chủ thể chính hoặc ý chủ đạo của gợi ý làm hạt nhân, nhưng tự dựng cảnh, góc máy và bố cục mới; không chép câu gợi ý làm tiêu đề (concept trùng ảnh mẫu sẽ bị loại).
-- Các trục của dòng là yêu cầu bắt buộc, phải thấy rõ trong scene/composition/palette/prompt; trục không được nêu thì tự chọn sao cho khác các concept còn lại. Nếu một trục thật sự không hợp chủ thể (ví dụ phi thực tế, không an toàn, mâu thuẫn trục khác), đổi chủ thể trong tinh thần gợi ý thay vì bỏ trục.
+- "Kiểu ảnh" là BẮT BUỘC và quyết định khung hình. Kiểu ảnh không nói tới tầm nhìn xa thì không mở cửa sổ, cửa, hiên hay ban công ra biển, đồi, phố hoặc phong cảnh; hậu cảnh là tường, khăn, kệ, lá hoặc đồ vật. Vùng/địa danh khi đó chỉ thể hiện qua món ăn, đồ vật, chất liệu và hoa văn.
+- Các trục còn lại chỉ là GỢI Ý để tránh lặp. Dùng trục nào hợp tự nhiên với chủ thể; BỎ trục nào khiến cảnh gượng ép, phải đặt đồ vật sai chỗ, ghép thứ không ai ghép ngoài đời, hoặc thêm vật lạ để "chứng minh" trục. Cảnh phải là thứ có thật, người xem nhận ra ngay.
 - Nếu chủ thể của gợi ý nằm trong danh sách CHỦ THỂ ĐÃ ĐỦ, chọn một vật khác có trong gợi ý hoặc một chủ thể cùng tinh thần chưa dùng.
 
 CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể tối đa {limit} lần ở quy mô {len(history)} mục; đổi tính từ, giống, màu hay bối cảnh vẫn tính là cùng chủ thể)

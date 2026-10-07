@@ -1,15 +1,139 @@
 {
   "version": 1,
-  "note": "Trục đa dạng gán cho từng concept, chắt lọc từ 2.204 ảnh Final. Mỗi concept nhận ngẫu nhiên từ per_concept.min đến per_concept.max trục; trong mỗi trục, ứng dụng chọn giá trị ít được dùng nhất trong lịch sử và không vi phạm rules. weight cao thì trục hay được chọn hơn. categories/exclude_categories dùng mã nhóm Final: food, interior, garden, objects, facade, animal, vehicle, shop, coast, drink. rules: exclude = if và then không được cùng xảy ra; require = khi if xảy ra thì then phải đúng (nếu trục của then được gán). Bộ chọn là {\"axis\": id, \"values\": [...]} (bỏ values = mọi giá trị) hoặc {\"category\": [mã nhóm]}.",
+  "note": "Trục đa dạng gán cho từng concept, chắt lọc từ 2.204 ảnh Final. Trục required (Kiểu ảnh) luôn được gán, theo tỷ lệ shares của từng nhóm lấy từ Final. Ngoài ra mỗi concept nhận ngẫu nhiên từ per_concept.min đến per_concept.max trục gợi ý; trong mỗi trục, ứng dụng chọn giá trị ít được dùng nhất trong lịch sử và không vi phạm rules. weight cao thì trục hay được chọn hơn. categories/exclude_categories dùng mã nhóm Final: food, interior, garden, objects, facade, animal, vehicle, shop, coast, drink. rules: exclude = if và then không được cùng xảy ra; require = khi if xảy ra thì then phải đúng (nếu trục của then được gán). Bộ chọn là {\"axis\": id, \"values\": [...]} (bỏ values = mọi giá trị) hoặc {\"category\": [mã nhóm]}.",
   "per_concept": {
-    "min": 2,
-    "max": 4
+    "min": 1,
+    "max": 2
   },
   "axes": [
     {
+      "id": "shot",
+      "label": "Kiểu ảnh",
+      "weight": 1.0,
+      "values": [
+        {
+          "value": "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "shares": {
+            "food": 58,
+            "drink": 63,
+            "objects": 55,
+            "garden": 22,
+            "shop": 8,
+            "coast": 12,
+            "interior": 6,
+            "animal": 4
+          }
+        },
+        {
+          "value": "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "shares": {
+            "food": 15,
+            "drink": 6,
+            "objects": 5,
+            "vehicle": 6,
+            "garden": 2
+          }
+        },
+        {
+          "value": "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "shares": {
+            "food": 12,
+            "drink": 8,
+            "objects": 18,
+            "shop": 6,
+            "garden": 4,
+            "interior": 4
+          }
+        },
+        {
+          "value": "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "shares": {
+            "food": 3,
+            "drink": 3,
+            "objects": 12,
+            "interior": 15,
+            "shop": 14,
+            "garden": 3
+          }
+        },
+        {
+          "value": "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "shares": {
+            "interior": 60,
+            "food": 2,
+            "animal": 6
+          }
+        },
+        {
+          "value": "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "shares": {
+            "garden": 45,
+            "food": 2
+          }
+        },
+        {
+          "value": "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa",
+          "shares": {
+            "animal": 80
+          }
+        },
+        {
+          "value": "mặt tiền nhà, cửa tiệm hoặc góc phố nhìn từ ngoài đường",
+          "shares": {
+            "facade": 72,
+            "shop": 60,
+            "coast": 18,
+            "garden": 4
+          }
+        },
+        {
+          "value": "phương tiện là chủ thể lớn trên phố, đường hoặc bến",
+          "shares": {
+            "vehicle": 60,
+            "coast": 5
+          }
+        },
+        {
+          "value": "bên trong toa tàu, xe hoặc thuyền",
+          "shares": {
+            "vehicle": 13
+          }
+        },
+        {
+          "value": "cảnh có tầm nhìn xa ra biển, hồ, đồi hoặc thành phố",
+          "shares": {
+            "food": 8,
+            "drink": 20,
+            "interior": 12,
+            "objects": 4,
+            "garden": 14,
+            "facade": 15,
+            "shop": 7,
+            "coast": 55,
+            "animal": 6,
+            "vehicle": 16
+          }
+        },
+        {
+          "value": "tác phẩm thủ công hoặc tranh như tranh giấy cắt lớp, kính màu, mô hình thu nhỏ",
+          "shares": {
+            "facade": 10,
+            "garden": 9,
+            "objects": 6,
+            "shop": 5,
+            "interior": 3,
+            "coast": 5,
+            "animal": 4,
+            "vehicle": 3
+          }
+        }
+      ],
+      "required": true
+    },
+    {
       "id": "viewpoint",
       "label": "Góc nhìn và điểm đứng",
-      "weight": 1.2,
+      "weight": 0.8,
       "values": [
         "nhìn thẳng từ trên xuống kiểu flat-lay",
         "góc cao khoảng 45 độ nhìn xuống bàn",
@@ -261,7 +385,7 @@
     {
       "id": "region",
       "label": "Vùng và địa danh",
-      "weight": 1.1,
+      "weight": 0.6,
       "values": [
         "Việt Nam - Hội An phố đèn lồng",
         "Việt Nam - Hà Nội phố cổ",
@@ -485,7 +609,7 @@
     {
       "id": "setting",
       "label": "Không gian",
-      "weight": 0.9,
+      "weight": 0.5,
       "values": [
         "trong bếp",
         "phòng khách",
@@ -2322,6 +2446,578 @@
         ]
       },
       "note": "Mặt tiền và phương tiện không đặt trong phòng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "viewpoint",
+        "values": [
+          "từ dưới gốc cây nhìn lên tán và trời",
+          "nhìn từ ban công xuống phố",
+          "nhìn từ sân thượng ra các mái nhà",
+          "từ boong thuyền nhìn vào bờ",
+          "từ chân bậc thang nhìn lên",
+          "từ đầu ngõ nhìn sâu vào ngõ",
+          "nhìn dọc thân cầu",
+          "nhìn chéo dọc dãy mặt tiền",
+          "từ bờ hồ nhìn ra giữa hồ",
+          "nhìn từ ngoài vào qua cửa tiệm mở",
+          "nhìn từ trên cao xuống góc phố như sa bàn",
+          "đứng ở góc phố thấy hai mặt tiền",
+          "từ trên đồi nhìn xuống làng",
+          "nhìn dọc đường ray hoặc đường mòn vào xa",
+          "nhìn qua cổng vườn mở",
+          "cảnh xa kiểu bưu thiếp, tiền cảnh có vật lớn",
+          "nhìn ngang mép hồ bơi",
+          "nhìn qua khung cửa sổ mở",
+          "nhìn qua vòm cổng đá",
+          "nhìn qua khung cửa gothic",
+          "nhìn qua cửa sổ máy bay",
+          "từ trong toa tàu nhìn ra cửa sổ",
+          "từ boong thuyền nhìn vào bờ",
+          "nhìn qua bậu cửa sổ có chậu hoa",
+          "từ hiên nhà nhìn ra sân",
+          "nhìn qua cửa sổ tròn kiểu tàu biển",
+          "toàn cảnh có nhiều mốc rõ"
+        ]
+      },
+      "note": "Kiểu ảnh không có tầm nhìn xa."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "light",
+        "values": [
+          "hoàng hôn cam hồng soi trên nước",
+          "mặt biển lấp lánh nắng",
+          "nắng phản chiếu từ mặt nước lên tường",
+          "bình minh ven biển xanh hồng dịu",
+          "pháo hoa xa trên trời chạng vạng",
+          "cực quang trên nền tuyết sáng"
+        ]
+      },
+      "note": "Ánh sáng này cần thấy cảnh xa."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "companion",
+        "values": [
+          "khinh khí cầu xa trên trời",
+          "thuyền buồm xa",
+          "hải đăng xa",
+          "cối xay gió",
+          "tàu điện",
+          "xe hơi nhỏ cổ điển"
+        ]
+      },
+      "note": "Vật ở xa cần tầm nhìn xa."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "ban công",
+          "sân thượng",
+          "hiên nhà",
+          "sân vườn",
+          "vườn rau",
+          "vườn cây ăn trái",
+          "ngõ bậc thang",
+          "đường phố",
+          "quảng trường",
+          "khu chợ",
+          "bến cảng",
+          "bến thuyền gỗ",
+          "bãi biển",
+          "vách đá ven biển",
+          "bờ hồ núi",
+          "bờ sông",
+          "cánh đồng hoa",
+          "đồi nho",
+          "rừng thông",
+          "đồng cỏ trang trại",
+          "sân ga",
+          "trạm xăng ven đường",
+          "đường ven biển",
+          "đường đèo",
+          "sa mạc",
+          "công viên",
+          "hồ bơi",
+          "trên boong thuyền",
+          "bên đài phun nước",
+          "dưới mái hiên tiệm"
+        ]
+      },
+      "note": "Kiểu ảnh gần không cần đặt ở không gian ngoài trời rộng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa",
+          "tác phẩm thủ công hoặc tranh như tranh giấy cắt lớp, kính màu, mô hình thu nhỏ"
+        ]
+      },
+      "then": {
+        "axis": "arrangement",
+        "values": [
+          "dãy nhà nhiều màu nối tiếp",
+          "xe hoặc thuyền nhiều màu xếp hàng",
+          "cầu thang dẫn mắt lên cao",
+          "đường dẫn chéo đưa mắt vào sâu",
+          "chủ thể lệch một bên, bên kia là cảnh xa",
+          "nửa trong nhà, nửa ngoài trời",
+          "vật trên bậu cửa sổ với cảnh ngoài"
+        ]
+      },
+      "note": "Bố cục cần cảnh rộng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện"
+        ]
+      },
+      "then": {
+        "axis": "viewpoint"
+      },
+      "note": "Kiểu ảnh đã xác định góc nhìn."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "mặt tiền nhà, cửa tiệm hoặc góc phố nhìn từ ngoài đường",
+          "cảnh có tầm nhìn xa ra biển, hồ, đồi hoặc thành phố",
+          "phương tiện là chủ thể lớn trên phố, đường hoặc bến"
+        ]
+      },
+      "then": {
+        "axis": "arrangement",
+        "values": [
+          "hộp chia ngăn, mỗi ngăn một loại",
+          "khay chia ô",
+          "vật rải kín mặt phẳng",
+          "kệ nhiều tầng đầy đồ",
+          "tủ kính nhiều ngăn",
+          "chồng sách làm bệ cho vật chính",
+          "bày trên khăn trải rộng"
+        ]
+      },
+      "note": "Cảnh rộng không bày như tĩnh vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "tác phẩm thủ công hoặc tranh như tranh giấy cắt lớp, kính màu, mô hình thu nhỏ"
+        ]
+      },
+      "then": {
+        "axis": "form"
+      },
+      "note": "Kiểu ảnh đã là tranh hoặc mô hình."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "companion",
+        "values": [
+          "một chú mèo cam",
+          "một chú mèo đen",
+          "một chú mèo trắng",
+          "một chú chó corgi",
+          "một chú chó con",
+          "chim sẻ nhỏ",
+          "vẹt nhiều màu",
+          "bướm",
+          "ong mật",
+          "vịt con",
+          "cá vàng trong bình",
+          "thỏ con"
+        ]
+      },
+      "note": "Đã có con vật chính."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "arrangement"
+      },
+      "note": "Con vật không được bày như đồ vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "story"
+      },
+      "note": "Tình huống của người không hợp con vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "material"
+      },
+      "note": "Con vật thật không có chất liệu chủ đạo."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "category": [
+          "animal"
+        ]
+      },
+      "then": {
+        "axis": "story",
+        "values": [
+          "chuẩn bị cho bữa tiệc",
+          "vừa đi chợ về",
+          "đang gói quà tặng",
+          "mở cửa tiệm buổi sáng",
+          "chuẩn bị hành lý",
+          "đang làm đồ thủ công",
+          "đang vẽ tranh dở",
+          "đang chơi một ván cờ",
+          "đang pha cà phê",
+          "góc học bài buổi tối",
+          "đang sắp xếp kệ sách",
+          "đang trưng bày hàng mới",
+          "đang làm mứt",
+          "chờ tuyết rơi bên lò sưởi"
+        ]
+      },
+      "note": "Tình huống của người không hợp nhóm động vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "story",
+        "values": [
+          "đang chờ tàu",
+          "cập bến buổi sớm",
+          "ra khơi buổi sáng",
+          "dừng chân giữa chuyến đi đường dài"
+        ]
+      },
+      "then": {
+        "axis": "shot",
+        "values": [
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện",
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời",
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa",
+          "tác phẩm thủ công hoặc tranh như tranh giấy cắt lớp, kính màu, mô hình thu nhỏ"
+        ]
+      },
+      "note": "Tình huống đi lại cần phương tiện hoặc cảnh rộng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "phương tiện là chủ thể lớn trên phố, đường hoặc bến",
+          "bên trong toa tàu, xe hoặc thuyền"
+        ]
+      },
+      "then": {
+        "axis": "material",
+        "values": [
+          "gỗ sáng màu",
+          "tre",
+          "mây tre đan",
+          "cói",
+          "gốm men lam",
+          "gốm talavera Mexico",
+          "gốm đất nung",
+          "sứ trắng viền vàng",
+          "sứ vẽ hoa",
+          "thủy tinh trong",
+          "thủy tinh màu",
+          "kính màu ghép chì",
+          "đồng đỏ",
+          "bạc chạm",
+          "sắt uốn hoa văn",
+          "hộp thiếc in hình",
+          "đá cẩm thạch",
+          "đá vôi sáng",
+          "đá cuội",
+          "gạch đỏ",
+          "gạch men họa tiết",
+          "gạch zellige Maroc",
+          "gạch azulejo",
+          "terrazzo",
+          "vữa trát màu",
+          "len đan",
+          "len móc",
+          "vải thêu",
+          "ren trắng",
+          "lụa",
+          "nhung",
+          "vải lanh",
+          "vải bông kẻ caro",
+          "giấy thủ công",
+          "giấy gấp origami",
+          "bìa và hộp giấy in hoa",
+          "nến sáp",
+          "đất sét nặn",
+          "nhựa đồ chơi nhiều màu",
+          "gỗ lũa",
+          "vỏ sò và san hô"
+        ]
+      },
+      "note": "Phương tiện chỉ dùng chất liệu thật của xe, tàu, thuyền."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "viewpoint",
+        "values": [
+          "từ trong bếp nhìn ra cửa sau",
+          "nhìn qua gương phản chiếu căn phòng",
+          "từ trong xe cắm trại nhìn ra ngoài",
+          "từ ghế lái nhìn qua kính chắn gió",
+          "nhìn xuống từ cầu thang xoắn",
+          "từ sau quầy pha chế nhìn ra quán",
+          "từ góc phòng bao quát hai bức tường",
+          "nhìn qua rèm voan vén sang hai bên",
+          "từ trong toa tàu nhìn ra cửa sổ",
+          "nhìn qua cửa sổ máy bay",
+          "từ chỗ ngồi nhìn ra mặt bàn trước mặt",
+          "nhìn qua tủ kính tiệm",
+          "nhìn từ ngoài vào qua cửa tiệm mở",
+          "nhìn ngang dọc mặt bàn dài",
+          "góc cao khoảng 45 độ nhìn xuống bàn"
+        ]
+      },
+      "note": "Góc nhìn trong nhà/bàn không hợp con vật ngoài môi trường sống."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "con vật cận hoặc trung cảnh trong môi trường quen thuộc của nó, không có tầm nhìn xa"
+        ]
+      },
+      "then": {
+        "axis": "occasion",
+        "values": [
+          "Trung thu",
+          "ngắm hoa anh đào Hanami",
+          "lễ Thất tịch Tanabata",
+          "Diwali lễ hội ánh sáng",
+          "Holi lễ hội sắc màu",
+          "Songkran Tết té nước",
+          "Loy Krathong thả đèn hoa đăng",
+          "Día de Muertos với hoa cúc vạn thọ",
+          "Oktoberfest",
+          "lễ hội hóa trang Venice",
+          "Lễ Tạ ơn",
+          "chợ Giáng sinh",
+          "Lễ Tình nhân",
+          "Ngày của Mẹ",
+          "tiệc trà chiều",
+          "tiệc vườn cuối tuần",
+          "tiệc nướng ngoài trời",
+          "cắm trại",
+          "dọn về nhà mới",
+          "khai trương tiệm",
+          "lễ hội hoa tulip",
+          "lễ hội khinh khí cầu",
+          "lễ hội đèn lồng",
+          "lễ hội thu hoạch nho",
+          "lễ hội dâu tây",
+          "chợ phiên cuối tuần",
+          "ngày đầu năm học",
+          "kỳ nghỉ hè",
+          "tiệc ngủ của trẻ em",
+          "tiệc chào em bé",
+          "lễ tốt nghiệp",
+          "kỷ niệm ngày cưới",
+          "đám cưới nhỏ trong vườn",
+          "Năm mới dương lịch",
+          "lễ hội âm nhạc ngoài trời",
+          "ngày hội thể thao",
+          "buổi chiếu phim ngoài trời",
+          "tiệc bể bơi",
+          "chuẩn bị đi du lịch"
+        ]
+      },
+      "note": "Con vật chỉ đi với vài dịp dễ thương quen thuộc."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "góc phòng trong nhà, cửa sổ nếu có chỉ là mảng sáng nhỏ, không mở ra phong cảnh",
+          "tĩnh vật trên mặt bàn hoặc kệ, nền là tường, khăn hay đồ vật, không thấy cảnh bên ngoài",
+          "nhìn thẳng từ trên xuống, chỉ thấy mặt bàn hoặc mặt phẳng và đồ vật",
+          "bộ sưu tập nhiều vật cùng loại xếp kín khung, không có hậu cảnh",
+          "kệ, tủ hoặc tường trưng bày đầy đồ, nhìn gần chính diện"
+        ]
+      },
+      "then": {
+        "axis": "story",
+        "values": [
+          "phơi đồ dưới nắng",
+          "đang tưới cây buổi sớm",
+          "đang làm vườn",
+          "kỳ nghỉ ở nhà nghỉ ven biển"
+        ]
+      },
+      "note": "Tình huống ngoài trời không hợp kiểu ảnh trong nhà."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "cận cảnh hoa, cây hoặc quả, nền là lá, tường hoặc trời"
+        ]
+      },
+      "then": {
+        "axis": "arrangement",
+        "values": [
+          "xếp chồng thành tháp",
+          "hộp chia ngăn, mỗi ngăn một loại",
+          "khay chia ô",
+          "tủ kính nhiều ngăn",
+          "chồng sách làm bệ cho vật chính",
+          "mâm tròn nhiều đĩa nhỏ",
+          "tháp nhiều tầng kiểu tiệc trà"
+        ]
+      },
+      "note": "Hoa cây sống không bày như đồ vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "shot",
+        "values": [
+          "cảnh có tầm nhìn xa ra biển, hồ, đồi hoặc thành phố"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "trong nhà kính",
+          "garage"
+        ]
+      },
+      "note": "Tầm nhìn xa cần đứng ngoài trời hoặc trên phương tiện."
     }
   ]
 }

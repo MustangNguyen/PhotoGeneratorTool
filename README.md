@@ -90,10 +90,14 @@ Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay l�
 
 ### Trục đa dạng (`diversity-axes.json`)
 
-Ngoài chủ thể, mỗi concept được gán thêm một số trục đa dạng. File hiện có 14 trục, 624 giá trị, chắt lọc từ caption 2.204 ảnh Final: góc nhìn và điểm đứng (48), kiểu bố cục và cách bày (46), thời điểm và ánh sáng (37), mùa/thời tiết/vụ mùa (40), dịp và lễ hội (46), vùng và địa danh (57), thời kỳ và phong cách (45), chất liệu (49), bảng màu (45), không gian (50), tình huống (48), điểm nhấn phụ (50), họa tiết (40), hình thức (23, weight thấp vì phần lớn là tranh/mô hình, trong Final chỉ chiếm vài phần trăm). File được sinh bằng tay một lần; sửa trực tiếp trong JSON.
+Ngoài chủ thể, mỗi concept luôn được gán **Kiểu ảnh** (trục bắt buộc `shot`): tĩnh vật, flat-lay, bộ sưu tập xếp kín, kệ trưng bày, góc phòng, cận cảnh hoa cây, con vật, mặt tiền, phương tiện, bên trong phương tiện, cảnh có tầm nhìn xa, tranh/thủ công. Tỷ lệ của từng kiểu theo nhóm lấy từ Final (`shares`), ví dụ nhóm ăn uống khoảng 58% tĩnh vật và chỉ 8% có tầm nhìn xa; tổng cộng khoảng 13% ảnh có tầm nhìn xa như Final. Kiểu ảnh không có tầm nhìn xa thì prompt cấm mở cửa sổ/cửa/ban công ra phong cảnh, và ảnh mẫu Final được chọn cùng kiểu (ảnh mẫu "bên biển" chỉ đi với kiểu có tầm nhìn xa).
 
-- Mỗi concept chỉ nhận ngẫu nhiên từ `per_concept.min` đến `per_concept.max` trục (mặc định 2–4), không phải tất cả. Trục không được gán thì model tự chọn, miễn khác các concept còn lại.
-- Trong mỗi trục được gán, ứng dụng chọn giá trị **ít được dùng nhất** trong lịch sử (hòa thì ngẫu nhiên), nên kho ảnh tự trải đều qua các giá trị.
+Batch đầu tiên sau khi thêm trục cho thấy 15/20 ảnh cùng khuôn "đồ vật trước cửa sổ nhìn ra phong cảnh" và nhiều tổ hợp gượng ép, nên các trục còn lại giờ chỉ là **gợi ý**: mỗi concept nhận 1–2 trục (`per_concept`), model được bỏ trục nào làm cảnh không có thật, và bước duyệt sửa/loại concept gượng ép theo trục.
+
+Các trục gợi ý: ngoài Kiểu ảnh, file có 14 trục gợi ý, 624 giá trị, chắt lọc từ caption 2.204 ảnh Final: góc nhìn và điểm đứng (48), kiểu bố cục và cách bày (46), thời điểm và ánh sáng (37), mùa/thời tiết/vụ mùa (40), dịp và lễ hội (46), vùng và địa danh (57), thời kỳ và phong cách (45), chất liệu (49), bảng màu (45), không gian (50), tình huống (48), điểm nhấn phụ (50), họa tiết (40), hình thức (23, weight thấp vì phần lớn là tranh/mô hình, trong Final chỉ chiếm vài phần trăm). File được sinh bằng tay một lần; sửa trực tiếp trong JSON.
+
+- Ngoài Kiểu ảnh, mỗi concept chỉ nhận ngẫu nhiên từ `per_concept.min` đến `per_concept.max` trục gợi ý (mặc định 1–2). Trục không được gán thì model tự chọn, miễn khác các concept còn lại.
+- Trong mỗi trục được gán, ứng dụng chọn giá trị **ít được dùng nhất** trong lịch sử (hòa thì ngẫu nhiên), nên kho ảnh tự trải đều qua các giá trị. Giá trị có `shares` (như Kiểu ảnh) thì chọn theo tỷ lệ của nhóm.
 - `weight` cao thì trục được chọn thường hơn. `categories` / `exclude_categories` (mã nhóm `food`, `interior`, `garden`, `objects`, `facade`, `animal`, `vehicle`, `shop`, `coast`, `drink`) giới hạn trục cho một số nhóm.
 - Thêm trục hoặc giá trị bằng cách sửa file; ứng dụng đọc lại khi file đổi, không cần khởi động lại. File sai cấu trúc sẽ dừng batch với lỗi rõ ràng.
 - Context lưu trục đã gán ở trường `axes`; bước duyệt nhận các trục này và phải giữ chúng khi sửa.

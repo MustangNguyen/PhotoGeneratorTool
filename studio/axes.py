@@ -78,17 +78,18 @@ def load_axes(path: Path | None = None) -> dict[str, Any]:
             weight = axis.get('weight', 1)
             if isinstance(weight, bool) or not isinstance(weight, (int, float)) or weight <= 0:
                 raise ValueError(f'diversity-axes.json: weight của trục {axis_id} phải là số dương.')
-            values = axis.get('values')
-            if not isinstance(values, list) or not values or not all(isinstance(v, str) and v.strip() for v in values):
-                raise ValueError(f'diversity-axes.json: values của trục {axis_id} phải là danh sách chuỗi không rỗng.')
-            if len({v.strip() for v in values}) != len(values):
-                raise ValueError(f'diversity-axes.json: trục {axis_id} có giá trị trùng.')
+            values, shares = _parse_values(axis_id, axis.get('values'))
+            required = axis.get('required', False)
+            if not isinstance(required, bool):
+                raise ValueError(f'diversity-axes.json: required của trục {axis_id} phải là true/false.')
             ids.add(axis_id)
             parsed.append({
                 'id': axis_id,
                 'label': label.strip(),
                 'weight': float(weight),
-                'values': [v.strip() for v in values],
+                'required': required,
+                'values': values,
+                'shares': shares,
                 'categories': _themes(axis_id, axis.get('categories'), 'categories'),
                 'exclude': _themes(axis_id, axis.get('exclude_categories'), 'exclude_categories'),
             })
@@ -96,6 +97,37 @@ def load_axes(path: Path | None = None) -> dict[str, Any]:
         _CACHE = {'min': per['min'], 'max': per['max'], 'axes': parsed, 'rules': rules}
         _CACHE_KEY = key
         return _CACHE
+
+
+def _parse_values(axis_id: str, raw: Any) -> tuple[list[str], dict[str, dict[str, float]]]:
+    """Values are strings, or {"value": str, "shares": {theme: weight}} for per-group quotas.
+
+    A value with shares is only eligible for the listed groups, in proportion to its weight.
+    """
+    if not isinstance(raw, list) or not raw:
+        raise ValueError(f'diversity-axes.json: values của trục {axis_id} phải là danh sách không rỗng.')
+    values: list[str] = []
+    shares: dict[str, dict[str, float]] = {}
+    for item in raw:
+        if isinstance(item, dict):
+            value = item.get('value')
+            weights = item.get('shares')
+            if (
+                not isinstance(weights, dict) or not weights
+                or set(weights) - _THEMES
+                or not all(isinstance(w, (int, float)) and not isinstance(w, bool) and w > 0 for w in weights.values())
+            ):
+                raise ValueError(f'diversity-axes.json: shares của trục {axis_id} phải là {{mã nhóm: số dương}}.')
+        else:
+            value, weights = item, None
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f'diversity-axes.json: trục {axis_id} có giá trị rỗng hoặc sai kiểu.')
+        values.append(value.strip())
+        if weights:
+            shares[value.strip()] = {theme: float(weight) for theme, weight in weights.items()}
+    if len(set(values)) != len(values):
+        raise ValueError(f'diversity-axes.json: trục {axis_id} có giá trị trùng.')
+    return values, shares
 
 
 def _parse_selector(raw: Any, axes_by_id: dict[str, dict[str, Any]], where: str) -> tuple[str, str, frozenset[str] | None]:
@@ -166,6 +198,15 @@ def _applies(axis: dict[str, Any], category: str) -> bool:
     return theme not in axis['exclude']
 
 
+def _theme_value_counts(history: list[dict[str, Any]], axis_id: str) -> Counter[tuple[str | None, str]]:
+    counts: Counter[tuple[str | None, str]] = Counter()
+    for item in history:
+        assigned = item.get('axes') if isinstance(item, dict) else None
+        if isinstance(assigned, dict) and axis_id in assigned:
+            counts[(final.CATEGORY_TO_THEME.get(str(item.get('category', ''))), str(assigned[axis_id]))] += 1
+    return counts
+
+
 def value_counts(history: list[dict[str, Any]]) -> dict[str, Counter[str]]:
     counts: dict[str, Counter[str]] = {}
     for item in history:
@@ -195,27 +236,46 @@ def assign_axes(
     rng = rng or random.Random()
     catalogue = load_axes()
     counts = value_counts(history)
+    theme_counts = {axis['id']: _theme_value_counts(history, axis['id']) for axis in catalogue['axes'] if axis['shares']}
     result = []
     for category in categories:
         theme = final.CATEGORY_TO_THEME.get(category)
         eligible = [axis for axis in catalogue['axes'] if _applies(axis, category)]
+        required = [axis for axis in eligible if axis['required']]
+        optional = [axis for axis in eligible if not axis['required']]
         number = rng.randint(catalogue['min'], catalogue['max'])
         assigned: dict[str, str] = {}
-        # Visit every eligible axis in weighted order and stop at the target count, so an
-        # axis left without a compatible value is replaced by the next one.
-        for axis in _weighted_sample(eligible, len(eligible), rng):
-            if len(assigned) >= number:
+        # Required axes first (they shape what the rules allow), then optional ones in
+        # weighted order until the target count; an axis with no compatible value is skipped.
+        for axis in required + _weighted_sample(optional, len(optional), rng):
+            if not axis['required'] and len(assigned) - len(required) >= number:
                 break
-            candidates = [v for v in axis['values'] if compatible(theme, {**assigned, axis['id']: v}, catalogue['rules'])]
+            candidates = [
+                v for v in axis['values']
+                if (v not in axis['shares'] or theme in axis['shares'][v])
+                and compatible(theme, {**assigned, axis['id']: v}, catalogue['rules'])
+            ]
             if not candidates:
                 continue
-            used = counts.setdefault(axis['id'], Counter())
-            lowest = min(used[value] for value in candidates)
-            value = rng.choice([value for value in candidates if used[value] == lowest])
-            used[value] += 1  # Later slots in this batch see this choice.
+            if axis['shares']:
+                # Quota per group: the value furthest below its share in this group wins.
+                used_here = theme_counts[axis['id']]
+                score = {v: (used_here[(theme, v)] + 1) / axis['shares'].get(v, {}).get(theme, 1.0) for v in candidates}
+                lowest = min(score.values())
+                value = rng.choice([v for v in candidates if score[v] == lowest])
+                used_here[(theme, value)] += 1
+            else:
+                used = counts.setdefault(axis['id'], Counter())
+                lowest = min(used[value] for value in candidates)
+                value = rng.choice([value for value in candidates if used[value] == lowest])
+            counts.setdefault(axis['id'], Counter())[value] += 1  # Later slots in this batch see this choice.
             assigned[axis['id']] = value
         result.append(assigned)
     return result
+
+
+def is_vista_shot(value: str) -> bool:
+    return "tầm nhìn xa" in value and "không có tầm nhìn xa" not in value
 
 
 def describe(assigned: dict[str, str]) -> str:

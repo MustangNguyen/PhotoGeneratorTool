@@ -30,9 +30,9 @@ Mặc định dùng **Codex CLI đã đăng nhập trên máy**. CLI phải hỗ
 
 ## Đa dạng nội dung
 
-24 nhóm gợi ý, subject/scene/story/composition/palette/materials cho từng concept. Bộ lọc chặn trùng khóa, dấu vân tay từ vựng và một số thay đổi bề mặt như đổi trái cây trong cùng cảnh. Lịch sử của tất cả batch được so sánh, kể cả ảnh đã loại, để không tự dùng lại ý đó. Sắp xếp ưu tiên tránh nhóm/bảng màu/góc nhìn tương tự cạnh nhau.
+10 nhóm chủ đề lấy từ kho Final kèm tỷ lệ mục tiêu (xem phần Bám phong cách Final), subject/scene/story/composition/palette/materials cho từng concept. Bộ lọc chặn trùng khóa, dấu vân tay từ vựng và một số thay đổi bề mặt như đổi trái cây trong cùng cảnh. Lịch sử của tất cả batch được so sánh, kể cả ảnh đã loại, để không tự dùng lại ý đó. Sắp xếp ưu tiên tránh nhóm/bảng màu/góc nhìn tương tự cạnh nhau.
 
-Đây là **lọc gần trùng theo heuristic**, không phải chứng minh 1.000 ảnh khác nhau tuyệt đối về ngữ nghĩa. Sau gen có cảnh báo ảnh gần giống theo màu/bố cục thô. Người duyệt vẫn kiểm tra nội dung và trải nghiệm ghép. Không tự gen lại khi có cảnh báo để tránh tốn quota. Kho ảnh mẫu `Final/` không được phân phối trong repo và chưa được gán context tự động; lịch sử chống trùng hiện là các batch tạo trong tool.
+Đây là **lọc gần trùng theo heuristic**, không phải chứng minh 1.000 ảnh khác nhau tuyệt đối về ngữ nghĩa. Sau gen có cảnh báo ảnh gần giống theo màu/bố cục thô. Người duyệt vẫn kiểm tra nội dung và trải nghiệm ghép. Không tự gen lại khi có cảnh báo để tránh tốn quota. Kho ảnh mẫu `Final/` không được phân phối trong repo; mô tả từng ảnh nằm trong `final-index.json` và được dùng để chặn concept lặp lại ảnh mẫu.
 
 ## Quota và kết nối
 
@@ -78,6 +78,20 @@ Bộ lọc trước khi tạo ảnh xét thêm các công thức cảnh dễ l�
 
 
 24 công thức bổ sung được quản lý trong `content-motifs.json`, dựa trên ảnh mẫu đã xem trong `Final/` (đường dẫn nguồn được lưu trong trường `evidence`; file ảnh không được phân phối). Cộng 11 công thức hiện có thành 35. Catalogue là bộ nhận diện chạy local, không phải danh sách bắt model tạo lần lượt và không tự đưa ảnh mẫu vào lịch sử. File được kiểm tra schema và nạp lại khi sửa; không phát sinh lượt gọi AI riêng để lọc.
+
+## Bám phong cách Final
+
+Hai file sinh ra một lần từ toàn bộ 2.204 ảnh trong `Final/` (Chap, Daily, lv; không gồm Collection và video):
+
+- `final-style.json`: phân vị p5–p95 của độ bão hòa, độ sáng, độ ấm (R−B), độ rực màu, độ tương phản và mật độ chi tiết, đo bằng `studio/style.py`.
+- `final-index.json`: mỗi ảnh có nhóm chủ đề, lưới cắt lấy từ tên file, mô tả ngắn và số đo màu. Mô tả do Claude viết khi xem contact sheet, không tốn quota tạo ảnh.
+
+Cách dùng trong tool:
+
+1. Quy cách ảnh (`_IMAGE_RULES`, prompt lập context và `art-direction.json` v11) mô tả phong cách Final: nắng ấm, màu tươi bão hòa hài hòa, cảnh bày biện nhiều vật cỡ vừa-lớn rõ ràng. Vẫn giữ không người, không chữ, không bùn, không blur, không chi tiết li ti.
+2. Nhóm chủ đề và tỷ lệ mục tiêu lấy từ Final. Mỗi lần lập context, planner nhận gợi ý phân bổ theo nhóm đang thiếu và vài mô tả ảnh Final cùng nhóm làm ví dụ.
+3. Concept có tiêu đề lặp lại mô tả một ảnh Final bị loại trước khi tạo ảnh. Khi chạy `python3 app.py` trên máy có `Final/`, ảnh mới còn được so pixel với ảnh mẫu; fingerprint lưu ở `data/final-fingerprints.json`, chỉ tính lại khi file đổi. Lần kiểm tra đầu tiên chậm hơn vì phải đọc toàn bộ ảnh mẫu.
+4. Sau khi lưu ảnh, tool đo màu và so với `final-style.json`. Ảnh lệch xa (ví dụ nhạt và lạnh hơn hẳn Final) có dòng "Màu so với Final" trong hộp chi tiết. Đây chỉ là cảnh báo; tool không tự tạo lại. Ngưỡng `warn_score` 0,5 gắn cờ khoảng 13% chính ảnh Final và 29/50 ảnh tool tạo gần nhất.
 
 ## Model và cài đặt
 

@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent
 ID = r'[a-f0-9]{32}'
 
 
-def build_server(data_root, port=8787, provider_factory=None):
+def build_server(data_root, port=8787, provider_factory=None, final_root=None):
     Path(data_root).mkdir(parents=True, exist_ok=True)
     process_lock = (Path(data_root) / '.server.lock').open('a')
     try:
@@ -33,7 +33,7 @@ def build_server(data_root, port=8787, provider_factory=None):
     store = Store(data_root)
     store.recover()
     factory = provider_factory or (lambda: create_provider(store))
-    engine = Engine(store, factory)
+    engine = Engine(store, factory, final_root=final_root)
     status_cache = {'at': 0, 'value': None}
     status_lock = threading.Lock()
 
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=8787)
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'data')
     args = parser.parse_args()
-    server = build_server(args.data_dir.resolve(), args.port)
+    server = build_server(args.data_dir.resolve(), args.port, final_root=ROOT / 'Final')
     print(f'Puzzle Atelier: http://127.0.0.1:{server.server_port}', flush=True)
     def stop(signum, frame):
         raise KeyboardInterrupt

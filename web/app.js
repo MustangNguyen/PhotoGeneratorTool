@@ -511,6 +511,8 @@ function updateModalDetails(item) {
   $("#modalPalette").textContent = item.palette || "—";
   $("#modalSimilarityRow").hidden = !item.similarity;
   $("#modalSimilarity").textContent = item.similarity || "—";
+  $("#modalStyleRow").hidden = !item.style_warning;
+  $("#modalStyle").textContent = item.style_warning || "—";
   $("#modalError").hidden = !item.error;
   $("#modalError").textContent = item.error || "";
   $("#modalPrompt").textContent = item.prompt || "Prompt chưa được tạo.";

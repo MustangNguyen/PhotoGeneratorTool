@@ -17,33 +17,12 @@ import threading
 import unicodedata
 from typing import Any, Iterable
 
+from . import final
 
-CATEGORIES = [
-    "Thiên nhiên hoang dã",
-    "Phong cảnh ven biển",
-    "Núi và địa chất",
-    "Rừng và thực vật",
-    "Động vật",
-    "Chim và sinh vật nhỏ",
-    "Kiến trúc lịch sử",
-    "Kiến trúc hiện đại",
-    "Đường phố và quảng trường",
-    "Nông thôn và nông trại",
-    "Xưởng thủ công",
-    "Khoa học và khám phá",
-    "Âm nhạc và biểu diễn",
-    "Giao thông và máy móc",
-    "Hàng hải và hàng không",
-    "Thể thao và vui chơi",
-    "Ẩm thực và nguyên liệu",
-    "Chợ và cửa hàng",
-    "Nội thất và đời sống",
-    "Vườn và nhà kính",
-    "Lễ hội và văn hóa",
-    "Khảo cổ và bảo tàng",
-    "Không gian kỳ thú hiện thực",
-    "Nghề nghiệp và công cụ",
-]
+
+# Planner categories and target shares come from the Final sample library (studio/final.py).
+CATEGORIES = [category for category, _ in final.THEMES.values()]
+CATEGORY_TARGETS = {category: share for category, share in final.THEMES.values()}
 
 FIELDS = (
     "title",
@@ -72,15 +51,14 @@ _MAX_LENGTH = {
 }
 
 _IMAGE_RULES = (
-    "Portrait 600x900 pixels, 2:3 aspect ratio. Bright, crisp, realistic photography "
-    "or photorealistic illustration. High-key natural daylight, lifted shadows, a cheerful "
-    "varied palette with distinct color accents, even for indoor or wooden subjects. "
-    "Avoid dark-dominated compositions, ominous mood, featureless empty backgrounds and heavy blur. "
-    "No people, no human figures, no cartoon style, "
-    "no text, letters, numbers, logos, watermarks, captions, borders, or collage. "
-    "Use one clear focal subject, a few large readable shape groups, calm breathing room, "
-    "clear depth, and a restrained number of puzzle-friendly visual anchors. Avoid clutter "
-    "and carpets of tiny repeated details."
+    "Portrait 600x900 pixels, 2:3 aspect ratio. Polished, high-detail illustration with photographic "
+    "realism, like premium jigsaw-puzzle art: bright warm sunlight or golden-hour glow, vivid harmonious "
+    "saturated colors with clean whites and open shadows. A cozy, joyful, carefully arranged scene that "
+    "fills the frame with many medium-to-large distinct objects, each with its own color, shape and outline, "
+    "so every region of the puzzle has a recognizable landmark. Sharp from front to back; no blur, bokeh or haze. "
+    "No people, no human figures, no flat cartoon style, "
+    "no text, letters, numbers, logos, watermarks, captions, borders, or collage. No mud, bare soil or murky water. "
+    "Avoid carpets of tiny repeated details, large empty areas, and dark, cold, grey or washed-out palettes."
 )
 
 ART_DIRECTION_PATH = Path(__file__).resolve().parent.parent / 'art-direction.json'
@@ -443,6 +421,32 @@ def _history_sample(history: list[dict[str, Any]], max_items: int = 72) -> list[
     return sampled[:max_items]
 
 
+def category_plan(count: int, counts: dict[str, int]) -> dict[str, int]:
+    """Split one request across categories so the catalogue moves toward Final's theme shares."""
+    total = sum(counts.get(category, 0) for category in CATEGORIES) + count
+    weight = sum(CATEGORY_TARGETS.values())
+    deficit = {
+        category: max(0.0, CATEGORY_TARGETS[category] * total / weight - counts.get(category, 0))
+        for category in CATEGORIES
+    }
+    pool = sum(deficit.values()) or 1.0
+    raw = {category: count * deficit[category] / pool for category in CATEGORIES}
+    plan = {category: int(raw[category]) for category in CATEGORIES}
+    leftovers = sorted(CATEGORIES, key=lambda c: (plan[c] - raw[c], -CATEGORY_TARGETS[c]))
+    for category in leftovers[: count - sum(plan.values())]:
+        plan[category] += 1
+    return {category: number for category, number in plan.items() if number}
+
+
+def _final_examples(offset: int) -> str:
+    lines = []
+    for category in CATEGORIES:
+        captions = final.examples(category, 3, offset)
+        if captions:
+            lines.append(f"- {category}: " + "; ".join(captions))
+    return "\n".join(lines) or "- (chưa có final-index.json)"
+
+
 def make_planning_prompt(
     count: int,
     history: list[dict[str, Any]],
@@ -455,7 +459,8 @@ def make_planning_prompt(
     counts = Counter(category_counts or {})
     if not category_counts:
         counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
-    count_text = ", ".join(f"{name}:{counts.get(name, 0)}" for name in CATEGORIES)
+    count_text = ", ".join(f"{name}: {counts.get(name, 0)} (mục tiêu {CATEGORY_TARGETS[name]}%)" for name in CATEGORIES)
+    plan_text = ", ".join(f"{name}: {number}" for name, number in category_plan(count, counts).items())
     # Bound text sent to the model; duplicate checks still use the entire history.
     history_lines = []
     history_chars = 0
@@ -479,14 +484,20 @@ CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
 MỤC TIÊU ĐA DẠNG
 - Mỗi concept phải khác về chủ thể chính, môi trường, câu chuyện qua đồ vật và cấu trúc bố cục; tạo một cảnh mạch lạc, không ghép ngẫu nhiên nhiều thứ.
 - Đổi loại trái cây, màu sắc, giống hoa hoặc vật trang trí trong cùng kiểu cảnh KHÔNG tạo thành concept mới. Cùng họ chủ thể chính + cùng môi trường là gần trùng và phải tránh.
-- Thống kê category chỉ để tham khảo; ưu tiên đa dạng nội dung tranh, bố cục, chất liệu và mảng màu theo hướng dẫn hiện tại. Không bù category ít dùng bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
+- Chia concept theo GỢI Ý PHÂN BỔ bên dưới để kho ảnh tiến dần về tỷ lệ chủ đề của Final, trong mỗi nhóm vẫn đa dạng nội dung, bố cục, chất liệu và mảng màu. Không bù nhóm thiếu bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
 - Hãy tự nghĩ thêm phương án dự phòng khi suy luận để thay thế concept trùng, nhưng chỉ xuất đúng {count} concept tốt nhất.
 
 NHÓM GỢI Ý
 {'; '.join(CATEGORIES)}
 
-SỐ LƯỢNG HIỆN CÓ THEO NHÓM
+SỐ LƯỢNG HIỆN CÓ THEO NHÓM VÀ TỶ LỆ MỤC TIÊU THEO FINAL
 {count_text}
+
+GỢI Ý PHÂN BỔ {count} CONCEPT LẦN NÀY
+{plan_text}
+
+ẢNH MẪU FINAL CÙNG NHÓM (học độ phong phú, màu và không khí; không dựng lại đúng cảnh, concept trùng ảnh mẫu sẽ bị loại)
+{_final_examples(len(history))}
 
 DẤU VÂN TAY CONCEPT ĐÃ DÙNG (được rút gọn từ {len(history)} mục; phải tránh lặp ý, không sao chép):
 {fingerprints}
@@ -507,7 +518,7 @@ HƯỚNG DẪN NỘI DUNG HIỆN TẠI — ÁP DỤNG NGAY KHI CHỌN CONCEPT
 {content_direction("vi")}
 
 QUY CÁCH ẢNH BẮT BUỘC
-Ảnh dọc 600x900, tỷ lệ 2:3; sáng, rõ nét, hiện thực; không người, không hoạt hình, không chữ/logo/watermark. Dùng một chủ thể chính rõ, vài mảng hình lớn dễ đọc, có khoảng nghỉ mắt và số lượng mốc thị giác vừa đủ cho puzzle; tránh phủ kín khung bằng chi tiết nhỏ lặp lại.
+Ảnh dọc 600x900, tỷ lệ 2:3; minh họa trau chuốt gần như ảnh thật giống kho Final: nắng ấm hoặc vàng chiều, màu tươi bão hòa hài hòa, cảnh ấm cúng vui vẻ được bày biện chăm chút. Chủ thể chính rõ, xung quanh nhiều vật cỡ vừa-lớn khác màu khác hình phủ khung để mảnh nào cũng có mốc; nét từ trước ra sau, không blur. Màu nhạt, xỉn hoặc ánh sáng phẳng kiểu ảnh tư liệu là lỗi. Không chữ/logo/watermark; không người, không hoạt hình phẳng, không bùn đất; tránh thảm chi tiết li ti lặp lại và vùng trống lớn.
 """
 
 
@@ -552,6 +563,26 @@ def _duplicate_reason(
         return f"dấu vân tay từ vựng quá giống (score {max(overall, key_score):.2f})"
     if same_family and scene_score >= 0.46 and (subject_score >= 0.25 or overall >= 0.42):
         return "cùng họ chủ thể chính và môi trường; có thể chỉ là đổi loại/màu"
+    return None
+
+
+_FINAL_TOKENS: tuple[Any, list[tuple[dict[str, Any], set[str]]]] = ((), [])
+
+
+def _final_duplicate(candidate: dict[str, str]) -> dict[str, Any] | None:
+    """Return the Final sample whose caption the candidate title repeats, if any.
+
+    Only the short title is compared: long subject/scene text would contain most
+    four-word captions by chance.
+    """
+    global _FINAL_TOKENS
+    items = final.load_index()
+    if _FINAL_TOKENS[0] is not items:
+        _FINAL_TOKENS = (items, [(item, _tokens(item["caption"])) for item in items])
+    title = _tokens(candidate["title"])
+    for item, caption in _FINAL_TOKENS[1]:
+        if (len(caption) >= 4 and caption <= title) or (len(caption) >= 3 and _similarity(title, caption) >= 0.75):
+            return item
     return None
 
 
@@ -602,6 +633,13 @@ def validate_concepts(raw: Any, history: list[dict[str, Any]], limit: int) -> tu
         if malformed:
             continue
         normalized["category"] = _normalized_category(normalized["category"])
+        sample = _final_duplicate(normalized)
+        if sample:
+            errors.append(
+                f"concept {index} ({normalized['title']}): gần trùng ảnh mẫu Final «{sample['caption']}» ({sample['path']}); "
+                "hãy giữ phong cách nhưng đổi cảnh"
+            )
+            continue
         candidate_motifs = _motifs(normalized)
         reason = next(
             (

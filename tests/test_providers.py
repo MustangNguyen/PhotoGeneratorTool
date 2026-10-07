@@ -114,8 +114,9 @@ def _jpeg(width, height):
 class FakeMcp:
     """Scripted digen-mcp: returns queued poll results and records tool calls."""
 
-    def __init__(self, polls):
+    def __init__(self, polls, send_failures=0):
         self.polls = list(polls)
+        self.send_failures = send_failures
         self.calls = []
         self.closed = False
 
@@ -125,6 +126,9 @@ class FakeMcp:
     def call(self, tool, arguments):
         self.calls.append((tool, arguments))
         if tool == "digen_send":
+            if self.send_failures:
+                self.send_failures -= 1
+                raise RuntimeError("Digen báo lỗi: fetch failed")
             return {"task_id": "task-1", "conversation_id": "conv-1", "status": "running"}
         if tool == "digen_poll":
             return self.polls.pop(0)
@@ -135,13 +139,15 @@ class FakeMcp:
 
 
 class DigenProviderTests(unittest.TestCase):
-    def run_generate(self, polls, image_bytes=None, settings=None):
-        fake = FakeMcp(polls)
+    def run_generate(self, polls, image_bytes=None, settings=None, send_failures=0):
+        fake = FakeMcp(polls, send_failures)
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
         provider = DigenProvider(settings or {"digen_image_model": "t2i.hd.lite"}, root / "jobs")
         provider.POLL_SECONDS = 0
+        provider.SEND_RETRY_DELAYS = (0, 0)
+        provider.DOWNLOAD_RETRY_DELAYS = (0, 0)
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = image_bytes or b""
         with mock.patch("studio.providers._McpSession", fake), \
@@ -188,6 +194,25 @@ class DigenProviderTests(unittest.TestCase):
         asset = {"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}
         _, error = self.run_generate([{"status": "done", "assets": [asset, asset]}], _jpeg(720, 960))
         self.assertIn("2 ảnh", str(error))
+
+    def test_retries_send_after_network_failure(self):
+        done = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        fake, target = self.run_generate([done], _jpeg(720, 960), send_failures=2)
+        self.assertIsInstance(target, Path, target)
+        self.assertEqual(3, sum(tool == "digen_send" for tool, _ in fake.calls))
+
+    def test_gives_up_after_three_network_failures(self):
+        fake, error = self.run_generate([], send_failures=3)
+        self.assertIn("không kết nối ổn định", str(error).lower())
+        self.assertEqual(3, sum(tool == "digen_send" for tool, _ in fake.calls))
+
+    def test_repolls_when_finished_image_link_is_unsigned(self):
+        unsigned = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "s3://bucket/img.jpg"}]}
+        signed = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        fake, target = self.run_generate([unsigned, signed], _jpeg(720, 960))
+        self.assertIsInstance(target, Path, target)
+        self.assertEqual(2, sum(tool == "digen_poll" for tool, _ in fake.calls))
+        self.assertEqual(1, sum(tool == "digen_send" for tool, _ in fake.calls))
 
     def test_unknown_model_is_rejected(self):
         _, error = self.run_generate([], settings={"digen_image_model": "nope"})

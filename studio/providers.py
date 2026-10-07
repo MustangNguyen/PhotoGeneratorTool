@@ -316,6 +316,10 @@ class DigenProvider(CodexProvider):
 
     PACKAGE = 'digen-cli@0.2.0'
     POLL_SECONDS = 5
+    # TLS to api.digen.ai (AWS us-west-1) can stall for minutes and digen-cli gives up
+    # after a 10 s connect timeout ("fetch failed"), before the request reaches Digen.
+    SEND_RETRY_DELAYS = (15, 30, 60)
+    DOWNLOAD_RETRY_DELAYS = (5, 15)
 
     def __init__(self, settings, work_root):
         super().__init__(settings, work_root)
@@ -372,16 +376,23 @@ class DigenProvider(CodexProvider):
                 raise RuntimeError('Lượt tạo đã dừng trước khi gọi Digen.')
             self.mcp = _McpSession(self.mcp_command(), directory / 'process.log')
         try:
-            sent = self.mcp.call('digen_send', {'message': instruction})
+            sent = self._send(instruction)
             task = sent.get('task_id')
             if not task:
                 raise RuntimeError('Digen không nhận yêu cầu: ' + str(sent.get('error', 'không có task_id'))[:300])
             deadline = time.monotonic() + 1200
+            relinks = 0
             while True:
                 time.sleep(self.POLL_SECONDS)
                 result = self.mcp.call('digen_poll', {'task_id': task})
                 log.write_text(json.dumps({'task_id': task, 'conversation_id': sent.get('conversation_id'), **result}, ensure_ascii=False, indent=1), encoding='utf-8')
                 status = result.get('status')
+                # When presigning fails on a flaky network the asset comes back as a raw s3:// link;
+                # polling again only re-signs the finished image and costs nothing.
+                unsigned = any(a.get('type') == 'image' and not a.get('url', '').startswith('https://') for a in result.get('assets', []))
+                if status == 'done' and unsigned and relinks < 3:
+                    relinks += 1
+                    continue
                 if status == 'done':
                     break
                 if status == 'await_confirmation':
@@ -400,17 +411,35 @@ class DigenProvider(CodexProvider):
             raise RuntimeError(f'Digen trả {len(images)} ảnh; cần đúng một ảnh. Xem {log}, không tự tạo lại.')
         suffix = Path(urllib.parse.urlparse(images[0]['url']).path).suffix.lower()
         target = directory / ('source' + (suffix if suffix in {'.png', '.jpg', '.jpeg', '.webp'} else '.jpg'))
-        try:
-            with urllib.request.urlopen(images[0]['url'], timeout=120) as response:
-                target.write_bytes(response.read())
-            with Image.open(target) as image:
-                width, height = ImageOps.exif_transpose(image).size
-        except (urllib.error.URLError, TimeoutError, OSError, UnidentifiedImageError) as error:
-            raise RuntimeError(f'Không tải được ảnh Digen; link còn trong {log} khoảng 24 giờ.') from error
+        for delay in (*self.DOWNLOAD_RETRY_DELAYS, None):
+            try:
+                with urllib.request.urlopen(images[0]['url'], timeout=120) as response:
+                    target.write_bytes(response.read())
+                with Image.open(target) as image:
+                    width, height = ImageOps.exif_transpose(image).size
+                break
+            except (urllib.error.URLError, TimeoutError, OSError, UnidentifiedImageError) as error:
+                # Downloading an already generated image is free, so retrying is safe.
+                if delay is None:
+                    raise RuntimeError(f'Không tải được ảnh Digen; link còn trong {log} khoảng 24 giờ.') from error
+                time.sleep(delay)
         # A landscape result would lose most of the scene when cropped to portrait.
         if height <= width:
             raise RuntimeError(f'Digen trả ảnh ngang {width}×{height} thay vì 3:4 dọc; không cắt về 2:3. Không tự tạo lại.')
         return target
+
+    def _send(self, instruction):
+        for delay in (*self.SEND_RETRY_DELAYS, None):
+            try:
+                return self.mcp.call('digen_send', {'message': instruction})
+            except RuntimeError as error:
+                # Only network failures are retried; a connect timeout means nothing was sent.
+                # A drop after Digen accepted the request could, rarely, charge twice.
+                if 'fetch failed' not in str(error):
+                    raise
+                if delay is None or self.cancelled:
+                    raise RuntimeError(f'Không kết nối ổn định được tới Digen sau {len(self.SEND_RETRY_DELAYS) + 1} lần gửi (fetch failed). Mạng tới AWS us-west-1 đang chập chờn; thử lại sau.') from error
+                time.sleep(delay)
 
     def cancel(self):
         super().cancel()

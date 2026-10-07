@@ -79,6 +79,34 @@ Bộ lọc trước khi tạo ảnh xét thêm các công thức cảnh dễ l�
 
 24 công thức bổ sung được quản lý trong `content-motifs.json`, dựa trên ảnh mẫu đã xem trong `Final/` (đường dẫn nguồn được lưu trong trường `evidence`; file ảnh không được phân phối). Cộng 11 công thức hiện có thành 35. Catalogue là bộ nhận diện chạy local, không phải danh sách bắt model tạo lần lượt và không tự đưa ảnh mẫu vào lịch sử. File được kiểm tra schema và nạp lại khi sửa; không phát sinh lượt gọi AI riêng để lọc.
 
+### Giới hạn chủ thể chính và gợi ý từ Final
+
+Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay lại ý quen thuộc (xe đạp touring, thỏ tai cụp, bánh mì, ngô nướng…), còn bộ lọc từ vựng không bắt được khi chỉ đổi bối cảnh. Hiện tại:
+
+1. Mỗi lượt lập context, ứng dụng gán cho từng concept một ảnh mẫu Final chưa dùng (theo GỢI Ý PHÂN BỔ). Model lấy chủ thể/ý chủ đạo của gợi ý rồi tự dựng cảnh mới và trả lại `seed_id`; context lưu `final_seed` để lượt sau không lặp gợi ý.
+2. Model phải trả `main_subject`: danh từ tiếng Anh chung, số ít (ví dụ `rabbit`, `bicycle`). Mỗi chủ thể chỉ được dùng tối đa `1 + số context / 500` lần (756 mục → 2 lần, 1.000 mục → 3 lần); đổi giống, màu, tính từ hay bối cảnh vẫn tính là cùng chủ thể. Danh từ quá chung như `machine`, `table`, `tree` cần cả từ đứng trước trùng mới tính là một chủ thể.
+3. Context cũ không có `main_subject` được suy ra từ cụm danh từ đầu của `key`. Cách suy ra này là heuristic và có thể sai với key không bắt đầu bằng chủ thể.
+4. Prompt lập context liệt kê toàn bộ chủ thể đã đủ giới hạn và các chủ thể dùng nhiều nhất, thay vì chỉ vài chục dấu vân tay gần nhất.
+
+### Trục đa dạng (`diversity-axes.json`)
+
+Ngoài chủ thể, mỗi concept được gán thêm một số trục đa dạng: góc nhìn, khoảng cách khung hình, kiểu bố cục, thời điểm, mùa, dịp, vùng văn hóa, thời kỳ, chất liệu, bảng màu, không gian, số lượng chủ thể, tình huống, điểm nhấn sống, hình thức.
+
+- Mỗi concept chỉ nhận ngẫu nhiên từ `per_concept.min` đến `per_concept.max` trục (mặc định 2–4), không phải tất cả. Trục không được gán thì model tự chọn, miễn khác các concept còn lại.
+- Trong mỗi trục được gán, ứng dụng chọn giá trị **ít được dùng nhất** trong lịch sử (hòa thì ngẫu nhiên), nên kho ảnh tự trải đều qua các giá trị.
+- `weight` cao thì trục được chọn thường hơn. `categories` / `exclude_categories` (mã nhóm `food`, `interior`, `garden`, `objects`, `facade`, `animal`, `vehicle`, `shop`, `coast`, `drink`) giới hạn trục cho một số nhóm.
+- Thêm trục hoặc giá trị bằng cách sửa file; ứng dụng đọc lại khi file đổi, không cần khởi động lại. File sai cấu trúc sẽ dừng batch với lỗi rõ ràng.
+- Context lưu trục đã gán ở trường `axes`; bước duyệt nhận các trục này và phải giữ chúng khi sửa.
+
+Tổ hợp không hợp nhau được khai báo trong `rules`, ứng dụng không bao giờ gán chúng cùng lúc:
+
+- `exclude`: `if` và `then` không được cùng xảy ra, ví dụ tuyết + vùng nhiệt đới, cận cảnh + nhìn từ ban công xuống.
+- `require`: khi `if` xảy ra thì `then` phải đúng nếu trục đó được gán, ví dụ Tết Nguyên đán chỉ đi với Việt Nam/Trung Hoa/Hàn Quốc và mùa xuân.
+- Bộ chọn là `{"axis": "season", "values": [...]}` (bỏ `values` = mọi giá trị của trục) hoặc `{"category": ["coast"]}`. Trục/giá trị/mã nhóm sai tên sẽ báo lỗi khi đọc file.
+- Nếu một trục không còn giá trị hợp lệ, ứng dụng bỏ trục đó và chọn trục khác.
+
+Luật chỉ áp dụng cho trục được gán. Chủ thể gợi ý từ Final vẫn có thể không hợp trục (ví dụ hải đăng + Alps không còn xảy ra, nhưng gợi ý "cua trên bãi đá" + "trên tàu"): model được yêu cầu đổi chủ thể theo tinh thần gợi ý thay vì bỏ trục, và bước duyệt loại cảnh phi thực tế. Gặp cặp lạ lặp lại thì thêm luật mới.
+
 ## Bám phong cách Final
 
 Hai file sinh ra một lần từ toàn bộ 2.204 ảnh trong `Final/` (Chap, Daily, lv; không gồm Collection và video):

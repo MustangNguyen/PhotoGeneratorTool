@@ -12,14 +12,14 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from .diversity import FIELDS, _MAX_LENGTH
+from .diversity import PLAN_FIELDS, _MAX_LENGTH
 from .review import REVIEW_SCHEMA
 
 DEFAULTS = {'provider': 'codex', 'antigravity_text_model': '', 'text_model': '', 'image_model': 'gpt-image-2', 'concurrency': 4}
 SCHEMA = {
     'type': 'object', 'properties': {'concepts': {'type': 'array', 'items': {
-        'type': 'object', 'properties': {field: {'type': 'string', 'minLength': 1, 'maxLength': _MAX_LENGTH[field]} for field in FIELDS},
-        'required': list(FIELDS), 'additionalProperties': False,
+        'type': 'object', 'properties': {field: {'type': 'string', 'minLength': 1, 'maxLength': _MAX_LENGTH[field]} for field in PLAN_FIELDS},
+        'required': list(PLAN_FIELDS), 'additionalProperties': False,
     }}}, 'required': ['concepts'], 'additionalProperties': False,
 }
 

@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from studio.diversity import CATEGORIES, image_prompt, make_planning_prompt, order_concepts, validate_concepts
+from studio.diversity import CATEGORIES, image_prompt, make_planning_prompt, order_concepts, subject_limit, validate_concepts
 
 
 def concept(**changes):
@@ -126,16 +126,59 @@ class DiversityTests(unittest.TestCase):
         self.assertEqual(1, len(accepted), errors)
 
     def test_empty_pottery_bowl_by_window_is_not_classified_as_fruit_still_life(self):
-        old = concept(subject="Bát gốm trống bên cửa sổ", scene="Bàn ăn cạnh cửa sổ", key="empty ceramic bowl window table")
+        old = concept(subject="Bát gốm trống bên cửa sổ", scene="Bàn ăn cạnh cửa sổ", key="empty ceramic bowl window table", main_subject="ceramic bowl")
         fruit = concept(
             title="Mâm lê",
             subject="Đĩa lê chín trên bàn",
             scene="Bàn ăn cạnh cửa sổ",
             story="Bữa quả nhẹ buổi chiều",
             key="ripe pears bright window table",
+            main_subject="pear",
         )
         accepted, errors = validate_concepts({"concepts": [fruit]}, [old], 1)
         self.assertEqual(1, len(accepted), errors)
+
+    def test_same_main_subject_in_new_setting_is_capped(self):
+        history = [
+            concept(title="Thỏ trong chuồng", subject="Thỏ tai cụp ăn rau", scene="Chuồng gỗ trong vườn", story="Bữa trưa của thỏ", key="lop-eared rabbit eating greens in a garden hutch"),
+        ]
+        new = concept(
+            title="Thỏ trên thảm",
+            subject="Thỏ lùn nằm nghỉ",
+            scene="Phòng khách sáng",
+            story="Giờ nghỉ trưa",
+            key="dwarf rabbit resting on a living room rug",
+            main_subject="rabbit",
+        )
+        accepted, errors = validate_concepts({"concepts": [new]}, history, 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("chủ thể chính “rabbit”" in error for error in errors), errors)
+
+    def test_subject_cap_grows_slowly_with_catalogue_size(self):
+        self.assertEqual(1, subject_limit(0))
+        self.assertEqual(2, subject_limit(756))
+        self.assertEqual(3, subject_limit(1000))
+
+    def test_generic_heads_need_matching_modifier(self):
+        old = concept(key="home sewing machine on a tidy table", main_subject="sewing machine")
+        new = concept(
+            title="Góc espresso trên quầy bếp",
+            subject="Máy pha espresso",
+            scene="Quầy bếp nhỏ",
+            story="Cà phê buổi sáng",
+            key="espresso machine on a kitchen counter",
+            main_subject="espresso machine",
+        )
+        accepted, errors = validate_concepts({"concepts": [new]}, [old], 1)
+        self.assertEqual(1, len(accepted), errors)
+
+    def test_seed_is_recorded_and_planner_fields_are_kept(self):
+        seeds = [{"id": "F7", "category": CATEGORIES[0], "caption": "bánh", "path": "Chap1/7-4x4.jpg"}]
+        item = concept(main_subject="cello", seed_id="F7")
+        accepted, errors = validate_concepts({"concepts": [item]}, [], 1, seeds)
+        self.assertEqual("Chap1/7-4x4.jpg", accepted[0]["final_seed"], errors)
+        self.assertEqual("cello", accepted[0]["main_subject"])
+        self.assertNotIn("seed_id", accepted[0])
 
     def test_within_batch_duplicate_is_rejected(self):
         first = concept()
@@ -195,6 +238,7 @@ class DiversityTests(unittest.TestCase):
         ]
         prompt = make_planning_prompt(3, history)
         self.assertIn("kính thiên văn tại đài quan sát: đã dùng 1 lần", prompt)
+        self.assertIn("CHỦ THỂ CHÍNH ĐÃ ĐỦ", prompt)
         self.assertIn("Bản đồ sao cũ", prompt)
 
     def test_unknown_real_category_is_preserved(self):

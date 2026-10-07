@@ -12,12 +12,13 @@ from collections import Counter, defaultdict
 from functools import lru_cache
 import json
 from pathlib import Path
+import random
 import re
 import threading
 import unicodedata
 from typing import Any, Iterable
 
-from . import final
+from . import axes, final
 
 
 # Planner categories and target shares come from the Final sample library (studio/final.py).
@@ -37,7 +38,13 @@ FIELDS = (
     "prompt",
 )
 
+# Extra planner outputs. They are optional when validating so legacy contexts and
+# review revisions (which use FIELDS) still pass; the planning schema requires them.
+PLAN_FIELDS = FIELDS + ("main_subject", "seed_id")
+
 _MAX_LENGTH = {
+    "main_subject": 60,
+    "seed_id": 12,
     "title": 120,
     "category": 80,
     "subject": 320,
@@ -445,19 +452,179 @@ def category_plan(count: int, counts: dict[str, int]) -> dict[str, int]:
     return {category: number for category, number in plan.items() if number}
 
 
-def _final_examples(offset: int) -> str:
-    lines = []
-    for category in CATEGORIES:
-        captions = final.examples(category, 3, offset)
-        if captions:
-            lines.append(f"- {category}: " + "; ".join(captions))
-    return "\n".join(lines) or "- (chưa có final-index.json)"
+# --- Main-subject frequency cap -------------------------------------------------
+# The planner names one generic English noun for the hero subject.  Legacy contexts
+# have no main_subject, so their subject is read from the head of the English key.
+SUBJECT_REPEAT_EVERY = 500  # one more use of the same subject per 500 saved contexts
+
+_HEAD_CUT = {
+    "on", "at", "in", "inside", "outside", "beside", "with", "by", "near", "under", "over",
+    "along", "for", "from", "behind", "against", "atop", "across", "among", "around", "into",
+    "onto", "through", "under", "beneath", "below", "above", "within", "during", "after", "before",
+    "parked", "resting", "eating", "floating", "sliding", "sitting", "grazing", "arriving", "playing",
+    "standing", "perched", "nibbling", "prepared", "draining", "arranged", "waiting", "lying",
+    "hanging", "tied", "displayed", "served", "cooling", "blooming", "growing", "leaning", "docked",
+    "moored", "set", "laid", "placed", "stacked", "drying", "climbing", "sleeping", "curled",
+    "foraging", "paused", "ready", "open", "opened", "shown", "seen", "viewed", "framed",
+}
+_COLOR_WORDS = {
+    "red", "blue", "green", "white", "black", "yellow", "pink", "orange", "purple", "brown",
+    "cream", "teal", "turquoise", "gold", "silver", "grey", "gray", "coral", "mint", "navy",
+}
+# Trailing words that describe the occasion rather than the hero subject.
+_HEAD_TAIL = {
+    "lunch", "breakfast", "dinner", "supper", "brunch", "snack", "platter", "preparation", "scene",
+    "setup", "spread", "time", "moment", "still", "life", "view", "close", "up", "closeup",
+}
+# Words a key may start with that are not a subject noun.
+_NOT_SUBJECT = {
+    "small", "large", "little", "big", "tiny", "quiet", "family", "home", "fresh", "old", "new", "cozy",
+    "sunny", "bright", "warm", "morning", "afternoon", "evening", "summer", "winter", "spring", "autumn",
+    "rest", "return", "service", "overhead", "top", "side", "front", "back", "early", "late", "local",
+}
+# Heads too generic to identify a subject alone: the preceding word must also match.
+_GENERIC_HEADS = {
+    "machine", "set", "box", "table", "stand", "house", "shop", "cart", "room", "corner", "area",
+    "display", "counter", "shelf", "basket", "tray", "plate", "bowl", "cup", "pot", "bag", "case",
+    "rack", "stall", "garden", "bed", "chair", "station", "boat", "car", "truck", "tower", "cake",
+    "tree", "plant", "bush", "flower", "cafe", "window",
+}
+
+
+def _singular(word: str) -> str:
+    if len(word) > 4 and word.endswith("lves"):
+        return word[:-3] + "f"
+    if len(word) > 5 and word.endswith("oaves"):
+        return word[:-3] + "f"
+    if len(word) > 4 and word.endswith("ises"):
+        return word[:-2]
+    if len(word) > 4 and word.endswith("ies"):
+        return word[:-3] + "y"
+    if len(word) > 4 and word.endswith(("ches", "shes", "sses", "xes")):
+        return word[:-2]
+    if len(word) > 3 and word.endswith("s") and not word.endswith(("ss", "us", "is")):
+        return word[:-1]
+    return word
+
+
+def _subject_words(value: str) -> list[str]:
+    return [_singular(word) for word in re.findall(r"[a-z0-9]+", _ascii(_clean(value)))]
+
+
+def _key_head(key: str) -> list[str]:
+    """The leading noun phrase of an English key, e.g. 'lop eared rabbit' from '... eating hay'."""
+    words = re.findall(r"[a-z0-9]+", _ascii(_clean(key)))
+    head: list[str] = []
+    for word in words:
+        if word in _HEAD_CUT and head:
+            break
+        if word == "and" and head and head[-1] not in _COLOR_WORDS:
+            break
+        # A participle after the noun phrase ("bicycle parked", "panel fitted") ends it.
+        if len(head) >= 2 and len(word) > 4 and word.endswith(("ed", "ing")):
+            break
+        head.append(word)
+    while len(head) > 1 and head[-1] in _HEAD_TAIL:
+        head.pop()
+    if head and head[-1] in _NOT_SUBJECT:  # Key does not start with a noun: no reliable subject.
+        return []
+    return [_singular(word) for word in head]
+
+
+def _subject_of(concept: dict[str, Any]) -> tuple[str, ...]:
+    words = _subject_words(str(concept.get("main_subject", "")))
+    if not words:
+        words = _key_head(str(concept.get("key", "")))
+    return tuple(words[-3:])
+
+
+def _subject_label(words: tuple[str, ...]) -> str:
+    if not words:
+        return ""
+    if words[-1] in _GENERIC_HEADS and len(words) > 1:
+        return " ".join(words[-2:])
+    return words[-1]
+
+
+def _same_subject(left: tuple[str, ...], right: tuple[str, ...]) -> bool:
+    if not left or not right or left[-1] != right[-1]:
+        return False
+    if left[-1] in _GENERIC_HEADS:
+        return len(left) > 1 and len(right) > 1 and left[-2] == right[-2]
+    return True
+
+
+def subject_limit(history_size: int) -> int:
+    return 1 + max(0, history_size) // SUBJECT_REPEAT_EVERY
+
+
+def _subject_counts(history: list[dict[str, Any]]) -> Counter[str]:
+    return Counter(label for item in history if isinstance(item, dict) and (label := _subject_label(_subject_of(item))))
+
+
+def _subject_summary(history: list[dict[str, Any]], limit: int) -> tuple[str, str]:
+    """(blocked subjects, most used subjects) as compact text over the full history."""
+    counts = _subject_counts(history)
+    blocked = [label for label, number in counts.most_common() if number >= limit]
+    blocked_text = ", ".join(blocked[:600]) or "(chưa có)"
+    common = ", ".join(f"{label}×{number}" for label, number in counts.most_common(150) if number >= 1)
+    return blocked_text, common or "(chưa có)"
+
+
+def pick_seeds(
+    count: int,
+    history: list[dict[str, Any]],
+    category_counts: dict[str, int] | None = None,
+    rng: random.Random | None = None,
+) -> list[dict[str, Any]]:
+    """Build one slot per concept: category, an unused Final caption, and diversity axes.
+
+    Seeds come from the whole Final library so the content spread follows the 2,204
+    sample images instead of the text model's favourite subjects; axes then push each
+    slot toward the least-used viewpoint, season, region and so on.
+    """
+    rng = rng or random.Random()
+    items = final.load_index()
+    counts = Counter(category_counts or {})
+    if not category_counts:
+        counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
+    used = {str(item.get("final_seed", "")) for item in history if isinstance(item, dict)}
+    seeds: list[dict[str, Any]] = []
+    for category, number in category_plan(count, counts).items():
+        theme = final.CATEGORY_TO_THEME.get(category)
+        pool = [
+            (index, item) for index, item in enumerate(items)
+            if item.get("theme") == theme and not item.get("people") and item["path"] not in used
+        ]
+        if len(pool) < number:  # Every seed in this theme was used: allow repeats rather than stall.
+            pool = [(index, item) for index, item in enumerate(items) if item.get("theme") == theme and not item.get("people")]
+        picked = rng.sample(pool, min(number, len(pool)))
+        for slot in range(number):
+            if slot < len(picked):
+                index, item = picked[slot]
+                seeds.append({"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]})
+            else:  # No Final index on this machine: the slot still carries category and axes.
+                seeds.append({"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""})
+    rng.shuffle(seeds)
+    for seed, assigned in zip(seeds, axes.assign_axes([seed["category"] for seed in seeds], history, rng)):
+        seed["axes"] = assigned
+    return seeds
+
+
+def _seed_line(seed: dict[str, Any]) -> str:
+    line = f"- {seed['id']} [{seed['category']}]"
+    if seed.get("caption"):
+        line += f" gợi ý: {seed['caption']}"
+    if seed.get("axes"):
+        line += f" | trục: {axes.describe(seed['axes'])}"
+    return line
 
 
 def make_planning_prompt(
     count: int,
     history: list[dict[str, Any]],
     category_counts: dict[str, int] | None = None,
+    seeds: list[dict[str, str]] | None = None,
 ) -> str:
     """Build a compact catalogue-planning prompt for a text model."""
     if not isinstance(count, int) or isinstance(count, bool) or count < 1:
@@ -480,6 +647,11 @@ def make_planning_prompt(
     fingerprints = "\n".join(history_lines)
     if not fingerprints:
         fingerprints = "- (chưa có concept trước đó)"
+    if seeds is None:
+        seeds = pick_seeds(count, history, dict(counts))
+    seed_text = "\n".join(_seed_line(seed) for seed in seeds)
+    limit = subject_limit(len(history))
+    blocked_subjects, common_subjects = _subject_summary(history, limit)
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
 CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
@@ -489,6 +661,7 @@ CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
 - Viết prompt ngắn, cụ thể, theo thứ tự cảnh → vị trí/cấu tạo → máy ảnh → ánh sáng/mảng màu. Không nối lại toàn bộ quy tắc chung; ứng dụng sẽ thêm một lần.
 
 MỤC TIÊU ĐA DẠNG
+- Mỗi concept phải có chủ thể chính khác hẳn các concept khác và lịch sử; cùng con vật/món/phương tiện/đồ vật với bối cảnh khác vẫn là trùng chủ đề.
 - Mỗi concept phải khác về chủ thể chính, môi trường, câu chuyện qua đồ vật và cấu trúc bố cục; tạo một cảnh mạch lạc, không ghép ngẫu nhiên nhiều thứ.
 - Đổi loại trái cây, màu sắc, giống hoa hoặc vật trang trí trong cùng kiểu cảnh KHÔNG tạo thành concept mới. Cùng họ chủ thể chính + cùng môi trường là gần trùng và phải tránh.
 - Chia concept theo GỢI Ý PHÂN BỔ bên dưới để kho ảnh tiến dần về tỷ lệ chủ đề của Final, trong mỗi nhóm vẫn đa dạng nội dung, bố cục, chất liệu và mảng màu. Không bù nhóm thiếu bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
@@ -503,8 +676,17 @@ SỐ LƯỢNG HIỆN CÓ THEO NHÓM VÀ TỶ LỆ MỤC TIÊU THEO FINAL
 GỢI Ý PHÂN BỔ {count} CONCEPT LẦN NÀY
 {plan_text}
 
-ẢNH MẪU FINAL CÙNG NHÓM (học độ phong phú, màu và không khí; không dựng lại đúng cảnh, concept trùng ảnh mẫu sẽ bị loại)
-{_final_examples(len(history))}
+CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL VÀ TRỤC ĐA DẠNG — MỖI CONCEPT DÙNG ĐÚNG MỘT DÒNG, KHÔNG DÙNG LẠI DÒNG
+{seed_text}
+- Mỗi concept ghi seed_id là mã dòng (ví dụ F12). Lấy chủ thể chính hoặc ý chủ đạo của gợi ý làm hạt nhân, nhưng tự dựng cảnh, góc máy và bố cục mới; không chép câu gợi ý làm tiêu đề (concept trùng ảnh mẫu sẽ bị loại).
+- Các trục của dòng là yêu cầu bắt buộc, phải thấy rõ trong scene/composition/palette/prompt; trục không được nêu thì tự chọn sao cho khác các concept còn lại. Nếu một trục thật sự không hợp chủ thể (ví dụ phi thực tế, không an toàn, mâu thuẫn trục khác), đổi chủ thể trong tinh thần gợi ý thay vì bỏ trục.
+- Nếu chủ thể của gợi ý nằm trong danh sách CHỦ THỂ ĐÃ ĐỦ, chọn một vật khác có trong gợi ý hoặc một chủ thể cùng tinh thần chưa dùng.
+
+CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể tối đa {limit} lần ở quy mô {len(history)} mục; đổi tính từ, giống, màu hay bối cảnh vẫn tính là cùng chủ thể)
+{blocked_subjects}
+
+CHỦ THỂ CHÍNH ĐÃ DÙNG NHIỀU NHẤT (toàn bộ lịch sử)
+{common_subjects}
 
 DẤU VÂN TAY CONCEPT ĐÃ DÙNG (được rút gọn từ {len(history)} mục; phải tránh lặp ý, không sao chép):
 {fingerprints}
@@ -514,7 +696,8 @@ MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đ
 
 ĐẦU RA
 Chỉ trả về JSON hợp lệ, không markdown, theo dạng {{"concepts":[...]}}. Mỗi phần tử có đủ chuỗi:
-title, category, subject, scene, story, composition, palette, materials, key, prompt.
+title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, seed_id.
+- main_subject là danh từ tiếng Anh chung, số ít, 1–3 từ, gọi tên chủ thể chính (ví dụ rabbit, bicycle, railway station, bread); không tính từ, không màu, không bối cảnh. Mỗi concept một chủ thể chính khác nhau.
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.
 - title tối đa 100 ký tự; category 70; subject/scene/story/composition/materials mỗi trường tối đa 200 ký tự; palette 150; key 150; prompt 1800 ký tự.
 - key là khóa ngữ nghĩa chuẩn bằng tiếng Anh, mô tả họ chủ thể + môi trường + câu chuyện; không dùng số thứ tự.
@@ -594,7 +777,12 @@ def _final_duplicate(candidate: dict[str, str]) -> dict[str, Any] | None:
     return None
 
 
-def validate_concepts(raw: Any, history: list[dict[str, Any]], limit: int) -> tuple[list[dict[str, str]], list[str]]:
+def validate_concepts(
+    raw: Any,
+    history: list[dict[str, Any]],
+    limit: int,
+    seeds: list[dict[str, str]] | None = None,
+) -> tuple[list[dict[str, str]], list[str]]:
     """Normalize valid concepts and reject malformed or obvious near-duplicates.
 
     Reasons are intended for retry prompts and human review.  Passing this heuristic
@@ -617,6 +805,11 @@ def validate_concepts(raw: Any, history: list[dict[str, Any]], limit: int) -> tu
     accepted: list[dict[str, str]] = []
     comparison_pool: list[dict[str, Any]] = [x for x in history if isinstance(x, dict)]
     comparison_motifs = [_motifs(item) for item in comparison_pool]
+    comparison_subjects = [_subject_of(item) for item in comparison_pool]
+    # The cap scales with the whole catalogue, including this response's accepted concepts.
+    max_uses = subject_limit(len(comparison_pool) + min(len(source), limit))
+    seed_by_id = {seed["id"]: seed for seed in seeds or ()}
+    used_seeds: set[str] = set()
 
     for index, item in enumerate(source[:limit], start=1):
         if not isinstance(item, dict):
@@ -638,9 +831,20 @@ def validate_concepts(raw: Any, history: list[dict[str, Any]], limit: int) -> tu
                 errors.append(f"concept {index}: trường {field} dài quá {_MAX_LENGTH[field]} ký tự")
                 malformed = True
             normalized[field] = value
+        for field in ("main_subject", "seed_id"):
+            value = item.get(field)
+            if isinstance(value, str) and _clean(value):
+                normalized[field] = _clean(value)[: _MAX_LENGTH[field]]
         if malformed:
             continue
         normalized["category"] = _normalized_category(normalized["category"])
+        seed_id = normalized.pop("seed_id", "")
+        # The seed only steers the planner; the subject cap below is the real gate.
+        seed = seed_by_id.get(seed_id) if seed_id not in used_seeds else None
+        if seed and seed.get("path"):
+            normalized["final_seed"] = seed["path"]
+        if seed and seed.get("axes"):
+            normalized["axes"] = dict(seed["axes"])
         sample = _final_duplicate(normalized)
         if sample:
             errors.append(
@@ -660,10 +864,21 @@ def validate_concepts(raw: Any, history: list[dict[str, Any]], limit: int) -> tu
         if reason:
             errors.append(f"concept {index} ({normalized['title']}): gần trùng — {reason}; heuristic cần người duyệt nếu nghi ngờ")
             continue
+        subject = _subject_of(normalized)
+        uses = sum(_same_subject(subject, other) for other in comparison_subjects)
+        if subject and uses >= max_uses:
+            errors.append(
+                f"concept {index} ({normalized['title']}): chủ thể chính “{_subject_label(subject)}” đã dùng {uses} lần "
+                f"(giới hạn {max_uses}); chọn chủ thể khác"
+            )
+            continue
         normalized["prompt"] = image_prompt(normalized)
         accepted.append(normalized)
         comparison_pool.append(normalized)
         comparison_motifs.append(candidate_motifs)
+        comparison_subjects.append(subject)
+        if seed:
+            used_seeds.add(seed_id)
     return accepted, errors
 
 

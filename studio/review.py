@@ -6,7 +6,8 @@ import json
 import re
 from typing import Any
 
-from .diversity import FIELDS, _IMAGE_RULES, content_direction, validate_concepts
+from .axes import describe
+from .diversity import FIELDS, _IMAGE_RULES, _key_head, _same_subject, _subject_words, content_direction, validate_concepts
 
 
 _REVIEW_LENGTHS = {
@@ -80,6 +81,8 @@ def _compact_concept(concept: dict[str, Any]) -> dict[str, str]:
     ).strip()
     prompt = prompt.replace(_IMAGE_RULES, "")
     compact["prompt"] = prompt.strip()
+    if concept.get("axes"):
+        compact["required_axes"] = describe(concept["axes"])
     return compact
 
 
@@ -103,6 +106,7 @@ TIÊU CHÍ
 - Vật thể phải có cấu tạo, tỷ lệ, điểm tựa, cách sử dụng và quan hệ không gian hợp lý ngoài đời.
 - Không ép vật thể tạo chữ, biểu tượng hay hình trang trí; không thêm đạo cụ chỉ để kể chuyện nếu không có lý do tự nhiên.
 - Không dùng sơ đồ kỹ thuật, mặt cắt, mô hình lai hoặc thiết bị/công trình khó nhận biết. Với đặc trưng địa danh/văn hóa/kỹ thuật, chỉ giữ khi là mẫu quen thuộc có thật; không khẳng định tên riêng chưa được kiểm chứng. Nếu mơ hồ, dùng vật quen thuộc hoặc reject.
+- required_axes là trục đa dạng đã gán; khi revise phải giữ các trục đó thể hiện rõ, không đổi về cảnh phổ thông.
 - Đánh giá cả nhóm: tránh lặp chủ thể, loại cảnh, bố cục và cách chia mảng màu. Mỗi cảnh vẫn phải bình tĩnh, rõ nét và có các mốc ghép hình tự nhiên.
 - reason phải ngắn, cụ thể. Trả đúng mọi index từ 0 đến {len(concepts) - 1}, mỗi index đúng một lần.
 
@@ -177,7 +181,11 @@ def apply_review(
         if decision == "keep":
             concept = dict(original)
         else:
-            revised = entry["revised"]
+            revised = dict(entry["revised"])
+            # Keep the planner's main subject when the revision still describes it.
+            original_subject = tuple(_subject_words(str(original.get("main_subject", ""))))
+            if original_subject and _same_subject(original_subject, tuple(_key_head(revised["key"]))):
+                revised["main_subject"] = original["main_subject"]
             peers = list(history) + keep_peers + list(accepted_by_index.values())
             valid, errors = validate_concepts({"concepts": [revised]}, peers, 1)
             if not valid:
@@ -185,6 +193,9 @@ def apply_review(
                 rejected.append(f"review sửa concept {index + 1} ({original['title']}) nhưng không qua kiểm tra: {detail}")
                 continue
             concept = valid[0]
+            for field in ("final_seed", "axes"):
+                if original.get(field):
+                    concept[field] = original[field]
         audit = {"decision": decision, "reason": reason}
         if decision == "revise":
             audit["original"] = {field: original[field] for field in FIELDS}

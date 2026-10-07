@@ -1,4 +1,5 @@
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -75,8 +76,21 @@ class FinalPlanningTests(unittest.TestCase):
         prompt = make_planning_prompt(6, [])
         self.assertIn('mục tiêu 22%', prompt)
         self.assertIn('GỢI Ý PHÂN BỔ 6 CONCEPT', prompt)
-        self.assertIn('ẢNH MẪU FINAL CÙNG NHÓM', prompt)
+        self.assertIn('CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL', prompt)
+        self.assertEqual(6, len(re.findall(r'^- F\d+ \[', prompt, re.MULTILINE)))
         self.assertIn('nắng ấm', prompt)
+
+    def test_seeds_follow_category_plan_and_skip_used_samples(self):
+        from studio.diversity import pick_seeds
+        seeds = pick_seeds(12, [])
+        self.assertEqual(12, len(seeds))
+        self.assertEqual(12, len({seed['id'] for seed in seeds}))
+        plan = category_plan(12, {})
+        for category, number in plan.items():
+            self.assertEqual(number, sum(seed['category'] == category for seed in seeds))
+        used = [{'category': seeds[0]['category'], 'final_seed': seed['path']} for seed in seeds]
+        again = pick_seeds(12, used)
+        self.assertFalse({seed['path'] for seed in seeds} & {seed['path'] for seed in again})
 
     def test_title_repeating_a_final_caption_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:

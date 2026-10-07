@@ -8,7 +8,7 @@ from . import final
 from .artifacts import load_fingerprint_cache, near_image, normalize_image, save_fingerprint_cache
 from .providers import DEFAULTS
 from .store import now
-from .diversity import make_planning_prompt, order_concepts, validate_concepts, image_prompt
+from .diversity import make_planning_prompt, order_concepts, pick_seeds, validate_concepts, image_prompt
 from .review import apply_review, make_review_prompt
 from .style import style_drift, style_stats
 
@@ -98,12 +98,14 @@ class Engine:
                     break
                 history = self.store.history()
                 requested = min(20, remaining)
-                prompt = make_planning_prompt(requested, history, dict(Counter(c.get('category', '') for c in history)))
+                category_counts = dict(Counter(c.get('category', '') for c in history))
+                seeds = pick_seeds(requested, history, category_counts)
+                prompt = make_planning_prompt(requested, history, category_counts, seeds)
                 if feedback:
                     prompt += '\nLượt trước đã bị loại vì: ' + '; '.join(feedback[:5]) + '. Hãy sửa các vấn đề này.'
                 self.store.event(batch_id, f"Đang lập {requested} context, đối chiếu {len(history)} context đã lưu.")
                 raw = provider.plan(prompt)
-                accepted, rejected = validate_concepts(raw, history, requested)
+                accepted, rejected = validate_concepts(raw, history, requested, seeds)
                 feedback = list(rejected)
                 if self.stopped(batch_id):
                     return
@@ -237,7 +239,7 @@ class Engine:
                 similar = near_image(target, self.store.completed_items() + self.final_reference(), self.image_cache)
                 self.save_final_fingerprints()
                 warning = f"Ảnh có bố cục/màu gần ảnh «{similar['title']}». Cần người duyệt đối chiếu." if similar else ''
-                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','prompt','context_review'] if k in item} | {'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
+                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','main_subject','final_seed','axes','prompt','context_review'] if k in item} | {'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
                 self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, style_warning=style_warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
             self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}." + (' Có cảnh báo gần trùng.' if warning else '') + (' Màu lệch so với ảnh mẫu Final.' if style_warning else ''))
         except Exception as error:

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /tmp/claude-1000/-home-mustang-MienCuong-PhotoGeneratorTool/8b587daf-4dcb-4caf-a948-41c81f857366/scratchpad/digen-trial && node -e \\\"\\nimport('./node_modules/digen-cli/dist/mcp-exp.js')...",
+  "error": "Exit code 1\nnode:internal/process/promises:394\n    triggerUncaughtException(err, true /* fromPromise */);\n    ^\n\nTypeError: fetch failed\n    at Object.processResponse (node:internal/deps/undici/undici:13017:20)\n    at node:internal/deps/undici/undici:13405:23\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at node:internal/deps/undici/undici:17694:7\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async DigenClient.j...",
+  "timestamp": "2026-10-07T10:16:53.662Z",
+  "retry_count": 1
+}

@@ -204,6 +204,9 @@
         "jellyfish",
         "seahorse",
         "clownfish"
+      ],
+      "learned": [
+        "seashell"
       ]
     },
     {
@@ -516,7 +519,10 @@
         "carafe",
         "milk"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "hibiscus cooler"
+      ]
     },
     {
       "id": "sewing",
@@ -645,6 +651,9 @@
         "lamp",
         "candle",
         "chandelier"
+      ],
+      "learned": [
+        "diya"
       ]
     },
     {
@@ -661,7 +670,8 @@
       ],
       "weight": 2,
       "learned": [
-        "cookie jar"
+        "cookie jar",
+        "washbasin"
       ]
     },
     {
@@ -741,7 +751,10 @@
         "sideboard",
         "dish rack"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "blanket chest"
+      ]
     },
     {
       "id": "bed",
@@ -1201,6 +1214,9 @@
         "trolley",
         "wagon",
         "carriage"
+      ],
+      "learned": [
+        "luggage trolley"
       ]
     },
     {
@@ -1399,7 +1415,85 @@
       "spice jar",
       "velvet shelf liner",
       "doorstep",
-      "herb plant"
+      "herb plant",
+      "teak seat",
+      "wall shower",
+      "cotton robe",
+      "tiled privacy wall",
+      "wrought iron balcony",
+      "potted shrub",
+      "parked bicycle",
+      "glazed pot",
+      "kitchen counter",
+      "herb scissor",
+      "drinking fountain",
+      "wooden door",
+      "terracotta roof",
+      "stone seat",
+      "curved walkway",
+      "grass border",
+      "park signpost",
+      "hard shell suitcase",
+      "leather strap",
+      "station canopy",
+      "train carriage",
+      "stone ledge",
+      "terracotta saucer",
+      "tiled ground",
+      "serving dish",
+      "roasted carrot",
+      "potato",
+      "salad bowl",
+      "water jug",
+      "linen cloth",
+      "brass faucet",
+      "dishcloth",
+      "stone countertop",
+      "tiled wall",
+      "syrup pitcher",
+      "cast iron pan",
+      "walnut",
+      "honey dish",
+      "chestnut",
+      "shade tree",
+      "garden path",
+      "collar",
+      "fabric ball",
+      "wooden box",
+      "wall shelf",
+      "moving carton",
+      "packing cord",
+      "plaster wall",
+      "glass pitcher",
+      "drinking glass",
+      "orange slice",
+      "biscuit plate",
+      "paper lantern",
+      "wooden shelf",
+      "oil dish",
+      "matchbox",
+      "marigold blossom",
+      "terrarium",
+      "branch",
+      "basking lamp",
+      "glass lid",
+      "small mirror",
+      "wooden vanity",
+      "hand towel",
+      "wall hook",
+      "tile wall",
+      "evergreen tree",
+      "gift box",
+      "stone curb",
+      "townhouse door",
+      "wool blanket",
+      "pumpkin",
+      "floor lamp",
+      "footstool",
+      "glass bowl",
+      "spoon",
+      "jam jar",
+      "coir placemat"
     ]
   }
 }

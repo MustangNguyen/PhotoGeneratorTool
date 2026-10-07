@@ -191,6 +191,21 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(4, len(provider.generate_calls))
         self.assertEqual(2, next(item for item in final_items if item["id"] == failed["id"])["attempts"])
 
+    def test_retry_failed_requeues_every_failed_item(self):
+        provider = FakeProvider(fail_calls={1})
+        engine = Engine(self.store, lambda: provider)
+        batch = self.store.create(3)
+        engine.start(batch["id"])
+        self.wait(engine)
+        self.assertEqual(1, sum(item["status"] == "failed" for item in self.store.items(batch["id"])))
+
+        engine.retry_failed(batch["id"])
+        self.wait(engine)
+        self.assertEqual("completed", self.store.batch(batch["id"])["status"])
+        self.assertFalse(any(item["status"] == "failed" for item in self.store.items(batch["id"])))
+        with self.assertRaisesRegex(ValueError, "không có ảnh lỗi"):
+            engine.retry_failed(batch["id"])
+
     def test_batch_count_bounds(self):
         for invalid in (True, 0, -1, 1001, 1.5, "2"):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):

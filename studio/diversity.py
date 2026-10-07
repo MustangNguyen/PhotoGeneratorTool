@@ -40,10 +40,11 @@ FIELDS = (
 
 # Extra planner outputs. They are optional when validating so legacy contexts and
 # review revisions (which use FIELDS) still pass; the planning schema requires them.
-PLAN_FIELDS = FIELDS + ("main_subject", "seed_id")
+PLAN_FIELDS = FIELDS + ("main_subject", "props", "seed_id")
 
 _MAX_LENGTH = {
     "main_subject": 60,
+    "props": 200,
     "seed_id": 12,
     "title": 120,
     "category": 80,
@@ -558,6 +559,120 @@ def subject_limit(history_size: int) -> int:
     return 1 + max(0, history_size) // SUBJECT_REPEAT_EVERY
 
 
+# --- Subject families and supporting props ---------------------------------------
+# Swapping a rabbit for a guinea pig, or a soup pot for a stew pot, keeps the same
+# picture.  Families group such subjects under one, looser cap; props are the
+# supporting objects (baskets, towels, watering cans) counted across the history.
+FAMILIES_PATH = Path(__file__).resolve().parent.parent / "subject-families.json"
+FAMILY_REPEAT_EVERY = 120
+PROP_REPEAT_EVERY = 25
+_FAMILY_LOCK = threading.Lock()
+_FAMILY_CACHE_KEY: tuple[str, int, int] | None = None
+_FAMILY_CACHE: dict[str, Any] = {}
+
+
+def _load_families() -> dict[str, Any]:
+    global _FAMILY_CACHE_KEY, _FAMILY_CACHE
+    try:
+        stat = FAMILIES_PATH.stat()
+    except OSError as error:
+        raise ValueError("Không đọc được subject-families.json.") from error
+    key = (str(FAMILIES_PATH.resolve()), stat.st_mtime_ns, stat.st_size)
+    with _FAMILY_LOCK:
+        if key == _FAMILY_CACHE_KEY:
+            return _FAMILY_CACHE
+        try:
+            raw = json.loads(FAMILIES_PATH.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            raise ValueError("Không đọc được subject-families.json.") from error
+        if not isinstance(raw, dict) or raw.get("version") != 1 or not isinstance(raw.get("families"), list):
+            raise ValueError("subject-families.json: cần version 1 và danh sách families.")
+        members: dict[tuple[str, ...], str] = {}
+        labels: dict[str, str] = {}
+        examples: dict[str, list[str]] = {}
+        weights: dict[str, float] = {}
+        for family in raw["families"]:
+            if not isinstance(family, dict) or not all(isinstance(family.get(k), str) and family[k].strip() for k in ("id", "label")):
+                raise ValueError("subject-families.json: mỗi họ cần id và label.")
+            family_id = family["id"]
+            if family_id in labels:
+                raise ValueError(f"subject-families.json: id trùng “{family_id}”.")
+            names = family.get("members")
+            if not isinstance(names, list) or not names or not all(isinstance(n, str) and n.strip() for n in names):
+                raise ValueError(f"subject-families.json: họ {family_id} cần members không rỗng.")
+            weight = family.get("weight", 1)
+            if isinstance(weight, bool) or not isinstance(weight, (int, float)) or weight <= 0:
+                raise ValueError(f"subject-families.json: weight của họ {family_id} phải là số dương.")
+            weights[family_id] = float(weight)
+            labels[family_id] = family["label"]
+            examples[family_id] = names[:6]
+            for name in names:
+                words = tuple(_subject_words(name))
+                if words in members and members[words] != family_id:
+                    raise ValueError(f"subject-families.json: “{name}” thuộc hai họ {members[words]} và {family_id}.")
+                members[words] = family_id
+        props = raw.get("props", {}).get("tracked", []) if isinstance(raw.get("props"), dict) else []
+        if not isinstance(props, list) or not all(isinstance(p, str) and p.strip() for p in props):
+            raise ValueError("subject-families.json: props.tracked phải là danh sách chuỗi.")
+        tracked = sorted({tuple(_subject_words(p)) for p in props}, key=len, reverse=True)
+        _FAMILY_CACHE = {"members": members, "labels": labels, "examples": examples, "weights": weights, "props": tracked}
+        _FAMILY_CACHE_KEY = key
+        return _FAMILY_CACHE
+
+
+def _family_of(words: tuple[str, ...]) -> str | None:
+    """Family whose member is the longest trailing phrase of the subject words."""
+    members = _load_families()["members"]
+    for size in range(min(3, len(words)), 0, -1):
+        family = members.get(words[-size:])
+        if family:
+            return family
+    return None
+
+
+def family_limit(history_size: int, family: str | None = None) -> int:
+    weight = _load_families()["weights"].get(family, 1.0) if family else 1.0
+    return 1 + int(max(0, history_size) * weight // FAMILY_REPEAT_EVERY)
+
+
+def prop_limit(history_size: int) -> int:
+    return 1 + max(0, history_size) // PROP_REPEAT_EVERY
+
+
+def _props_of(concept: dict[str, Any]) -> frozenset[tuple[str, ...]]:
+    """Tracked props named by the planner, or found in a legacy context's English prompt."""
+    tracked = _load_families()["props"]
+    listed = concept.get("props")
+    if isinstance(listed, str) and listed.strip():
+        text = " , ".join(" ".join(_subject_words(part)) for part in listed.split(","))
+    else:
+        body = re.split(r"Portrait 600x900", str(concept.get("prompt", "")), maxsplit=1)[0]
+        text = " ".join(_subject_words(body))
+    padded = f" {text} "
+    found: set[tuple[str, ...]] = set()
+    for words in tracked:  # Longest first: "woven basket" also covers "basket".
+        phrase = " ".join(words)
+        if f" {phrase} " in padded:
+            found.add(words)
+            padded = padded.replace(f" {phrase} ", "  ")
+    return frozenset(found)
+
+
+def _family_summary(history: list[dict[str, Any]]) -> str:
+    families = _load_families()
+    counts = Counter(family for item in history if isinstance(item, dict) and (family := _family_of(_subject_of(item))))
+    full = [
+        f"{families['labels'][family]} ({', '.join(families['examples'][family])})"
+        for family, number in counts.most_common() if number >= family_limit(len(history), family)
+    ]
+    return "; ".join(full) or "(chưa có)"
+
+
+def _overused_props(history: list[dict[str, Any]], limit: int) -> list[str]:
+    counts = Counter(prop for item in history if isinstance(item, dict) for prop in _props_of(item))
+    return [" ".join(prop) for prop, number in counts.most_common() if number >= limit]
+
+
 def _subject_counts(history: list[dict[str, Any]]) -> Counter[str]:
     return Counter(label for item in history if isinstance(item, dict) and (label := _subject_label(_subject_of(item))))
 
@@ -659,6 +774,8 @@ def make_planning_prompt(
     seed_text = "\n".join(_seed_line(seed) for seed in seeds)
     limit = subject_limit(len(history))
     blocked_subjects, common_subjects = _subject_summary(history, limit)
+    blocked_families = _family_summary(history)
+    overused_props = ", ".join(_overused_props(history, prop_limit(len(history)))) or "(chưa có)"
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
 CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
@@ -696,6 +813,12 @@ CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể t�
 CHỦ THỂ CHÍNH ĐÃ DÙNG NHIỀU NHẤT (toàn bộ lịch sử)
 {common_subjects}
 
+HỌ CHỦ THỂ ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi họ có giới hạn riêng theo độ rộng; đổi sang con/vật khác cùng họ, ví dụ thỏ sang chuột lang hay nồi súp sang nồi hầm, vẫn bị loại)
+{blocked_families}
+
+VẬT PHỤ ĐÃ DÙNG QUÁ NHIỀU — mỗi concept dùng tối đa 1 vật trong danh sách này, concept có từ 2 vật trở lên bị loại; hãy chọn vật phụ khác hẳn, hợp với cảnh
+{overused_props}
+
 DẤU VÂN TAY CONCEPT ĐÃ DÙNG (được rút gọn từ {len(history)} mục; phải tránh lặp ý, không sao chép):
 {fingerprints}
 
@@ -704,7 +827,8 @@ MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đ
 
 ĐẦU RA
 Chỉ trả về JSON hợp lệ, không markdown, theo dạng {{"concepts":[...]}}. Mỗi phần tử có đủ chuỗi:
-title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, seed_id.
+title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, props, seed_id.
+- props là 3–6 vật phụ thấy rõ trong ảnh, danh từ tiếng Anh chung số ít, cách nhau dấu phẩy (ví dụ: teapot, linen napkin, wooden tray).
 - main_subject là danh từ tiếng Anh chung, số ít, 1–3 từ, gọi tên chủ thể chính (ví dụ rabbit, bicycle, railway station, bread); không tính từ, không màu, không bối cảnh. Mỗi concept một chủ thể chính khác nhau.
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.
 - title tối đa 100 ký tự; category 70; subject/scene/story/composition/materials mỗi trường tối đa 200 ký tự; palette 150; key 150; prompt 1800 ký tự.
@@ -816,6 +940,10 @@ def validate_concepts(
     comparison_subjects = [_subject_of(item) for item in comparison_pool]
     # The cap scales with the whole catalogue, including this response's accepted concepts.
     max_uses = subject_limit(len(comparison_pool) + min(len(source), limit))
+    catalogue_size = len(comparison_pool) + min(len(source), limit)
+    max_prop = prop_limit(len(comparison_pool) + min(len(source), limit))
+    comparison_families = [_family_of(subject) for subject in comparison_subjects]
+    prop_counts = Counter(prop for item in comparison_pool for prop in _props_of(item))
     seed_by_id = {seed["id"]: seed for seed in seeds or ()}
     used_seeds: set[str] = set()
 
@@ -839,7 +967,7 @@ def validate_concepts(
                 errors.append(f"concept {index}: trường {field} dài quá {_MAX_LENGTH[field]} ký tự")
                 malformed = True
             normalized[field] = value
-        for field in ("main_subject", "seed_id"):
+        for field in ("main_subject", "props", "seed_id"):
             value = item.get(field)
             if isinstance(value, str) and _clean(value):
                 normalized[field] = _clean(value)[: _MAX_LENGTH[field]]
@@ -880,11 +1008,29 @@ def validate_concepts(
                 f"(giới hạn {max_uses}); chọn chủ thể khác"
             )
             continue
+        family = _family_of(subject)
+        family_uses = sum(other == family for other in comparison_families) if family else 0
+        max_family = family_limit(catalogue_size, family)
+        if family and family_uses >= max_family:
+            errors.append(
+                f"concept {index} ({normalized['title']}): họ chủ thể “{_load_families()['labels'][family]}” đã dùng "
+                f"{family_uses} lần (giới hạn {max_family}); chọn họ chủ thể khác"
+            )
+            continue
+        props = _props_of(normalized)
+        crowded = sorted(" ".join(prop) for prop in props if prop_counts[prop] >= max_prop)
+        if len(crowded) >= 2:
+            errors.append(
+                f"concept {index} ({normalized['title']}): dùng nhiều vật phụ đã quá quen ({', '.join(crowded)}); đổi vật phụ"
+            )
+            continue
         normalized["prompt"] = image_prompt(normalized)
         accepted.append(normalized)
         comparison_pool.append(normalized)
         comparison_motifs.append(candidate_motifs)
         comparison_subjects.append(subject)
+        comparison_families.append(family)
+        prop_counts.update(props)
         if seed:
             used_seeds.add(seed_id)
     return accepted, errors

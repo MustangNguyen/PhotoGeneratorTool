@@ -154,6 +154,38 @@ class DiversityTests(unittest.TestCase):
         self.assertEqual([], accepted)
         self.assertTrue(any("chủ thể chính “rabbit”" in error for error in errors), errors)
 
+    def test_swapping_to_another_member_of_a_full_family_is_rejected(self):
+        history = [
+            concept(title=f"Thú {n}", subject=f"Thú nhỏ {n}", scene=f"Chuồng {n}", story=f"Bữa {n}",
+                    key=f"pet eating greens {n}", main_subject=name)
+            for n, name in enumerate(["rabbit", "hamster"])
+        ]
+        new = concept(
+            title="Chuột lang gặm cỏ",
+            subject="Chuột lang gặm cọng cỏ",
+            scene="Chuồng nuôi sạch",
+            story="Bữa trưa",
+            key="guinea pig eating grass in a clean hutch",
+            main_subject="guinea pig",
+        )
+        accepted, errors = validate_concepts({"concepts": [new]}, history, 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("họ chủ thể" in error and "thú nhỏ ăn cỏ" in error for error in errors), errors)
+
+    def test_concept_with_two_overused_props_is_rejected(self):
+        history = [
+            concept(title=f"Cảnh {n}", subject=f"Vật riêng {n}", scene=f"Nơi {n}", story=f"Chuyện {n}",
+                    key=f"unique subject {n}", main_subject=f"widget{n}", props="woven basket, watering can")
+            for n in range(2)
+        ]
+        crowded = concept(main_subject="cello", props="woven basket, watering can, violin bow")
+        accepted, errors = validate_concepts({"concepts": [crowded]}, history, 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("vật phụ" in error for error in errors), errors)
+        single = concept(main_subject="cello", props="woven basket, violin bow, rosin")
+        accepted, errors = validate_concepts({"concepts": [single]}, history, 1)
+        self.assertEqual(1, len(accepted), errors)
+
     def test_subject_cap_grows_slowly_with_catalogue_size(self):
         self.assertEqual(1, subject_limit(0))
         self.assertEqual(2, subject_limit(756))

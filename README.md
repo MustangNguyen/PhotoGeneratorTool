@@ -88,6 +88,17 @@ Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay l�
 3. Context cũ không có `main_subject` được suy ra từ cụm danh từ đầu của `key`. Cách suy ra này là heuristic và có thể sai với key không bắt đầu bằng chủ thể.
 4. Prompt lập context liệt kê toàn bộ chủ thể đã đủ giới hạn và các chủ thể dùng nhiều nhất, thay vì chỉ vài chục dấu vân tay gần nhất.
 
+### Họ chủ thể và vật phụ (`subject-families.json`)
+
+Giới hạn theo `main_subject` không bắt được việc đổi sang con/vật cùng loại: chuột lang gặm cỏ thay cho thỏ gặm rau, nồi hầm thay cho nồi súp. File này gom 77 họ chủ thể (thú nhỏ ăn cỏ, nồi và món hầm, bánh mì, quần áo/khăn/túi…), mỗi họ liệt kê danh từ tiếng Anh thành viên.
+
+- Chủ thể thuộc họ có cụm cuối dài nhất khớp với `main_subject` (context cũ: cụm danh từ đầu của `key`). Chủ thể chưa có trong file chỉ chịu giới hạn theo chủ thể.
+- Mỗi họ dùng tối đa `1 + số context × weight / 120` lần (756 mục, weight 1 → 7 lần). Họ rộng như mặt tiền, cửa tiệm, trái cây, hoa dùng weight 2–3. Prompt liệt kê các họ đã đủ.
+- Planner trả thêm `props`: 3–6 vật phụ tiếng Anh. Các vật trong `props.tracked` được đếm trên toàn bộ lịch sử (context cũ: tìm trong prompt tiếng Anh). Vật đã dùng từ `1 + số context / 25` lần trở lên là "quá quen"; concept có từ 2 vật quá quen trở lên bị loại.
+- Một từ thuộc hai họ sẽ báo lỗi khi đọc file. Thêm họ, thành viên hay vật phụ bằng cách sửa file; ứng dụng đọc lại khi file đổi.
+
+Giới hạn chặt khiến lượt đầu sau khi bật có thể loại nhiều concept hơn và tốn thêm lượt lập context. Nếu batch hay dừng vì "Ba lượt lập context không có đề xuất mới hợp lệ", tăng `weight` của họ đang chặn hoặc tăng `FAMILY_REPEAT_EVERY`/`PROP_REPEAT_EVERY` trong `studio/diversity.py`.
+
 ### Trục đa dạng (`diversity-axes.json`)
 
 Ngoài chủ thể, mỗi concept luôn được gán **Kiểu ảnh** (trục bắt buộc `shot`): tĩnh vật, flat-lay, bộ sưu tập xếp kín, kệ trưng bày, góc phòng, cận cảnh hoa cây, con vật, mặt tiền, phương tiện, bên trong phương tiện, cảnh có tầm nhìn xa, tranh/thủ công. Tỷ lệ của từng kiểu theo nhóm lấy từ Final (`shares`), ví dụ nhóm ăn uống khoảng 58% tĩnh vật và chỉ 8% có tầm nhìn xa; tổng cộng khoảng 13% ảnh có tầm nhìn xa như Final. Kiểu ảnh không có tầm nhìn xa thì prompt cấm mở cửa sổ/cửa/ban công ra phong cảnh, và ảnh mẫu Final được chọn cùng kiểu (ảnh mẫu "bên biển" chỉ đi với kiểu có tầm nhìn xa).

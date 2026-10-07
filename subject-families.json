@@ -1,0 +1,1297 @@
+{
+  "version": 1,
+  "note": "Họ chủ thể: chủ thể chính (main_subject) thuộc cùng họ thì bị giới hạn chung, để đổi thỏ sang chuột lang hay nồi súp sang nồi hầm vẫn tính là lặp. members là danh từ tiếng Anh; khớp theo cụm cuối dài nhất của main_subject. props.tracked là vật phụ được đếm trong toàn bộ lịch sử; vật vượt giới hạn bị hạn chế. weight (mặc định 1) nhân giới hạn của họ: họ rộng như mặt tiền, cửa tiệm, trái cây dùng weight 2–3.",
+  "families": [
+    {
+      "id": "small_pet",
+      "label": "thú nhỏ ăn cỏ",
+      "members": [
+        "rabbit",
+        "bunny",
+        "hare",
+        "guinea pig",
+        "cavy",
+        "hamster",
+        "gerbil",
+        "chinchilla",
+        "ferret",
+        "hedgehog"
+      ]
+    },
+    {
+      "id": "cat",
+      "label": "mèo",
+      "members": [
+        "cat",
+        "kitten",
+        "kitty"
+      ]
+    },
+    {
+      "id": "dog",
+      "label": "chó",
+      "members": [
+        "dog",
+        "puppy",
+        "corgi",
+        "retriever",
+        "shiba",
+        "poodle",
+        "beagle",
+        "pug",
+        "husky",
+        "terrier",
+        "collie",
+        "dachshund",
+        "spaniel"
+      ]
+    },
+    {
+      "id": "farm_animal",
+      "label": "gia súc trang trại",
+      "members": [
+        "cow",
+        "calf",
+        "sheep",
+        "lamb",
+        "goat",
+        "kid goat",
+        "pig",
+        "piglet",
+        "donkey",
+        "horse",
+        "pony",
+        "foal",
+        "alpaca",
+        "llama"
+      ]
+    },
+    {
+      "id": "poultry",
+      "label": "gia cầm",
+      "members": [
+        "chicken",
+        "hen",
+        "chick",
+        "rooster",
+        "duck",
+        "duckling",
+        "goose",
+        "swan"
+      ]
+    },
+    {
+      "id": "songbird",
+      "label": "chim nhỏ",
+      "members": [
+        "bird",
+        "sparrow",
+        "robin",
+        "finch",
+        "bluebird",
+        "kingfisher",
+        "swallow",
+        "wren",
+        "woodpecker",
+        "hummingbird",
+        "tit"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "parrot",
+      "label": "vẹt",
+      "members": [
+        "parrot",
+        "budgerigar",
+        "budgie",
+        "cockatiel",
+        "cockatoo",
+        "macaw",
+        "lovebird"
+      ]
+    },
+    {
+      "id": "raptor",
+      "label": "cú và chim săn mồi",
+      "members": [
+        "owl",
+        "eagle",
+        "hawk",
+        "falcon"
+      ]
+    },
+    {
+      "id": "wader",
+      "label": "chim lội nước",
+      "members": [
+        "flamingo",
+        "heron",
+        "crane",
+        "stork",
+        "pelican",
+        "egret"
+      ]
+    },
+    {
+      "id": "polar",
+      "label": "động vật xứ lạnh",
+      "members": [
+        "penguin",
+        "polar bear",
+        "puffin",
+        "arctic fox",
+        "reindeer"
+      ]
+    },
+    {
+      "id": "water_mammal",
+      "label": "thú sống dưới nước",
+      "members": [
+        "otter",
+        "seal",
+        "sea lion",
+        "beaver",
+        "walrus"
+      ]
+    },
+    {
+      "id": "forest_mammal",
+      "label": "thú rừng nhỏ",
+      "members": [
+        "fox",
+        "deer",
+        "fawn",
+        "squirrel",
+        "chipmunk",
+        "raccoon",
+        "badger",
+        "bear",
+        "panda",
+        "red panda",
+        "koala"
+      ]
+    },
+    {
+      "id": "big_wild",
+      "label": "thú hoang lớn",
+      "members": [
+        "lion",
+        "tiger",
+        "elephant",
+        "giraffe",
+        "zebra",
+        "leopard",
+        "cheetah",
+        "rhino",
+        "hippo",
+        "camel"
+      ]
+    },
+    {
+      "id": "sea_life",
+      "label": "sinh vật biển và cá",
+      "members": [
+        "fish",
+        "koi",
+        "goldfish",
+        "turtle",
+        "crab",
+        "starfish",
+        "dolphin",
+        "whale",
+        "octopus",
+        "jellyfish",
+        "seahorse",
+        "clownfish"
+      ]
+    },
+    {
+      "id": "insect",
+      "label": "côn trùng",
+      "members": [
+        "butterfly",
+        "bee",
+        "ladybird",
+        "ladybug",
+        "dragonfly",
+        "moth",
+        "beetle",
+        "snail"
+      ]
+    },
+    {
+      "id": "bread",
+      "label": "bánh mì",
+      "members": [
+        "bread",
+        "loaf",
+        "baguette",
+        "sourdough",
+        "bun",
+        "roll",
+        "bagel",
+        "croissant",
+        "brioche",
+        "baozi",
+        "focaccia",
+        "pretzel"
+      ]
+    },
+    {
+      "id": "cake",
+      "label": "bánh kem và bánh bông lan",
+      "members": [
+        "cake",
+        "cheesecake",
+        "cupcake",
+        "muffin",
+        "gateau",
+        "roll cake",
+        "sponge cake",
+        "custard cake",
+        "apple cake"
+      ]
+    },
+    {
+      "id": "pie_tart",
+      "label": "bánh nướng nhân",
+      "members": [
+        "pie",
+        "tart",
+        "quiche",
+        "galette",
+        "crumble",
+        "strudel",
+        "cobbler"
+      ]
+    },
+    {
+      "id": "pastry_dessert",
+      "label": "bánh ngọt và tráng miệng",
+      "members": [
+        "mille feuille",
+        "eclair",
+        "macaron",
+        "profiterole",
+        "cream puff",
+        "custard",
+        "pudding",
+        "flan",
+        "mousse",
+        "trifle",
+        "parfait",
+        "crepe",
+        "waffle",
+        "pancake",
+        "donut",
+        "doughnut",
+        "churro",
+        "cookie",
+        "biscuit",
+        "scone",
+        "dessert",
+        "pastry"
+      ]
+    },
+    {
+      "id": "ice_cream",
+      "label": "kem",
+      "members": [
+        "ice cream",
+        "gelato",
+        "sundae",
+        "popsicle",
+        "sorbet",
+        "cone"
+      ]
+    },
+    {
+      "id": "pot_dish",
+      "label": "nồi và món hầm",
+      "members": [
+        "stewpot",
+        "stockpot",
+        "soup pot",
+        "cocoa pot",
+        "hot pot",
+        "hotpot",
+        "clay pot",
+        "stew",
+        "soup",
+        "casserole",
+        "curry",
+        "chowder",
+        "tagine",
+        "paella",
+        "dutch oven",
+        "cauldron"
+      ]
+    },
+    {
+      "id": "noodle",
+      "label": "mì và sủi cảo",
+      "members": [
+        "noodle",
+        "pasta",
+        "spaghetti",
+        "ravioli",
+        "ramen",
+        "udon",
+        "soba",
+        "pho",
+        "lasagna",
+        "dumpling",
+        "gyoza"
+      ]
+    },
+    {
+      "id": "rice_dish",
+      "label": "cơm và hộp cơm",
+      "members": [
+        "rice",
+        "onigiri",
+        "sushi",
+        "bento",
+        "lunchbox",
+        "lunch box",
+        "rice roll",
+        "risotto",
+        "fried rice",
+        "bibimbap"
+      ]
+    },
+    {
+      "id": "grill",
+      "label": "đồ nướng",
+      "members": [
+        "corn",
+        "skewer",
+        "barbecue",
+        "grill",
+        "kebab",
+        "sausage",
+        "steak",
+        "roast"
+      ]
+    },
+    {
+      "id": "breakfast",
+      "label": "bữa sáng trứng và ngũ cốc",
+      "members": [
+        "egg",
+        "omelette",
+        "toast",
+        "cereal",
+        "granola",
+        "yogurt",
+        "breakfast"
+      ]
+    },
+    {
+      "id": "fruit",
+      "label": "trái cây",
+      "members": [
+        "fruit",
+        "apple",
+        "pear",
+        "orange",
+        "lemon",
+        "apricot",
+        "peach",
+        "plum",
+        "cherry",
+        "grape",
+        "strawberry",
+        "watermelon",
+        "melon",
+        "pomegranate",
+        "fig",
+        "mango",
+        "pineapple",
+        "banana",
+        "kiwi",
+        "citrus",
+        "berry",
+        "persimmon"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "vegetable",
+      "label": "rau củ",
+      "members": [
+        "vegetable",
+        "tomato",
+        "eggplant",
+        "squash",
+        "pumpkin",
+        "carrot",
+        "cabbage",
+        "potato",
+        "mushroom",
+        "pepper",
+        "zucchini",
+        "cucumber"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "seafood",
+      "label": "hải sản",
+      "members": [
+        "salmon",
+        "shrimp",
+        "lobster",
+        "oyster",
+        "mussel",
+        "clam",
+        "prawn",
+        "scallop",
+        "salmon tray"
+      ]
+    },
+    {
+      "id": "cheese",
+      "label": "phô mai và đồ nguội",
+      "members": [
+        "cheese",
+        "mozzarella",
+        "brie",
+        "charcuterie"
+      ]
+    },
+    {
+      "id": "candy",
+      "label": "kẹo và sô cô la",
+      "members": [
+        "candy",
+        "sweet",
+        "lollipop",
+        "chocolate",
+        "gummy",
+        "marshmallow",
+        "jelly"
+      ]
+    },
+    {
+      "id": "hot_drink",
+      "label": "trà, cà phê, cacao",
+      "members": [
+        "tea",
+        "teapot",
+        "tea set",
+        "tea tray",
+        "coffee",
+        "cocoa",
+        "latte",
+        "cappuccino",
+        "espresso",
+        "matcha",
+        "kettle",
+        "moka",
+        "samovar",
+        "mug",
+        "teacup"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "cold_drink",
+      "label": "đồ uống lạnh",
+      "members": [
+        "lemonade",
+        "juice",
+        "smoothie",
+        "milkshake",
+        "soda",
+        "cocktail",
+        "mojito",
+        "pitcher",
+        "bottle",
+        "jug",
+        "carafe",
+        "milk"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "sewing",
+      "label": "may vá và len",
+      "members": [
+        "sewing machine",
+        "sewing table",
+        "sewing corner",
+        "thread",
+        "yarn",
+        "knitting",
+        "button",
+        "quilt",
+        "embroidery",
+        "loom",
+        "handloom",
+        "haberdashery counter",
+        "spool"
+      ]
+    },
+    {
+      "id": "music",
+      "label": "nhạc cụ và máy nghe nhạc",
+      "members": [
+        "piano",
+        "guitar",
+        "violin",
+        "cello",
+        "accordion",
+        "flute",
+        "harp",
+        "drum",
+        "ukulele",
+        "music box",
+        "record player",
+        "player",
+        "gramophone",
+        "jukebox",
+        "radio",
+        "cassette"
+      ]
+    },
+    {
+      "id": "optics_travel",
+      "label": "máy ảnh, ống nhòm, bản đồ",
+      "members": [
+        "camera",
+        "binocular",
+        "telescope",
+        "magnifier",
+        "projector",
+        "kaleidoscope",
+        "compass",
+        "globe",
+        "map"
+      ]
+    },
+    {
+      "id": "writing",
+      "label": "đồ viết và giấy",
+      "members": [
+        "typewriter",
+        "desk",
+        "stationery",
+        "stationery shop",
+        "notebook",
+        "postcard",
+        "envelope",
+        "stamp",
+        "inkstone",
+        "pen",
+        "letter",
+        "book"
+      ]
+    },
+    {
+      "id": "clock",
+      "label": "đồng hồ",
+      "members": [
+        "clock",
+        "watch",
+        "sundial",
+        "hourglass",
+        "sundial tower"
+      ]
+    },
+    {
+      "id": "tech",
+      "label": "điện thoại và máy cũ",
+      "members": [
+        "telephone",
+        "phone",
+        "switchboard",
+        "computer",
+        "tv",
+        "television",
+        "arcade",
+        "console"
+      ]
+    },
+    {
+      "id": "toy",
+      "label": "đồ chơi và cờ",
+      "members": [
+        "toy",
+        "doll",
+        "teddy",
+        "teddy bear",
+        "train set",
+        "kite",
+        "puzzle",
+        "game",
+        "chessboard",
+        "chess table",
+        "chess",
+        "dollhouse",
+        "rocking horse",
+        "marble"
+      ]
+    },
+    {
+      "id": "lighting",
+      "label": "đèn và nến",
+      "members": [
+        "lantern",
+        "lamp",
+        "candle",
+        "chandelier"
+      ]
+    },
+    {
+      "id": "ceramics",
+      "label": "đồ gốm và bình",
+      "members": [
+        "vase",
+        "pottery",
+        "ceramic plate",
+        "plate",
+        "bowl",
+        "jar",
+        "urn"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "clothes",
+      "label": "quần áo, khăn và túi",
+      "members": [
+        "dress",
+        "coat",
+        "hat",
+        "sunhat",
+        "scarf",
+        "shoe",
+        "boot",
+        "umbrella",
+        "bag",
+        "handbag",
+        "suitcase",
+        "trunk",
+        "towel",
+        "blanket",
+        "laundry",
+        "clothes",
+        "clothing",
+        "wardrobe",
+        "apron",
+        "shirt"
+      ]
+    },
+    {
+      "id": "garden_tool",
+      "label": "dụng cụ và chậu vườn",
+      "members": [
+        "watering can",
+        "wheelbarrow",
+        "garden tool",
+        "rake",
+        "spade",
+        "planter",
+        "flower pot",
+        "plant pot",
+        "terracotta pot",
+        "window box",
+        "flower box"
+      ]
+    },
+    {
+      "id": "seating",
+      "label": "ghế và chỗ ngồi",
+      "members": [
+        "armchair",
+        "chair",
+        "sofa",
+        "bench",
+        "rocking chair",
+        "lounger",
+        "beach chair",
+        "hammock",
+        "swing",
+        "stool",
+        "reading chair",
+        "rattan chair",
+        "deck chair"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "storage",
+      "label": "tủ và kệ",
+      "members": [
+        "cabinet",
+        "bookcase",
+        "shelf",
+        "cupboard",
+        "dresser",
+        "shoe rack",
+        "chest",
+        "sideboard",
+        "dish rack"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "bed",
+      "label": "giường",
+      "members": [
+        "bed",
+        "bunk bed",
+        "made bed",
+        "cradle",
+        "pet bed",
+        "daybed"
+      ]
+    },
+    {
+      "id": "hearth",
+      "label": "lò sưởi, bếp lò",
+      "members": [
+        "fireplace",
+        "stove",
+        "oven",
+        "kiln",
+        "hearth"
+      ]
+    },
+    {
+      "id": "bath_laundry",
+      "label": "bồn tắm và bồn giặt",
+      "members": [
+        "bathtub",
+        "sink",
+        "washing machine",
+        "basin",
+        "washtub"
+      ]
+    },
+    {
+      "id": "flower_bulb",
+      "label": "hoa củ",
+      "members": [
+        "tulip",
+        "daffodil",
+        "hyacinth",
+        "iris",
+        "lily",
+        "crocus",
+        "iris flower"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "flower_shrub",
+      "label": "hoa bụi",
+      "members": [
+        "rose",
+        "peony",
+        "hydrangea",
+        "camellia",
+        "dahlia",
+        "magnolia",
+        "azalea",
+        "bougainvillea",
+        "hibiscus",
+        "gardenia",
+        "lilac",
+        "geranium"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "flower_field",
+      "label": "hoa đồng",
+      "members": [
+        "sunflower",
+        "lavender",
+        "daisy",
+        "poppy",
+        "cosmos",
+        "marigold",
+        "wildflower"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "water_plant",
+      "label": "cây thủy sinh",
+      "members": [
+        "lotus",
+        "water lily",
+        "lily pad",
+        "reed"
+      ]
+    },
+    {
+      "id": "fruit_tree",
+      "label": "cây ăn quả",
+      "members": [
+        "orange tree",
+        "lemon tree",
+        "citrus tree",
+        "fig tree",
+        "apple tree",
+        "cherry tree",
+        "olive tree",
+        "pomegranate tree",
+        "peach tree"
+      ]
+    },
+    {
+      "id": "tree",
+      "label": "cây lớn",
+      "members": [
+        "tree",
+        "cypress",
+        "maple",
+        "birch",
+        "pine",
+        "oak",
+        "willow",
+        "palm",
+        "bamboo",
+        "banana plant",
+        "birch tree"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "herb",
+      "label": "rau thơm",
+      "members": [
+        "herb",
+        "basil",
+        "rosemary",
+        "thyme",
+        "mint",
+        "sage"
+      ]
+    },
+    {
+      "id": "houseplant",
+      "label": "cây trong nhà",
+      "members": [
+        "fern",
+        "cactus",
+        "cacti",
+        "succulent",
+        "monstera",
+        "houseplant",
+        "bonsai",
+        "orchid",
+        "saguaro"
+      ]
+    },
+    {
+      "id": "climbing",
+      "label": "giàn leo",
+      "members": [
+        "vine",
+        "trellis",
+        "pergola",
+        "arbor",
+        "wisteria",
+        "ivy",
+        "grapevine"
+      ]
+    },
+    {
+      "id": "house_door",
+      "label": "cửa và lối vào nhà",
+      "weight": 2,
+      "members": [
+        "entrance",
+        "door",
+        "doorway",
+        "entryway",
+        "gate",
+        "porch",
+        "front door",
+        "garden gate"
+      ]
+    },
+    {
+      "id": "house_stairs",
+      "label": "bậc thang và cầu thang ngoài nhà",
+      "weight": 2,
+      "members": [
+        "step",
+        "staircase",
+        "stairway",
+        "stair",
+        "stone step"
+      ]
+    },
+    {
+      "id": "house_facade",
+      "label": "mặt tiền nhà",
+      "weight": 2,
+      "members": [
+        "facade",
+        "townhouse",
+        "town house",
+        "house",
+        "cottage",
+        "villa",
+        "balcony",
+        "veranda",
+        "hillside house"
+      ]
+    },
+    {
+      "id": "shopfront",
+      "label": "cửa tiệm và quầy",
+      "members": [
+        "shop",
+        "storefront",
+        "bakery",
+        "cafe",
+        "boutique",
+        "store",
+        "stall",
+        "market stall",
+        "fruit stall",
+        "flower stall",
+        "kiosk",
+        "bakery counter",
+        "pastry counter",
+        "bread counter",
+        "shop counter",
+        "flower counter",
+        "craft stall",
+        "pottery stall",
+        "pastry stall",
+        "market"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "tower_temple",
+      "label": "tháp, đền, nhà thờ",
+      "members": [
+        "church",
+        "chapel",
+        "temple",
+        "pagoda",
+        "bell tower",
+        "tower",
+        "cathedral",
+        "monastery",
+        "dome"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "station",
+      "label": "nhà ga và trạm chờ",
+      "members": [
+        "station",
+        "railway station",
+        "countryside station",
+        "platform",
+        "terminus",
+        "bus stop",
+        "shelter"
+      ]
+    },
+    {
+      "id": "bridge",
+      "label": "cầu",
+      "members": [
+        "bridge",
+        "footbridge"
+      ]
+    },
+    {
+      "id": "waterfront",
+      "label": "bến, hải đăng, bãi biển",
+      "members": [
+        "pier",
+        "dock",
+        "harbor",
+        "marina",
+        "boathouse",
+        "lighthouse",
+        "beach",
+        "shore",
+        "cove",
+        "cabana",
+        "beach hut"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "water_feature",
+      "label": "đài phun, hồ, giếng",
+      "members": [
+        "fountain",
+        "pool",
+        "pond",
+        "well"
+      ]
+    },
+    {
+      "id": "landscape",
+      "label": "phong cảnh thiên nhiên",
+      "members": [
+        "valley",
+        "cliff",
+        "waterfall",
+        "lake",
+        "river",
+        "hill",
+        "mountain",
+        "field",
+        "meadow",
+        "sea",
+        "reef",
+        "canyon",
+        "dune",
+        "desert"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "garden_space",
+      "label": "nhà kính, sân vườn",
+      "members": [
+        "greenhouse",
+        "garden",
+        "courtyard",
+        "atrium",
+        "patio",
+        "lawn"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "mill",
+      "label": "cối xay",
+      "members": [
+        "windmill",
+        "mill",
+        "water wheel"
+      ]
+    },
+    {
+      "id": "bicycle",
+      "label": "xe đạp",
+      "members": [
+        "bicycle",
+        "bike",
+        "tricycle"
+      ]
+    },
+    {
+      "id": "motorbike",
+      "label": "xe máy, xe tay ga",
+      "members": [
+        "motorcycle",
+        "scooter",
+        "vespa",
+        "moped",
+        "sidecar"
+      ]
+    },
+    {
+      "id": "car",
+      "label": "ô tô và xe tải",
+      "members": [
+        "car",
+        "van",
+        "caravan",
+        "camper",
+        "jeep",
+        "truck",
+        "delivery van",
+        "convertible",
+        "beetle car",
+        "taxi",
+        "bus",
+        "minibus"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "rail",
+      "label": "tàu hỏa, tàu điện",
+      "members": [
+        "train",
+        "tram",
+        "streetcar",
+        "locomotive",
+        "railcar",
+        "cable car",
+        "funicular"
+      ]
+    },
+    {
+      "id": "small_boat",
+      "label": "thuyền nhỏ",
+      "members": [
+        "boat",
+        "rowing boat",
+        "rowboat",
+        "canoe",
+        "kayak",
+        "dinghy",
+        "gondola",
+        "punt",
+        "red boat",
+        "wooden boat",
+        "canal boat",
+        "barge",
+        "vendor boat"
+      ]
+    },
+    {
+      "id": "large_boat",
+      "label": "thuyền buồm, phà, tàu",
+      "members": [
+        "sailboat",
+        "sailing boat",
+        "yacht",
+        "ferry",
+        "tour boat",
+        "ship",
+        "steamer"
+      ]
+    },
+    {
+      "id": "aircraft",
+      "label": "khinh khí cầu, máy bay",
+      "members": [
+        "balloon",
+        "hot air balloon",
+        "airplane",
+        "plane",
+        "seaplane",
+        "glider"
+      ]
+    },
+    {
+      "id": "cart",
+      "label": "xe đẩy và xe kéo",
+      "members": [
+        "cart",
+        "handcart",
+        "cream cart",
+        "service cart",
+        "trolley",
+        "wagon",
+        "carriage"
+      ]
+    }
+  ],
+  "props": {
+    "tracked": [
+      "woven basket",
+      "wicker basket",
+      "basket",
+      "watering can",
+      "terracotta pot",
+      "potted plant",
+      "planter",
+      "folded towel",
+      "towel",
+      "napkin",
+      "linen napkin",
+      "tablecloth",
+      "checkered cloth",
+      "cutting board",
+      "wooden board",
+      "teapot",
+      "teacup",
+      "mug",
+      "glass jar",
+      "jar",
+      "pitcher",
+      "jug",
+      "vase",
+      "bouquet",
+      "candle",
+      "lantern",
+      "lamp",
+      "open book",
+      "book",
+      "notebook",
+      "cushion",
+      "pillow",
+      "blanket",
+      "quilt",
+      "rug",
+      "woven rug",
+      "curtain",
+      "tray",
+      "wooden tray",
+      "ladle",
+      "kettle",
+      "skillet",
+      "bread",
+      "loaf",
+      "pastry",
+      "cake",
+      "pie",
+      "tart",
+      "cookie",
+      "jam",
+      "honey jar",
+      "butter",
+      "cheese",
+      "lemon",
+      "apple",
+      "pear",
+      "strawberry",
+      "grapes",
+      "herbs",
+      "rosemary",
+      "basil",
+      "hydrangea",
+      "geranium",
+      "fern",
+      "ivy",
+      "vine",
+      "umbrella",
+      "parasol",
+      "straw hat",
+      "hat",
+      "scarf",
+      "suitcase",
+      "bicycle",
+      "radio",
+      "clock",
+      "map",
+      "globe",
+      "camera",
+      "typewriter",
+      "tin box",
+      "crate",
+      "wooden crate",
+      "barrel",
+      "ladder",
+      "bucket",
+      "broom",
+      "apron",
+      "oven mitt",
+      "trivet",
+      "awning",
+      "shutters",
+      "window box",
+      "flower box",
+      "cat",
+      "dog",
+      "bird",
+      "side table",
+      "stool",
+      "armchair",
+      "bench",
+      "railing"
+    ]
+  }
+}

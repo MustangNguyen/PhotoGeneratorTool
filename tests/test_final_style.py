@@ -7,7 +7,7 @@ from unittest.mock import patch
 from PIL import Image
 
 from studio import final
-from studio.diversity import CATEGORIES, CATEGORY_TARGETS, category_plan, make_planning_prompt, validate_concepts
+from studio.diversity import CATEGORIES, image_prompt, CATEGORY_TARGETS, category_plan, make_planning_prompt, validate_concepts
 from studio.engine import Engine
 from studio.store import Store
 from studio.style import METRICS, STYLE_PROFILE_PATH, load_profile, style_drift, style_stats
@@ -89,6 +89,21 @@ class FinalPlanningTests(unittest.TestCase):
                 accepted, errors = validate_concepts({'concepts': [copied, concept()]}, [], 2)
         self.assertEqual(['Xưởng đóng đàn ven sông'], [item['title'] for item in accepted])
         self.assertTrue(any('ảnh mẫu Final' in error and 'Chap9/1-4x4.jpg' in error for error in errors))
+
+
+class LegacyPromptTests(unittest.TestCase):
+    def test_context_planned_with_old_rules_gets_only_final_style(self):
+        old_rules = (
+            'Portrait 600x900 pixels, 2:3 aspect ratio. Bright, crisp, realistic photography or photorealistic '
+            'illustration. High-key natural daylight. Use one clear focal subject, a few large readable shape groups, '
+            'calm breathing room, clear depth, and a restrained number of puzzle-friendly visual anchors. '
+            'Avoid clutter and carpets of tiny repeated details.'
+        )
+        prompt = image_prompt({'prompt': 'A bakery counter with pastries. ' + old_rules})
+        self.assertIn('A bakery counter with pastries', prompt)
+        self.assertNotIn('calm breathing room', prompt)
+        self.assertNotIn('realistic photography', prompt)
+        self.assertEqual(1, prompt.count('Polished, high-detail illustration'))
 
 
 class FinalEngineTests(unittest.TestCase):

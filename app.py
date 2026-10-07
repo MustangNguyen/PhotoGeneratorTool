@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from studio.artifacts import export_batch, game_jpeg
 from studio.engine import Engine
-from studio.providers import DEFAULTS, create_provider, read_secret, save_secret
+from studio.providers import DEFAULTS, DIGEN_MODELS, DigenProvider, create_provider, read_secret, save_secret
 from studio.store import Store
 
 ROOT = Path(__file__).resolve().parent
@@ -119,6 +119,8 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                             'has_api_key': bool(read_secret(store.root)),
                             'codex_available': bool(shutil.which('codex')),
                             'antigravity_available': bool(shutil.which('agy')),
+                            'digen_available': bool(DigenProvider.mcp_command()),
+                            'digen_models': DIGEN_MODELS,
                         })
                     if path == '/api/batches':
                         return self.send(store.batches())
@@ -149,19 +151,21 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                     with engine.lock:
                         if engine.active:
                             raise ValueError('Tạm dừng batch trước khi đổi kết nối.')
-                        allowed = {'provider', 'text_model', 'antigravity_text_model', 'image_model', 'api_key', 'concurrency'}
+                        allowed = {'provider', 'text_model', 'antigravity_text_model', 'image_model', 'digen_image_model', 'api_key', 'concurrency'}
                         if not payload.keys() <= allowed:
                             raise ValueError('Cài đặt không hợp lệ.')
                         settings = {**DEFAULTS, **store.settings(), **{k: v for k, v in payload.items() if k != 'api_key'}}
                         value = settings['concurrency']
                         if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 8:
                             raise ValueError('Số ảnh đồng thời phải là số nguyên từ 1 đến 8.')
-                        if settings['provider'] not in {'codex', 'antigravity', 'openai'}:
+                        if settings['provider'] not in {'codex', 'antigravity', 'openai', 'digen'}:
                             raise ValueError('Provider không hợp lệ.')
                         for key in ('text_model', 'antigravity_text_model', 'image_model'):
                             settings.setdefault(key, '')
                             if not isinstance(settings[key], str) or not re.fullmatch(r'[a-zA-Z0-9._:/-]{0,100}', settings[key]):
                                 raise ValueError('Tên model không hợp lệ.')
+                        if settings['digen_image_model'] not in DIGEN_MODELS:
+                            raise ValueError('Model Digen không hợp lệ.')
                         if settings['provider'] == 'openai' and not (settings['text_model'] and settings['image_model']):
                             raise ValueError('OpenAI API cần model context và model ảnh.')
                         if 'api_key' in payload and payload['api_key']:

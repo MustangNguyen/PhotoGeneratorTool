@@ -98,6 +98,8 @@ const elements = {
   settingsStatus: $("#settingsStatus"),
   providerSelect: $("#providerSelect"),
   providerHint: $("#providerHint"),
+  digenModelField: $("#digenModelField"),
+  digenModelSelect: $("#digenModelSelect"),
   textModelInput: $("#textModelInput"),
   textModelHint: $("#textModelHint"),
   imageModelInput: $("#imageModelInput"),
@@ -666,6 +668,9 @@ async function openSettings() {
       ? elements.settingsModal.dataset.antigravityTextModel
       : elements.settingsModal.dataset.standardTextModel;
     elements.imageModelInput.value = settings.image_model || "";
+    elements.digenModelSelect.replaceChildren(...Object.entries(settings.digen_models || {}).map(([id, label]) => new Option(`${label} (${id})`, id)));
+    elements.digenModelSelect.value = settings.digen_image_model || "t2i.hd.lite";
+    elements.settingsModal.dataset.digenAvailable = String(Boolean(settings.digen_available));
     elements.concurrencyInput.value = String(settings.concurrency ?? 4);
     elements.apiKeyInput.value = "";
     elements.apiKeyHint.textContent = settings.has_api_key ? "Đã có khóa API. Để trống nếu không thay đổi." : "Khóa hiện tại chưa được thiết lập.";
@@ -693,10 +698,14 @@ function updateSettingsFields(preserveCurrent = true) {
   elements.settingsModal.dataset.activeProvider = provider;
 
   const openai = provider === "openai";
+  const digen = provider === "digen";
   elements.apiKeyField.hidden = !openai;
+  elements.digenModelField.hidden = !digen;
   elements.imageModelInput.disabled = !openai;
   elements.providerHint.textContent = provider === "openai"
     ? "OpenAI API dùng API key và được tính phí riêng."
+    : digen
+      ? "Ảnh qua digen-cli chính chủ, dùng credit tài khoản Digen; context qua Codex CLI."
     : provider === "antigravity"
       ? "Dùng phiên đăng nhập Antigravity CLI và hạn mức của tài khoản đó."
       : "Dùng phiên đăng nhập Codex CLI và hạn mức của tài khoản đó.";
@@ -707,10 +716,15 @@ function updateSettingsFields(preserveCurrent = true) {
       : "Model riêng cho Codex; để trống để Codex dùng mặc định.";
   elements.imageModelHint.textContent = openai
     ? "Model tạo ảnh được gọi qua OpenAI API."
-    : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
+    : digen
+      ? "Digen dùng model chọn ở mục Model ảnh Digen."
+      : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
   if (provider === "codex" && elements.settingsModal.dataset.codexAvailable === "false") {
     elements.settingsStatus.className = "settings-status error";
     elements.settingsStatus.textContent = "Không tìm thấy Codex cục bộ trên máy này.";
+  } else if (digen && elements.settingsModal.dataset.digenAvailable === "false") {
+    elements.settingsStatus.className = "settings-status error";
+    elements.settingsStatus.textContent = "Không tìm thấy digen-mcp hoặc npx. Cài Node.js hoặc chạy npm install -g digen-cli.";
   } else if (provider === "antigravity" && elements.settingsModal.dataset.antigravityAvailable === "false") {
     elements.settingsStatus.className = "settings-status error";
     elements.settingsStatus.textContent = "Không tìm thấy Antigravity CLI (agy) trên máy này.";
@@ -721,7 +735,9 @@ function updateSettingsFields(preserveCurrent = true) {
     elements.settingsStatus.className = "settings-status";
     elements.settingsStatus.textContent = openai
       ? "Nhập model và API key, sau đó lưu để kiểm tra kết nối."
-      : `${provider === "antigravity" ? "Antigravity" : "Codex"} CLI đã được tìm thấy. Lưu để kiểm tra phiên đăng nhập.`;
+      : digen
+        ? "Lưu để kiểm tra đăng nhập Digen (npx digen-cli login) và Codex."
+        : `${provider === "antigravity" ? "Antigravity" : "Codex"} CLI đã được tìm thấy. Lưu để kiểm tra phiên đăng nhập.`;
   }
 }
 
@@ -741,6 +757,7 @@ async function saveSettings(event) {
     text_model: elements.settingsModal.dataset.standardTextModel || "",
     antigravity_text_model: elements.settingsModal.dataset.antigravityTextModel || "",
     image_model: elements.imageModelInput.value.trim(),
+    digen_image_model: elements.digenModelSelect.value || "t2i.hd.lite",
     concurrency,
   };
   if (elements.providerSelect.value === "openai" && elements.apiKeyInput.value.trim()) body.api_key = elements.apiKeyInput.value.trim();

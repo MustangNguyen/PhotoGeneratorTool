@@ -381,6 +381,22 @@ class HTTPPipelineTests(unittest.TestCase):
         self.assertTrue(settings["antigravity_available"])
         self.assertFalse(settings["codex_available"])
 
+    def test_http_saves_digen_model_and_rejects_unknown_model(self):
+        status, _, payload = self.decoded(
+            "PUT", "/api/settings", {"provider": "digen", "digen_image_model": "t2i.hd"},
+        )
+        self.assertEqual(200, status, payload)
+        status, _, settings = self.decoded("GET", "/api/settings")
+        self.assertEqual("digen", settings["provider"])
+        self.assertEqual("t2i.hd", settings["digen_image_model"])
+        self.assertIn("krea2", settings["digen_models"])
+
+        status, _, payload = self.decoded(
+            "PUT", "/api/settings", {"provider": "digen", "digen_image_model": "made-up"},
+        )
+        self.assertEqual(400, status, payload)
+        self.assertIn("Model Digen", payload["error"])
+
     def test_data_directory_allows_only_one_server(self):
         with self.assertRaisesRegex(RuntimeError, "đang dùng thư mục dữ liệu"):
             build_server(self.root, port=0, provider_factory=lambda: self.provider)

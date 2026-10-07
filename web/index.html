@@ -199,6 +199,7 @@
         <select id="providerSelect" name="provider">
           <option value="codex">Codex cục bộ</option>
           <option value="antigravity">Antigravity cục bộ</option>
+          <option value="digen">Digen (ảnh) + Codex (context)</option>
           <option value="openai">OpenAI API</option>
         </select>
         <small id="providerHint"></small>
@@ -208,6 +209,11 @@
         <label for="imageModelInput">Model tạo ảnh</label>
         <input id="imageModelInput" name="image_model" type="text" autocomplete="off">
         <small id="imageModelHint">Chỉ dùng khi chọn OpenAI API; CLI dùng công cụ tạo ảnh tích hợp.</small>
+        <div id="digenModelField" hidden>
+          <label for="digenModelSelect">Model ảnh Digen</label>
+          <select id="digenModelSelect" name="digen_image_model"></select>
+          <small>Credit mỗi ảnh đo ngày 07/10/2026; Digen có thể đổi giá. Ảnh tạo ở 3:4 rồi cắt giữa về 2:3.</small>
+        </div>
         <label for="concurrencyInput">Số ảnh tạo đồng thời</label>
         <input id="concurrencyInput" name="concurrency" type="number" inputmode="numeric" min="1" max="8" value="4" required aria-describedby="concurrencyHint">
         <small id="concurrencyHint">Mặc định 4, tối đa 8. Tăng số này có thể tạo nhanh hơn nếu dịch vụ hỗ trợ.</small>

@@ -139,11 +139,12 @@ class FakeMcp:
 
 
 class DigenProviderTests(unittest.TestCase):
-    def run_generate(self, polls, image_bytes=None, settings=None, send_failures=0):
+    def run_generate(self, polls, image_bytes=None, settings=None, send_failures=0, root=None):
         fake = FakeMcp(polls, send_failures)
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        root = Path(temporary.name)
+        if root is None:
+            temporary = tempfile.TemporaryDirectory()
+            self.addCleanup(temporary.cleanup)
+            root = Path(temporary.name)
         provider = DigenProvider(settings or {"digen_image_model": "t2i.hd.lite"}, root / "jobs")
         provider.POLL_SECONDS = 0
         provider.SEND_RETRY_DELAYS = (0, 0)
@@ -213,6 +214,23 @@ class DigenProviderTests(unittest.TestCase):
         self.assertIsInstance(target, Path, target)
         self.assertEqual(2, sum(tool == "digen_poll" for tool, _ in fake.calls))
         self.assertEqual(1, sum(tool == "digen_send" for tool, _ in fake.calls))
+
+    def test_retry_recovers_finished_image_without_new_generation(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        unsigned = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "s3://bucket/img.jpg"}]}
+        fake, error = self.run_generate([unsigned] * 13, root=root)
+        self.assertIn("không tốn thêm credit", str(error))
+
+        signed = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        fake, target = self.run_generate([signed], _jpeg(720, 960), root=root)
+        self.assertIsInstance(target, Path, target)
+        self.assertEqual([("digen_poll", {"task_id": "task-1"})], fake.calls)
+
+        # Once saved, a later retry is a fresh generation again.
+        fake, _ = self.run_generate([signed], _jpeg(720, 960), root=root)
+        self.assertEqual("digen_send", fake.calls[0][0])
 
     def test_unknown_model_is_rejected(self):
         _, error = self.run_generate([], settings={"digen_image_model": "nope"})

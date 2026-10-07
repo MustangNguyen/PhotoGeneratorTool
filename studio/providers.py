@@ -320,6 +320,7 @@ class DigenProvider(CodexProvider):
     # after a 10 s connect timeout ("fetch failed"), before the request reaches Digen.
     SEND_RETRY_DELAYS = (15, 30, 60)
     DOWNLOAD_RETRY_DELAYS = (5, 15)
+    RELINK_POLLS = 12
 
     def __init__(self, settings, work_root):
         super().__init__(settings, work_root)
@@ -358,7 +359,25 @@ class DigenProvider(CodexProvider):
             return {**codex, 'name': name, 'message': 'Digen tạo ảnh, còn context dùng Codex CLI. ' + codex['message']}
         return {'name': name, 'ready': True, 'text_ready': True, 'message': f'Ảnh qua Digen ({DIGEN_MODELS.get(self.settings.get("digen_image_model"), "model mặc định")}), context qua Codex CLI. Ảnh 3:4 được cắt giữa về 2:3.'}
 
+    @staticmethod
+    def finished_task(item_directory):
+        """Task id of an earlier attempt whose image Digen finished but this app never saved."""
+        attempts = sorted(Path(item_directory).glob('attempt-*/digen.json'), key=lambda path: path.stat().st_mtime, reverse=True)
+        for log in attempts:
+            if any(log.parent.glob('source.*')):
+                return None
+            try:
+                previous = json.loads(log.read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                continue
+            if previous.get('status') == 'done' and previous.get('task_id') and any(a.get('type') == 'image' for a in previous.get('assets', [])):
+                return previous['task_id']
+        return None
+
     def generate(self, prompt, directory):
+        # Retrying an item whose image was generated but not downloaded fetches that image
+        # again instead of paying for a new one.
+        recovered = self.finished_task(directory)
         directory = Path(tempfile.mkdtemp(prefix='attempt-', dir=Path(directory).resolve()))
         model = self.model()
         model_rule = 'the default text-to-image model (do not set a model parameter)' if model == 'krea2' else f'model `{model}`'
@@ -376,7 +395,7 @@ class DigenProvider(CodexProvider):
                 raise RuntimeError('Lượt tạo đã dừng trước khi gọi Digen.')
             self.mcp = _McpSession(self.mcp_command(), directory / 'process.log')
         try:
-            sent = self._send(instruction)
+            sent = {'task_id': recovered, 'recovered': True} if recovered else self._send(instruction)
             task = sent.get('task_id')
             if not task:
                 raise RuntimeError('Digen không nhận yêu cầu: ' + str(sent.get('error', 'không có task_id'))[:300])
@@ -385,12 +404,12 @@ class DigenProvider(CodexProvider):
             while True:
                 time.sleep(self.POLL_SECONDS)
                 result = self.mcp.call('digen_poll', {'task_id': task})
-                log.write_text(json.dumps({'task_id': task, 'conversation_id': sent.get('conversation_id'), **result}, ensure_ascii=False, indent=1), encoding='utf-8')
+                log.write_text(json.dumps({'task_id': task, 'conversation_id': sent.get('conversation_id'), 'recovered': bool(recovered), **result}, ensure_ascii=False, indent=1), encoding='utf-8')
                 status = result.get('status')
                 # When presigning fails on a flaky network the asset comes back as a raw s3:// link;
                 # polling again only re-signs the finished image and costs nothing.
                 unsigned = any(a.get('type') == 'image' and not a.get('url', '').startswith('https://') for a in result.get('assets', []))
-                if status == 'done' and unsigned and relinks < 3:
+                if status == 'done' and unsigned and relinks < self.RELINK_POLLS:
                     relinks += 1
                     continue
                 if status == 'done':
@@ -407,6 +426,8 @@ class DigenProvider(CodexProvider):
                 session, self.mcp = self.mcp, None
             session.close()
         images = [asset for asset in result.get('assets', []) if asset.get('type') == 'image' and asset.get('url', '').startswith('https://')]
+        if not images and any(a.get('type') == 'image' for a in result.get('assets', [])):
+            raise RuntimeError('Digen đã tạo ảnh nhưng mạng lỗi nên chưa lấy được link tải. Bấm thử lại ảnh này để tải lại đúng ảnh đó, không tốn thêm credit.')
         if len(images) != 1:
             raise RuntimeError(f'Digen trả {len(images)} ảnh; cần đúng một ảnh. Xem {log}, không tự tạo lại.')
         suffix = Path(urllib.parse.urlparse(images[0]['url']).path).suffix.lower()
@@ -420,8 +441,9 @@ class DigenProvider(CodexProvider):
                 break
             except (urllib.error.URLError, TimeoutError, OSError, UnidentifiedImageError) as error:
                 # Downloading an already generated image is free, so retrying is safe.
+                target.unlink(missing_ok=True)
                 if delay is None:
-                    raise RuntimeError(f'Không tải được ảnh Digen; link còn trong {log} khoảng 24 giờ.') from error
+                    raise RuntimeError('Không tải được ảnh Digen do lỗi mạng. Bấm thử lại ảnh này để tải lại đúng ảnh đó, không tốn thêm credit.') from error
                 time.sleep(delay)
         # A landscape result would lose most of the scene when cropped to portrait.
         if height <= width:

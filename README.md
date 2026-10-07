@@ -42,6 +42,8 @@ Trang lấy trạng thái mới từ máy chủ mỗi vài giây; đồng hồ c
 
 OpenAI API là lựa chọn trong cài đặt, **tính phí riêng**, không dùng quota ChatGPT/Codex. Chỉ được gọi khi người dùng chọn provider API và bấm chạy. API key lấy từ `OPENAI_API_KEY` hoặc lưu server-side trong `data/api-key` với quyền 0600; không trả key về trình duyệt. Model context phải hỗ trợ Responses structured outputs; model ảnh mặc định `gpt-image-2`, có thể đổi khi tài khoản hỗ trợ.
 
+Digen là lựa chọn dùng gói tài khoản Digen để tạo ảnh, còn lập và duyệt context vẫn qua Codex CLI. Tool gọi [`digen-cli`](https://github.com/digen-ai/digen-cli) chính chủ (`digen-mcp`, chạy qua `npx` nếu chưa cài toàn cục) và không đọc hay chuyển token. Đăng nhập một lần bằng `npx digen-cli login`. Mỗi ảnh là một lượt chat với agent `skill_agent`: tool yêu cầu model đã chọn, `aspect_ratio 3:4` và truyền nguyên văn prompt. Agent bỏ qua 2:3 (trả 9:16) nhưng nhận 3:4, nên ảnh 3:4 được cắt giữa về 2:3 và prompt dặn chừa mép trái/phải. Ảnh ngang hoặc khác đúng một ảnh bị báo lỗi, không tự tạo lại. Credit mỗi ảnh đo ngày 07/10/2026: `krea2` 1, `t2i.hd.lite` (Nano Banana 2 Lite) 15, `t2i.hd` (GPT Image 2) 30; Digen có thể đổi giá. Tạm dừng chỉ ngắt kết nối; ảnh đã gửi lên Digen vẫn có thể hoàn tất và dùng credit.
+
 Nguồn tích hợp: [Codex image generation](https://learn.chatgpt.com/docs/image-generation), [Image API](https://developers.openai.com/api/docs/guides/image-generation), [giới hạn ChatGPT-plan OAuth](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations).
 
 ## Dữ liệu và giới hạn
@@ -95,6 +97,7 @@ Giới hạn theo `main_subject` không bắt được việc đổi sang con/v�
 - Chủ thể thuộc họ có cụm cuối dài nhất khớp với `main_subject` (context cũ: cụm danh từ đầu của `key`). Chủ thể chưa có trong file chỉ chịu giới hạn theo chủ thể.
 - Mỗi họ dùng tối đa `1 + số context × weight / 120` lần (756 mục, weight 1 → 7 lần). Họ rộng như mặt tiền, cửa tiệm, trái cây, hoa dùng weight 2–3. Prompt liệt kê các họ đã đủ.
 - Planner trả thêm `props`: 3–6 vật phụ tiếng Anh. Các vật trong `props.tracked` được đếm trên toàn bộ lịch sử (context cũ: tìm trong prompt tiếng Anh). Vật đã dùng từ `1 + số context / 25` lần trở lên là "quá quen"; concept có từ 2 vật quá quen trở lên bị loại.
+- **Tự học:** planner trả thêm `subject_family` (id họ có sẵn, hoặc họ mới dạng `id: nhãn`). Chủ thể đã có trong file luôn giữ họ của nó, nên không thể đặt họ mới để né họ đã đủ. Khi context được lưu, chủ thể chưa có họ được ghi vào `learned` của họ đó (họ mới có `"auto": true`), và vật phụ mới được ghi vào `props.learned`. Log batch báo số mục đã học. Nên thỉnh thoảng xem lại các mục `learned`/`auto` và sửa nếu model xếp sai họ.
 - Một từ thuộc hai họ sẽ báo lỗi khi đọc file. Thêm họ, thành viên hay vật phụ bằng cách sửa file; ứng dụng đọc lại khi file đổi.
 
 Giới hạn chặt khiến lượt đầu sau khi bật có thể loại nhiều concept hơn và tốn thêm lượt lập context. Nếu batch hay dừng vì "Ba lượt lập context không có đề xuất mới hợp lệ", tăng `weight` của họ đang chặn hoặc tăng `FAMILY_REPEAT_EVERY`/`PROP_REPEAT_EVERY` trong `studio/diversity.py`.

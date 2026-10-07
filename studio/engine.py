@@ -8,7 +8,7 @@ from . import final
 from .artifacts import load_fingerprint_cache, near_image, normalize_image, save_fingerprint_cache
 from .providers import DEFAULTS
 from .store import now
-from .diversity import make_planning_prompt, order_concepts, pick_seeds, validate_concepts, image_prompt
+from .diversity import learn_from, make_planning_prompt, order_concepts, pick_seeds, validate_concepts, image_prompt
 from .review import apply_review, make_review_prompt
 from .style import style_drift, style_stats
 
@@ -125,6 +125,13 @@ class Engine:
                 if reviewed:
                     self.store.add_concepts(batch_id, reviewed)
                     stalled = 0
+                    try:
+                        learned = learn_from(reviewed)
+                    except (OSError, ValueError) as error:
+                        self.store.event(batch_id, f'Không ghi được họ chủ thể/vật phụ mới: {error}'[:500])
+                    else:
+                        if any(learned.values()):
+                            self.store.event(batch_id, f"Đã học thêm {learned['members']} chủ thể vào họ ({learned['families']} họ mới) và {learned['props']} vật phụ vào subject-families.json.")
                 else:
                     stalled += 1
                 self.store.event(batch_id, f"Đã duyệt và giữ {len(reviewed)} context; loại {len(feedback)} đề xuất chưa đạt.")
@@ -239,7 +246,7 @@ class Engine:
                 similar = near_image(target, self.store.completed_items() + self.final_reference(), self.image_cache)
                 self.save_final_fingerprints()
                 warning = f"Ảnh có bố cục/màu gần ảnh «{similar['title']}». Cần người duyệt đối chiếu." if similar else ''
-                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','main_subject','final_seed','axes','prompt','context_review'] if k in item} | {'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
+                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','main_subject','subject_family','props','final_seed','axes','prompt','context_review'] if k in item} | {'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
                 self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, style_warning=style_warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
             self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}." + (' Có cảnh báo gần trùng.' if warning else '') + (' Màu lệch so với ảnh mẫu Final.' if style_warning else ''))
         except Exception as error:

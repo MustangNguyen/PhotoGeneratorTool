@@ -40,11 +40,12 @@ FIELDS = (
 
 # Extra planner outputs. They are optional when validating so legacy contexts and
 # review revisions (which use FIELDS) still pass; the planning schema requires them.
-PLAN_FIELDS = FIELDS + ("main_subject", "props", "seed_id")
+PLAN_FIELDS = FIELDS + ("main_subject", "subject_family", "props", "seed_id")
 
 _MAX_LENGTH = {
     "main_subject": 60,
     "props": 200,
+    "subject_family": 80,
     "seed_id": 12,
     "title": 120,
     "category": 80,
@@ -567,6 +568,7 @@ FAMILIES_PATH = Path(__file__).resolve().parent.parent / "subject-families.json"
 FAMILY_REPEAT_EVERY = 120
 PROP_REPEAT_EVERY = 25
 _FAMILY_LOCK = threading.Lock()
+_FAMILY_WRITE_LOCK = threading.Lock()
 _FAMILY_CACHE_KEY: tuple[str, int, int] | None = None
 _FAMILY_CACHE: dict[str, Any] = {}
 
@@ -597,9 +599,13 @@ def _load_families() -> dict[str, Any]:
             family_id = family["id"]
             if family_id in labels:
                 raise ValueError(f"subject-families.json: id trùng “{family_id}”.")
-            names = family.get("members")
-            if not isinstance(names, list) or not names or not all(isinstance(n, str) and n.strip() for n in names):
-                raise ValueError(f"subject-families.json: họ {family_id} cần members không rỗng.")
+            names = family.get("members", [])
+            learned = family.get("learned", [])
+            if not all(isinstance(group, list) and all(isinstance(n, str) and n.strip() for n in group) for group in (names, learned)):
+                raise ValueError(f"subject-families.json: members/learned của họ {family_id} phải là danh sách chuỗi.")
+            names = names + learned
+            if not names:
+                raise ValueError(f"subject-families.json: họ {family_id} cần ít nhất một thành viên.")
             weight = family.get("weight", 1)
             if isinstance(weight, bool) or not isinstance(weight, (int, float)) or weight <= 0:
                 raise ValueError(f"subject-families.json: weight của họ {family_id} phải là số dương.")
@@ -611,9 +617,10 @@ def _load_families() -> dict[str, Any]:
                 if words in members and members[words] != family_id:
                     raise ValueError(f"subject-families.json: “{name}” thuộc hai họ {members[words]} và {family_id}.")
                 members[words] = family_id
-        props = raw.get("props", {}).get("tracked", []) if isinstance(raw.get("props"), dict) else []
+        prop_section = raw.get("props", {}) if isinstance(raw.get("props"), dict) else {}
+        props = prop_section.get("tracked", []) + prop_section.get("learned", []) if isinstance(prop_section.get("learned", []), list) else None
         if not isinstance(props, list) or not all(isinstance(p, str) and p.strip() for p in props):
-            raise ValueError("subject-families.json: props.tracked phải là danh sách chuỗi.")
+            raise ValueError("subject-families.json: props.tracked/learned phải là danh sách chuỗi.")
         tracked = sorted({tuple(_subject_words(p)) for p in props}, key=len, reverse=True)
         _FAMILY_CACHE = {"members": members, "labels": labels, "examples": examples, "weights": weights, "props": tracked}
         _FAMILY_CACHE_KEY = key
@@ -628,6 +635,75 @@ def _family_of(words: tuple[str, ...]) -> str | None:
         if family:
             return family
     return None
+
+
+_FAMILY_ID = re.compile(r"^[a-z][a-z0-9_]{2,39}$")
+
+
+def _concept_family(item: dict[str, Any]) -> str | None:
+    """Saved family of a context (planner choice, possibly a learned family), else by subject."""
+    family = item.get("subject_family")
+    if isinstance(family, str) and family in _load_families()["labels"]:
+        return family
+    return _family_of(_subject_of(item))
+
+
+def _resolve_family(subject: tuple[str, ...], claimed: str) -> tuple[str | None, str]:
+    """(family id, label of a new family or "") for a planner-proposed concept.
+
+    A subject already listed in the file keeps its family whatever the planner says, so
+    a new family name cannot be used to dodge a full one.
+    """
+    families = _load_families()
+    mapped = _family_of(subject)
+    if mapped:
+        return mapped, ""
+    family_id, _, label = (part.strip() for part in claimed.partition(":"))
+    family_id = family_id.lower()
+    if family_id in families["labels"]:
+        return family_id, ""
+    if label and _FAMILY_ID.match(family_id):
+        return family_id, label[:60]
+    return None, ""
+
+
+def learn_from(concepts: list[dict[str, Any]]) -> dict[str, int]:
+    """Record new subjects and props from saved concepts in subject-families.json.
+
+    Learned entries are kept apart ("learned", "auto") so the editor can review them.
+    """
+    added = {"members": 0, "families": 0, "props": 0}
+    with _FAMILY_WRITE_LOCK:
+        raw = json.loads(FAMILIES_PATH.read_text(encoding="utf-8"))
+        by_id = {family["id"]: family for family in raw["families"]}
+        known = {tuple(_subject_words(name)) for family in raw["families"] for name in family.get("members", []) + family.get("learned", [])}
+        prop_section = raw.setdefault("props", {})
+        known_props = {tuple(_subject_words(p)) for p in prop_section.get("tracked", []) + prop_section.get("learned", [])}
+        for concept in concepts:
+            family_id = concept.get("subject_family")
+            words = tuple(_subject_words(str(concept.get("main_subject", ""))))[-3:]
+            if family_id and words and words not in known:
+                family = by_id.get(family_id)
+                if family is None and concept.get("family_label"):
+                    family = {"id": family_id, "label": concept["family_label"], "auto": True, "members": [], "learned": []}
+                    raw["families"].append(family)
+                    by_id[family_id] = family
+                    added["families"] += 1
+                if family is not None:
+                    family.setdefault("learned", []).append(" ".join(words))
+                    known.add(words)
+                    added["members"] += 1
+            for part in str(concept.get("props", "")).split(","):
+                prop = tuple(_subject_words(part))[-3:]
+                if prop and prop not in known_props and all(word.isalpha() for word in prop):
+                    prop_section.setdefault("learned", []).append(" ".join(prop))
+                    known_props.add(prop)
+                    added["props"] += 1
+        if any(added.values()):
+            temporary = FAMILIES_PATH.with_suffix(".json.tmp")
+            temporary.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            temporary.replace(FAMILIES_PATH)
+    return added
 
 
 def family_limit(history_size: int, family: str | None = None) -> int:
@@ -660,7 +736,7 @@ def _props_of(concept: dict[str, Any]) -> frozenset[tuple[str, ...]]:
 
 def _family_summary(history: list[dict[str, Any]]) -> str:
     families = _load_families()
-    counts = Counter(family for item in history if isinstance(item, dict) and (family := _family_of(_subject_of(item))))
+    counts = Counter(family for item in history if isinstance(item, dict) and (family := _concept_family(item)))
     full = [
         f"{families['labels'][family]} ({', '.join(families['examples'][family])})"
         for family, number in counts.most_common() if number >= family_limit(len(history), family)
@@ -775,6 +851,7 @@ def make_planning_prompt(
     limit = subject_limit(len(history))
     blocked_subjects, common_subjects = _subject_summary(history, limit)
     blocked_families = _family_summary(history)
+    family_ids = "; ".join(f"{family_id} ({label})" for family_id, label in _load_families()["labels"].items())
     overused_props = ", ".join(_overused_props(history, prop_limit(len(history)))) or "(chưa có)"
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
@@ -813,6 +890,9 @@ CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể t�
 CHỦ THỂ CHÍNH ĐÃ DÙNG NHIỀU NHẤT (toàn bộ lịch sử)
 {common_subjects}
 
+DANH SÁCH HỌ CHỦ THỂ (id và nhãn)
+{family_ids}
+
 HỌ CHỦ THỂ ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi họ có giới hạn riêng theo độ rộng; đổi sang con/vật khác cùng họ, ví dụ thỏ sang chuột lang hay nồi súp sang nồi hầm, vẫn bị loại)
 {blocked_families}
 
@@ -827,7 +907,8 @@ MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đ
 
 ĐẦU RA
 Chỉ trả về JSON hợp lệ, không markdown, theo dạng {{"concepts":[...]}}. Mỗi phần tử có đủ chuỗi:
-title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, props, seed_id.
+title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, subject_family, props, seed_id.
+- subject_family là id họ của main_subject trong DANH SÁCH HỌ CHỦ THỂ. Chỉ khi không họ nào hợp mới ghi họ mới dạng "id_tieng_anh: nhãn tiếng Việt" (id snake_case). Họ mới cũng bị giới hạn và được ghi lại cho các lần sau; không tạo họ mới để né họ đã đủ.
 - props là 3–6 vật phụ thấy rõ trong ảnh, danh từ tiếng Anh chung số ít, cách nhau dấu phẩy (ví dụ: teapot, linen napkin, wooden tray).
 - main_subject là danh từ tiếng Anh chung, số ít, 1–3 từ, gọi tên chủ thể chính (ví dụ rabbit, bicycle, railway station, bread); không tính từ, không màu, không bối cảnh. Mỗi concept một chủ thể chính khác nhau.
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.
@@ -942,7 +1023,8 @@ def validate_concepts(
     max_uses = subject_limit(len(comparison_pool) + min(len(source), limit))
     catalogue_size = len(comparison_pool) + min(len(source), limit)
     max_prop = prop_limit(len(comparison_pool) + min(len(source), limit))
-    comparison_families = [_family_of(subject) for subject in comparison_subjects]
+    comparison_families = [_concept_family(item) for item in comparison_pool]
+    new_family_labels: dict[str, str] = {}
     prop_counts = Counter(prop for item in comparison_pool for prop in _props_of(item))
     seed_by_id = {seed["id"]: seed for seed in seeds or ()}
     used_seeds: set[str] = set()
@@ -967,7 +1049,7 @@ def validate_concepts(
                 errors.append(f"concept {index}: trường {field} dài quá {_MAX_LENGTH[field]} ký tự")
                 malformed = True
             normalized[field] = value
-        for field in ("main_subject", "props", "seed_id"):
+        for field in ("main_subject", "subject_family", "props", "seed_id"):
             value = item.get(field)
             if isinstance(value, str) and _clean(value):
                 normalized[field] = _clean(value)[: _MAX_LENGTH[field]]
@@ -1008,12 +1090,15 @@ def validate_concepts(
                 f"(giới hạn {max_uses}); chọn chủ thể khác"
             )
             continue
-        family = _family_of(subject)
+        family, new_label = _resolve_family(subject, normalized.pop("subject_family", ""))
+        if new_label:
+            new_label = new_family_labels.setdefault(family, new_label)
         family_uses = sum(other == family for other in comparison_families) if family else 0
         max_family = family_limit(catalogue_size, family)
         if family and family_uses >= max_family:
+            label = _load_families()["labels"].get(family) or new_label or family
             errors.append(
-                f"concept {index} ({normalized['title']}): họ chủ thể “{_load_families()['labels'][family]}” đã dùng "
+                f"concept {index} ({normalized['title']}): họ chủ thể “{label}” đã dùng "
                 f"{family_uses} lần (giới hạn {max_family}); chọn họ chủ thể khác"
             )
             continue
@@ -1024,6 +1109,10 @@ def validate_concepts(
                 f"concept {index} ({normalized['title']}): dùng nhiều vật phụ đã quá quen ({', '.join(crowded)}); đổi vật phụ"
             )
             continue
+        if family:
+            normalized["subject_family"] = family
+        if new_label:
+            normalized["family_label"] = new_label
         normalized["prompt"] = image_prompt(normalized)
         accepted.append(normalized)
         comparison_pool.append(normalized)

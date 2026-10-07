@@ -186,6 +186,13 @@ def apply_review(
             original_subject = tuple(_subject_words(str(original.get("main_subject", ""))))
             if original_subject and _same_subject(original_subject, tuple(_key_head(revised["key"]))):
                 revised["main_subject"] = original["main_subject"]
+                if original.get("subject_family"):
+                    claimed = original["subject_family"]
+                    if original.get("family_label"):
+                        claimed += f": {original['family_label']}"
+                    revised["subject_family"] = claimed
+            if original.get("props"):
+                revised["props"] = original["props"]
             peers = list(history) + keep_peers + list(accepted_by_index.values())
             valid, errors = validate_concepts({"concepts": [revised]}, peers, 1)
             if not valid:

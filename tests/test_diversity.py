@@ -186,6 +186,39 @@ class DiversityTests(unittest.TestCase):
         accepted, errors = validate_concepts({"concepts": [single]}, history, 1)
         self.assertEqual(1, len(accepted), errors)
 
+    def test_learned_subjects_and_props_are_written_and_reused(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from studio import diversity
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "subject-families.json"
+            shutil.copy(diversity.FAMILIES_PATH, path)
+            with patch("studio.diversity.FAMILIES_PATH", path):
+                first = concept(main_subject="capybara", subject_family="large_rodent: thú gặm nhấm lớn", props="hot spring stone, yuzu, wooden tub")
+                accepted, errors = validate_concepts({"concepts": [first]}, [], 1)
+                self.assertEqual("large_rodent", accepted[0]["subject_family"], errors)
+                learned = diversity.learn_from(accepted)
+                self.assertEqual({"members": 1, "families": 1, "props": 3}, learned)
+                saved = json.loads(path.read_text(encoding="utf-8"))
+                family = next(f for f in saved["families"] if f["id"] == "large_rodent")
+                self.assertEqual(["capybara"], family["learned"])
+                self.assertTrue(family["auto"])
+                self.assertIn("yuzu", saved["props"]["learned"])
+                # A later concept naming another family for the same subject still lands in the learned one.
+                again = concept(title="Capybara tắm", key="capybara bathing", main_subject="capybara", subject_family="pet: thú cưng")
+                accepted, _ = validate_concepts({"concepts": [again]}, [], 1)
+                self.assertEqual("large_rodent", accepted[0]["subject_family"])
+                # Learning the same subject twice adds nothing.
+                self.assertEqual({"members": 0, "families": 0, "props": 0}, diversity.learn_from(accepted))
+
+    def test_known_subject_ignores_planner_family_claim(self):
+        item = concept(main_subject="guinea pig", subject_family="exotic_pet: thú cưng lạ")
+        accepted, errors = validate_concepts({"concepts": [item]}, [], 1)
+        self.assertEqual("small_pet", accepted[0]["subject_family"], errors)
+        self.assertNotIn("family_label", accepted[0])
+
     def test_subject_cap_grows_slowly_with_catalogue_size(self):
         self.assertEqual(1, subject_limit(0))
         self.assertEqual(2, subject_limit(756))
@@ -248,7 +281,8 @@ class DiversityTests(unittest.TestCase):
         self.assertIn("B:", prompt)
         self.assertIn("Màu:", prompt)
         self.assertIn("Chất:", prompt)
-        self.assertLess(len(prompt), 25000)
+        # The family list and caps add a few thousand characters; still well within model context.
+        self.assertLess(len(prompt), 32000)
         for category in CATEGORIES:
             self.assertIn(category, prompt)
 

@@ -90,7 +90,7 @@ Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay l�
 
 ### Trục đa dạng (`diversity-axes.json`)
 
-Ngoài chủ thể, mỗi concept được gán thêm một số trục đa dạng: góc nhìn, khoảng cách khung hình, kiểu bố cục, thời điểm, mùa, dịp, vùng văn hóa, thời kỳ, chất liệu, bảng màu, không gian, số lượng chủ thể, tình huống, điểm nhấn sống, hình thức.
+Ngoài chủ thể, mỗi concept được gán thêm một số trục đa dạng. File hiện có 14 trục, 624 giá trị, chắt lọc từ caption 2.204 ảnh Final: góc nhìn và điểm đứng (48), kiểu bố cục và cách bày (46), thời điểm và ánh sáng (37), mùa/thời tiết/vụ mùa (40), dịp và lễ hội (46), vùng và địa danh (57), thời kỳ và phong cách (45), chất liệu (49), bảng màu (45), không gian (50), tình huống (48), điểm nhấn phụ (50), họa tiết (40), hình thức (23, weight thấp vì phần lớn là tranh/mô hình, trong Final chỉ chiếm vài phần trăm). File được sinh bằng tay một lần; sửa trực tiếp trong JSON.
 
 - Mỗi concept chỉ nhận ngẫu nhiên từ `per_concept.min` đến `per_concept.max` trục (mặc định 2–4), không phải tất cả. Trục không được gán thì model tự chọn, miễn khác các concept còn lại.
 - Trong mỗi trục được gán, ứng dụng chọn giá trị **ít được dùng nhất** trong lịch sử (hòa thì ngẫu nhiên), nên kho ảnh tự trải đều qua các giá trị.
@@ -100,8 +100,8 @@ Ngoài chủ thể, mỗi concept được gán thêm một số trục đa dạ
 
 Tổ hợp không hợp nhau được khai báo trong `rules`, ứng dụng không bao giờ gán chúng cùng lúc:
 
-- `exclude`: `if` và `then` không được cùng xảy ra, ví dụ tuyết + vùng nhiệt đới, cận cảnh + nhìn từ ban công xuống.
-- `require`: khi `if` xảy ra thì `then` phải đúng nếu trục đó được gán, ví dụ Tết Nguyên đán chỉ đi với Việt Nam/Trung Hoa/Hàn Quốc và mùa xuân.
+- `exclude`: `if` và `then` không được cùng xảy ra, ví dụ tuyết + vùng nóng, góc nhìn ngoài trời + không gian trong nhà, vật liệu vải/giấy + công trình.
+- `require`: khi `if` xảy ra thì `then` phải đúng nếu trục đó được gán, ví dụ Tết Nguyên đán chỉ đi với vùng Đông Á đón Tết âm lịch và đầu xuân, Diwali chỉ ở Ấn Độ, cực quang chỉ ở Na Uy/Scotland.
 - Bộ chọn là `{"axis": "season", "values": [...]}` (bỏ `values` = mọi giá trị của trục) hoặc `{"category": ["coast"]}`. Trục/giá trị/mã nhóm sai tên sẽ báo lỗi khi đọc file.
 - Nếu một trục không còn giá trị hợp lệ, ứng dụng bỏ trục đó và chọn trục khác.
 

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Trục đa dạng gán cho từng concept. Mỗi concept nhận ngẫu nhiên từ per_concept.min đến per_concept.max trục; trong mỗi trục, ứng dụng chọn giá trị ít được dùng nhất trong lịch sử. weight cao thì trục hay được chọn hơn. categories/exclude_categories dùng mã nhóm Final: food, interior, garden, objects, facade, animal, vehicle, shop, coast, drink. Thêm/bớt giá trị trực tiếp trong file; ứng dụng đọc lại khi file đổi. rules khai báo tổ hợp không hợp nhau: type exclude = if và then không được cùng xảy ra; type require = khi if xảy ra thì then phải đúng (nếu trục của then được gán). Bộ chọn là {\"axis\": id, \"values\": [...]} (bỏ values = mọi giá trị của trục) hoặc {\"category\": [mã nhóm]}.",
+  "note": "Trục đa dạng gán cho từng concept, chắt lọc từ 2.204 ảnh Final. Mỗi concept nhận ngẫu nhiên từ per_concept.min đến per_concept.max trục; trong mỗi trục, ứng dụng chọn giá trị ít được dùng nhất trong lịch sử và không vi phạm rules. weight cao thì trục hay được chọn hơn. categories/exclude_categories dùng mã nhóm Final: food, interior, garden, objects, facade, animal, vehicle, shop, coast, drink. rules: exclude = if và then không được cùng xảy ra; require = khi if xảy ra thì then phải đúng (nếu trục của then được gán). Bộ chọn là {\"axis\": id, \"values\": [...]} (bỏ values = mọi giá trị) hoặc {\"category\": [mã nhóm]}.",
   "per_concept": {
     "min": 2,
     "max": 4
@@ -8,108 +8,318 @@
   "axes": [
     {
       "id": "viewpoint",
-      "label": "Góc nhìn",
+      "label": "Góc nhìn và điểm đứng",
       "weight": 1.2,
       "values": [
         "nhìn thẳng từ trên xuống kiểu flat-lay",
-        "góc cao khoảng 45 độ nhìn xuống",
+        "góc cao khoảng 45 độ nhìn xuống bàn",
         "ngang tầm mắt",
         "góc thấp nhìn lên",
-        "nhìn qua khung cửa, cửa sổ hoặc vòm cổng",
-        "nhìn từ ban công hoặc chỗ cao xuống"
-      ]
-    },
-    {
-      "id": "framing",
-      "label": "Khoảng cách và khung hình",
-      "weight": 1.0,
-      "values": [
+        "từ dưới gốc cây nhìn lên tán và trời",
+        "nhìn qua khung cửa sổ mở",
+        "nhìn qua vòm cổng đá",
+        "nhìn qua khung cửa gothic",
+        "nhìn từ ban công xuống phố",
+        "nhìn từ sân thượng ra các mái nhà",
+        "từ trong toa tàu nhìn ra cửa sổ",
+        "nhìn qua cửa sổ máy bay",
+        "từ boong thuyền nhìn vào bờ",
+        "nhìn qua tủ kính tiệm",
+        "từ trong bếp nhìn ra cửa sau",
+        "từ chân bậc thang nhìn lên",
+        "từ đầu ngõ nhìn sâu vào ngõ",
+        "nhìn dọc thân cầu",
+        "nhìn chéo dọc dãy mặt tiền",
+        "nhìn ngang sát mặt nước",
+        "từ bờ hồ nhìn ra giữa hồ",
+        "nhìn từ ngoài vào qua cửa tiệm mở",
+        "nhìn xuyên qua giàn hoa leo",
+        "nhìn qua rèm voan vén sang hai bên",
+        "nhìn qua vách kính nhà kính",
         "cận cảnh một nhóm vật lấp đầy khung",
+        "cận cảnh vật bổ đôi lộ ruột",
         "trung cảnh được bày biện",
         "toàn cảnh có nhiều mốc rõ",
-        "cảnh xa kiểu bưu thiếp nhưng tiền cảnh vẫn có vật lớn"
+        "cảnh xa kiểu bưu thiếp, tiền cảnh có vật lớn",
+        "nhìn từ trên cao xuống góc phố như sa bàn",
+        "đứng ở góc phố thấy hai mặt tiền",
+        "chính diện đối xứng",
+        "từ chỗ ngồi nhìn ra mặt bàn trước mặt",
+        "nhìn qua gương phản chiếu căn phòng",
+        "từ trong xe cắm trại nhìn ra ngoài",
+        "từ ghế lái nhìn qua kính chắn gió",
+        "nhìn qua cửa sổ tròn kiểu tàu biển",
+        "nhìn ngang mép hồ bơi",
+        "từ trên đồi nhìn xuống làng",
+        "nhìn dọc đường ray hoặc đường mòn vào xa",
+        "nhìn qua bậu cửa sổ có chậu hoa",
+        "nhìn xuống từ cầu thang xoắn",
+        "từ sau quầy pha chế nhìn ra quán",
+        "nhìn qua cổng vườn mở",
+        "từ hiên nhà nhìn ra sân",
+        "từ góc phòng bao quát hai bức tường",
+        "nhìn ngang dọc mặt bàn dài"
       ]
     },
     {
       "id": "arrangement",
-      "label": "Kiểu bố cục",
+      "label": "Kiểu bố cục và cách bày",
       "weight": 1.2,
       "values": [
         "một chủ thể lớn chiếm phần lớn khung",
+        "cặp chủ thể đặt cạnh nhau",
+        "nhóm 3 đến 5 vật quây quần",
         "bộ sưu tập nhiều vật cùng loại xếp kín, mỗi vật khác màu",
-        "bàn hoặc kệ bày nhiều món khác nhau",
+        "vật rải kín mặt phẳng",
+        "xếp thành hàng thẳng",
+        "xếp chồng thành tháp",
+        "xếp theo dải màu cầu vồng",
+        "xếp tròn quanh một tâm",
+        "hộp chia ngăn, mỗi ngăn một loại",
+        "kệ nhiều tầng đầy đồ",
+        "tủ kính nhiều ngăn",
+        "giỏ tràn đầy",
+        "thùng gỗ chồng nhiều tầng",
+        "khay chia ô",
+        "bàn dài bày nhiều món",
+        "mâm tròn nhiều đĩa nhỏ",
+        "tháp nhiều tầng kiểu tiệc trà",
+        "vật treo thành chùm từ trên xuống",
+        "tường treo nhiều vật",
+        "dây cờ hoặc dây đèn vắt ngang khung",
         "đường dẫn chéo đưa mắt vào sâu",
+        "đường cong uốn lượn",
         "bố cục gần đối xứng",
         "ba lớp tiền cảnh, trung cảnh, hậu cảnh rõ",
         "khung trong khung",
-        "cặp chủ thể đặt cạnh nhau"
+        "chủ thể lệch một bên, bên kia là cảnh xa",
+        "chủ thể được hoa lá lớn bao quanh",
+        "cầu thang dẫn mắt lên cao",
+        "dãy nhà nhiều màu nối tiếp",
+        "xe hoặc thuyền nhiều màu xếp hàng",
+        "nhiều vật cao thấp khác nhau thành bậc",
+        "bàn làm việc đầy dụng cụ nhưng ngăn nắp",
+        "vật đang mở lộ bên trong",
+        "vật nổi trên mặt nước",
+        "vật trên bậu cửa sổ với cảnh ngoài",
+        "nhóm vật quanh một điểm nhấn trung tâm",
+        "lưới ô vuông đều như gạch hay kệ ô",
+        "phản chiếu đối xứng qua mặt nước",
+        "bày trên khăn trải rộng",
+        "đặt trên xe đẩy hoặc xe chở hàng",
+        "khung tròn hoặc vòng hoa bao quanh",
+        "mỗi bậc thang một vật",
+        "chồng sách làm bệ cho vật chính",
+        "chậu cây nhiều cỡ quây quần",
+        "nửa trong nhà, nửa ngoài trời"
       ]
     },
     {
-      "id": "time_of_day",
-      "label": "Thời điểm",
-      "weight": 0.8,
+      "id": "light",
+      "label": "Thời điểm và ánh sáng",
+      "weight": 0.9,
       "values": [
         "sáng sớm nắng dịu",
+        "nắng sớm xiên qua cửa sổ",
         "giữa trưa nắng trong",
         "nắng vàng buổi chiều",
-        "hoàng hôn với đèn ấm vừa bật, cảnh vẫn sáng rõ"
+        "giờ vàng trước hoàng hôn",
+        "hoàng hôn cam hồng soi trên nước",
+        "hoàng hôn với đèn ấm vừa bật, cảnh vẫn sáng rõ",
+        "chạng vạng còn sáng với dây đèn ấm",
+        "nắng xuyên rèm voan",
+        "nắng lọc qua tán lá thành đốm",
+        "nắng qua kính màu đổ mảng màu",
+        "vệt cầu vồng ánh sáng từ lăng kính",
+        "nắng phản chiếu từ mặt nước lên tường",
+        "ánh sáng trong trẻo sau mưa",
+        "trời xanh mây trắng bồng bềnh",
+        "trời trong không mây",
+        "mây hồng buổi sớm",
+        "nắng ngược viền sáng quanh vật",
+        "bóng đổ dài buổi chiều",
+        "ánh nến và đèn dầu ấm trong phòng sáng",
+        "đèn lồng thắp lúc chạng vạng còn sáng",
+        "đèn chùm sáng ấm trong phòng",
+        "ánh tuyết hắt sáng trong trẻo",
+        "trăng tròn trên trời chạng vạng còn sáng",
+        "cực quang trên nền tuyết sáng",
+        "đèn neon pastel dịu trong quán",
+        "ánh sáng tỏa đều trong nhà kính",
+        "mặt biển lấp lánh nắng",
+        "nắng chiếu nghiêng làm nổi kết cấu gỗ đá",
+        "bình minh ven biển xanh hồng dịu",
+        "ánh hồng tím sau hoàng hôn",
+        "đèn đường cổ thắp lúc chạng vạng",
+        "lửa trại và đèn bão lúc chạng vạng",
+        "pháo hoa xa trên trời chạng vạng",
+        "nắng dịu qua mái hiên sọc",
+        "ánh sáng ngày nhiều mây mỏng, màu vẫn tươi",
+        "nắng đổ qua cửa vòm thành mảng sáng trên sàn"
       ]
     },
     {
       "id": "season",
-      "label": "Mùa và thời tiết",
+      "label": "Mùa, thời tiết và vụ mùa",
       "weight": 0.9,
       "values": [
+        "đầu xuân chồi non",
+        "mùa hoa anh đào",
+        "mùa hoa tulip",
         "mùa xuân hoa nở",
+        "mùa hoa mai hoa đào ngày Tết",
+        "mùa hoa cải vàng",
+        "mùa hoa tử đằng",
         "mùa hè nắng rực",
+        "giữa hè trái cây chín",
+        "mùa hướng dương",
+        "mùa hoa oải hương",
+        "mùa sen",
+        "mùa dưa hấu",
+        "mùa dâu tây",
+        "mùa đào",
+        "ngày hè oi nóng bên hồ bơi",
+        "ngày nắng có gió biển",
         "mùa thu lá vàng đỏ",
+        "cuối thu lá rụng đầy sân",
+        "mùa bí ngô",
+        "mùa nấm rừng",
+        "mùa táo chín",
+        "mùa nho chín",
+        "mùa gặt lúa vàng",
+        "mùa ô liu",
         "mùa đông tuyết trắng sáng",
+        "tuyết đầu mùa phủ mỏng",
+        "băng đóng trên hồ",
+        "ngày gió nhẹ",
         "ngay sau mưa, trời trong và mặt đường sạch",
-        "ngày gió nhẹ"
+        "ngày mây trắng lớn",
+        "mùa cam quýt",
+        "mùa cẩm tú cầu",
+        "mùa hoa giấy",
+        "mùa hoa dại trên đồi",
+        "mùa lúa non xanh",
+        "mùa thu hoạch chè",
+        "sau cơn mưa nhiệt đới, lá xanh bóng",
+        "mùa khô sa mạc nắng gắt",
+        "sương sớm tan trên đồng"
       ]
     },
     {
       "id": "occasion",
-      "label": "Dịp",
+      "label": "Dịp và lễ hội",
       "weight": 0.9,
       "values": [
         "Tết Nguyên đán",
         "Trung thu",
+        "ngắm hoa anh đào Hanami",
+        "lễ Thất tịch Tanabata",
+        "Diwali lễ hội ánh sáng",
+        "Holi lễ hội sắc màu",
+        "Songkran Tết té nước",
+        "Loy Krathong thả đèn hoa đăng",
+        "Día de Muertos với hoa cúc vạn thọ",
+        "Oktoberfest",
+        "lễ hội hóa trang Venice",
+        "Lễ Tạ ơn",
         "Giáng sinh",
+        "chợ Giáng sinh",
         "Halloween dễ thương",
-        "sinh nhật",
-        "picnic cuối tuần",
-        "lễ hội hoa",
-        "Lễ Tình nhân",
         "Phục sinh",
+        "Lễ Tình nhân",
+        "Ngày của Mẹ",
+        "sinh nhật",
+        "tiệc trà chiều",
+        "tiệc vườn cuối tuần",
+        "picnic cuối tuần",
+        "tiệc nướng ngoài trời",
+        "cắm trại",
+        "dọn về nhà mới",
+        "khai trương tiệm",
+        "lễ hội hoa tulip",
+        "lễ hội khinh khí cầu",
+        "lễ hội đèn lồng",
+        "lễ hội thu hoạch nho",
+        "lễ hội dâu tây",
+        "chợ phiên cuối tuần",
+        "ngày đầu năm học",
+        "kỳ nghỉ hè",
+        "tiệc ngủ của trẻ em",
+        "tiệc chào em bé",
+        "lễ tốt nghiệp",
+        "kỷ niệm ngày cưới",
+        "đám cưới nhỏ trong vườn",
+        "Năm mới dương lịch",
+        "lễ hội âm nhạc ngoài trời",
+        "ngày hội thể thao",
+        "buổi chiếu phim ngoài trời",
+        "tiệc bể bơi",
         "chuẩn bị đi du lịch",
         "ngày thường thư thả"
       ]
     },
     {
       "id": "region",
-      "label": "Vùng văn hóa",
+      "label": "Vùng và địa danh",
       "weight": 1.1,
       "values": [
-        "Việt Nam",
-        "Nhật Bản",
-        "Hàn Quốc",
-        "Trung Hoa",
-        "Thái Lan",
-        "Ấn Độ",
-        "Ma-rốc",
-        "Hy Lạp và Địa Trung Hải",
-        "Ý",
-        "Provence nước Pháp",
-        "đồng quê nước Anh",
-        "Bắc Âu",
-        "Hà Lan",
-        "Mexico",
-        "Peru vùng Andes",
-        "núi Alps Thụy Sĩ",
-        "thị trấn ven biển Bồ Đào Nha",
-        "Mỹ retro"
+        "Việt Nam - Hội An phố đèn lồng",
+        "Việt Nam - Hà Nội phố cổ",
+        "Việt Nam - vịnh Hạ Long",
+        "Việt Nam - Đà Lạt đồi thông",
+        "Nhật Bản - Kyoto phố gỗ",
+        "Nhật Bản - Hokkaido đồng hoa",
+        "Nhật Bản - làng chài ven biển",
+        "Hàn Quốc - làng nhà hanok",
+        "Trung Hoa - phố cổ nhiều tầng",
+        "Trung Hoa - Thượng Hải ven sông",
+        "Đài Loan - phố núi đèn lồng",
+        "Singapore - nhà phố Peranakan",
+        "Thái Lan - đảo nhiệt đới",
+        "Indonesia - Bali ruộng bậc thang",
+        "Ấn Độ - cung điện Rajasthan",
+        "Mỹ - San Francisco phố dốc",
+        "Mỹ - New York",
+        "Mỹ - Miami Art Deco",
+        "Mỹ - Route 66 sa mạc",
+        "Mỹ - New England mùa lá",
+        "Mỹ - Hawaii",
+        "Canada - Québec phố cổ",
+        "Mexico - phố nhà màu",
+        "Đức - phố nhà gỗ nửa khung",
+        "Ý - Venice kênh đào",
+        "Hà Lan - kênh Amsterdam",
+        "Hà Lan - đồng tulip và cối xay gió",
+        "Ma-rốc - sân nhà riad",
+        "Ai Cập - ven sông Nile",
+        "UAE - Dubai",
+        "Thổ Nhĩ Kỳ - Istanbul",
+        "Hy Lạp - Santorini",
+        "Ý - bờ biển Amalfi",
+        "Ý - đồi Tuscany",
+        "Ý - Cinque Terre",
+        "Ý - Rome",
+        "Pháp - Paris",
+        "Pháp - Provence",
+        "Pháp - Nice ven biển",
+        "Tây Ban Nha - Seville",
+        "Bồ Đào Nha - Lisbon",
+        "Bồ Đào Nha - Porto",
+        "Đan Mạch - bến Nyhavn",
+        "Bỉ - Bruges",
+        "Séc - Praha",
+        "Áo - Hallstatt",
+        "Thụy Sĩ - núi Alps",
+        "Slovenia - hồ Bled",
+        "Anh - London",
+        "Anh - làng Cotswolds",
+        "Scotland - cao nguyên",
+        "Na Uy - làng ven vịnh hẹp",
+        "Cuba - Havana",
+        "Peru - vùng Andes",
+        "Brazil - Rio de Janeiro",
+        "Úc - Sydney",
+        "Nam Phi - Bo-Kaap Cape Town"
       ]
     },
     {
@@ -117,14 +327,51 @@
       "label": "Thời kỳ và phong cách",
       "weight": 0.8,
       "values": [
-        "cổ điển thế kỷ 19",
+        "cổ điển thời Victoria",
+        "Art Nouveau đường cong hoa lá",
         "Art Deco thập niên 1920",
         "retro thập niên 1950",
+        "pop art thập niên 1960",
         "retro thập niên 1970",
-        "mộc mạc nông thôn",
+        "Memphis thập niên 1980",
+        "đồ chơi thập niên 1990",
+        "Y2K pastel",
+        "mid-century hiện đại",
         "Bohemian nhiều hoa văn",
-        "nhiệt đới",
-        "hiện đại ấm áp"
+        "Scandinavian tối giản ấm",
+        "Japandi gỗ sáng",
+        "cottagecore đồng quê",
+        "trang trại kiểu Mỹ",
+        "Địa Trung Hải tường trắng",
+        "Maroc vòm và gạch men",
+        "Mexico rực rỡ",
+        "Hollywood Regency",
+        "shabby chic sơn bong nhẹ",
+        "phong cách thủy thủ",
+        "tiki nhiệt đới",
+        "nhà nấm cổ tích",
+        "lâu đài cổ tích",
+        "kitsch vui nhộn",
+        "diner Mỹ ghế đỏ",
+        "tiệm tạp hóa xưa",
+        "toa tàu hạng sang cổ điển",
+        "nhà kính thời Victoria",
+        "Đông Dương gạch bông và cửa chớp",
+        "nhà gỗ Nhật truyền thống",
+        "Trung Hoa cổ điển sơn son",
+        "Ấn Độ hoàng gia",
+        "Hy Lạp cổ đại cột đá",
+        "Tuscany đá mộc",
+        "Provence gỗ sơn phai",
+        "Bắc Âu nhà gỗ sơn màu",
+        "Alps nhà gỗ ban công hoa",
+        "Hà Lan nhà mái bậc thang",
+        "Bồ Đào Nha azulejo",
+        "Anh đồng quê mái tranh",
+        "nhà phố Paris thế kỷ 19",
+        "thập niên 1930 du lịch hàng hải",
+        "hippie xe van thập niên 1960",
+        "đương đại ấm áp"
       ]
     },
     {
@@ -133,15 +380,54 @@
       "weight": 0.8,
       "values": [
         "gỗ sáng màu",
-        "gốm men",
+        "gỗ sơn pastel",
+        "gỗ tếch đánh bóng",
+        "tre",
         "mây tre đan",
-        "kính màu",
+        "cói",
+        "gốm men lam",
+        "gốm talavera Mexico",
+        "gốm đất nung",
+        "sứ trắng viền vàng",
+        "sứ vẽ hoa",
+        "thủy tinh trong",
+        "thủy tinh màu",
+        "kính màu ghép chì",
         "đồng thau",
-        "vải thêu và len đan",
-        "giấy thủ công",
-        "đá cẩm thạch",
+        "đồng đỏ",
+        "bạc chạm",
+        "men tráng enamel",
         "sắt sơn màu",
-        "gạch men họa tiết"
+        "sắt uốn hoa văn",
+        "hộp thiếc in hình",
+        "nhựa retro bóng",
+        "đá cẩm thạch",
+        "đá vôi sáng",
+        "đá cuội",
+        "gạch đỏ",
+        "gạch men họa tiết",
+        "gạch zellige Maroc",
+        "gạch azulejo",
+        "terrazzo",
+        "vữa trát màu",
+        "len đan",
+        "len móc",
+        "vải thêu",
+        "ren trắng",
+        "lụa",
+        "nhung",
+        "vải lanh",
+        "vải bông kẻ caro",
+        "da thuộc",
+        "giấy thủ công",
+        "giấy gấp origami",
+        "bìa và hộp giấy in hoa",
+        "nến sáp",
+        "đất sét nặn",
+        "nhựa đồ chơi nhiều màu",
+        "kim loại mạ chrome",
+        "gỗ lũa",
+        "vỏ sò và san hô"
       ]
     },
     {
@@ -150,6 +436,7 @@
       "weight": 1.0,
       "values": [
         "pastel kẹo ngọt",
+        "hồng và xanh bạc hà",
         "đỏ và xanh lá",
         "ngọc lam và san hô",
         "vàng hướng dương và xanh dương",
@@ -157,37 +444,102 @@
         "xanh bạc hà và kem",
         "tím oải hương và vàng chanh",
         "nhiều màu cầu vồng",
-        "trắng sạch với một màu nhấn mạnh"
+        "trắng sạch với một màu nhấn mạnh",
+        "trắng và xanh cobalt",
+        "đỏ và trắng caro",
+        "cam và xanh ngọc",
+        "vàng và hồng",
+        "xanh lá tươi và trắng",
+        "hồng đào và vàng kem",
+        "đỏ cherry và kem",
+        "xanh navy và vàng mù tạt",
+        "hồng phấn và đỏ",
+        "cam đất nung và xanh lá ô liu",
+        "vàng chanh và xanh lá",
+        "xanh da trời và trắng",
+        "tím và vàng",
+        "đỏ, vàng và xanh dương cơ bản",
+        "xanh lá và hồng",
+        "nâu gỗ ấm và xanh lá",
+        "kem và xanh lá sage",
+        "hồng dâu và xanh lá",
+        "cam quýt và trắng",
+        "xanh ngọc và vàng",
+        "xanh lá rừng và đỏ",
+        "xanh biển và cam",
+        "be và hồng phấn",
+        "đỏ và vàng lễ hội",
+        "xanh pastel và vàng bơ",
+        "hồng tím và xanh ngọc",
+        "cam bí ngô và tím",
+        "trắng, vàng và xanh lá non",
+        "xanh cổ vịt và hồng san hô",
+        "vàng đồng và xanh lục bảo",
+        "đỏ son và vàng kim",
+        "xanh bạc hà và hồng đào",
+        "lam nhạt và nâu cam",
+        "tím than và vàng ấm",
+        "nhiều màu kẹo dẻo"
       ]
     },
     {
       "id": "setting",
       "label": "Không gian",
       "weight": 0.9,
+      "values": [
+        "trong bếp",
+        "phòng khách",
+        "phòng ngủ",
+        "gác mái",
+        "phòng tắm",
+        "phòng giặt",
+        "thư viện tại gia",
+        "phòng làm việc",
+        "phòng trẻ em",
+        "lối vào nhà",
+        "tiệm bánh",
+        "tiệm hoa",
+        "quán cà phê",
+        "quán diner",
+        "tiệm đồ cổ",
+        "toa tàu",
+        "khoang du thuyền",
+        "trong xe cắm trại",
+        "trong nhà kính",
+        "garage",
+        "ban công",
+        "sân thượng",
+        "hiên nhà",
+        "sân vườn",
+        "vườn rau",
+        "vườn cây ăn trái",
+        "ngõ bậc thang",
+        "đường phố",
+        "quảng trường",
+        "khu chợ",
+        "bến cảng",
+        "bến thuyền gỗ",
+        "bãi biển",
+        "vách đá ven biển",
+        "bờ hồ núi",
+        "bờ sông",
+        "cánh đồng hoa",
+        "đồi nho",
+        "rừng thông",
+        "đồng cỏ trang trại",
+        "sân ga",
+        "trạm xăng ven đường",
+        "đường ven biển",
+        "đường đèo",
+        "sa mạc",
+        "công viên",
+        "hồ bơi",
+        "trên boong thuyền",
+        "bên đài phun nước",
+        "dưới mái hiên tiệm"
+      ],
       "exclude_categories": [
         "interior"
-      ],
-      "values": [
-        "trong nhà",
-        "hiên nhà hoặc ban công",
-        "sân vườn",
-        "đường phố",
-        "bờ biển",
-        "vùng núi",
-        "khu chợ",
-        "trên tàu, thuyền hoặc xe",
-        "sau cửa kính tiệm"
-      ]
-    },
-    {
-      "id": "quantity",
-      "label": "Số lượng chủ thể",
-      "weight": 0.7,
-      "values": [
-        "một chủ thể",
-        "một cặp",
-        "một nhóm 3 đến 5",
-        "rất nhiều vật cùng loại"
       ]
     },
     {
@@ -202,34 +554,181 @@
         "góc sưu tầm thú vị",
         "đang gói quà tặng",
         "đang chờ khách đến",
-        "dọn dẹp xong, mọi thứ ngăn nắp"
+        "dọn dẹp xong, mọi thứ ngăn nắp",
+        "vừa nướng bánh xong",
+        "đang bày bàn ăn",
+        "chuẩn bị đi picnic",
+        "vừa hái từ vườn",
+        "đang trang trí cho lễ hội",
+        "mở cửa tiệm buổi sáng",
+        "giờ nghỉ trưa",
+        "chiều cuối tuần thong thả",
+        "chuẩn bị hành lý",
+        "dừng chân giữa chuyến đi đường dài",
+        "ngày đầu dọn về nhà mới",
+        "đang làm đồ thủ công",
+        "đang vẽ tranh dở",
+        "đang chơi một ván cờ",
+        "nghe nhạc từ đĩa than",
+        "đọc sách bên tách trà",
+        "đang cắm hoa",
+        "đang làm vườn",
+        "phơi đồ dưới nắng",
+        "đang chờ tàu",
+        "cập bến buổi sớm",
+        "ra khơi buổi sáng",
+        "thú cưng đang ngủ trưa",
+        "bữa sáng trên giường",
+        "quà bất ngờ để trên bàn",
+        "góc học bài buổi tối",
+        "đang pha cà phê",
+        "mở hộp đồ cũ tìm thấy kỷ vật",
+        "chuẩn bị đồ đi biển",
+        "đang trưng bày hàng mới",
+        "hàng xóm mang bánh sang",
+        "đang sắp xếp kệ sách",
+        "bữa tối dưới dây đèn",
+        "sau buổi tiệc vui",
+        "đón mùa mới",
+        "chờ tuyết rơi bên lò sưởi",
+        "chuẩn bị chuyến cắm trại",
+        "đang làm mứt",
+        "kỳ nghỉ ở nhà nghỉ ven biển",
+        "đang tưới cây buổi sớm"
       ]
     },
     {
       "id": "companion",
-      "label": "Điểm nhấn sống",
-      "weight": 0.5,
-      "exclude_categories": [
-        "animal"
-      ],
+      "label": "Điểm nhấn phụ",
+      "weight": 0.6,
       "values": [
-        "một chú mèo",
-        "một chú chó nhỏ",
-        "chim nhỏ",
+        "một chú mèo cam",
+        "một chú mèo đen",
+        "một chú mèo trắng",
+        "một chú chó corgi",
+        "một chú chó con",
+        "chim sẻ nhỏ",
+        "vẹt nhiều màu",
         "bướm",
+        "ong mật",
+        "vịt con",
         "cá vàng trong bình",
-        "chậu cây xanh lớn"
+        "thỏ con",
+        "xe đạp có giỏ hoa",
+        "xe tay ga cổ",
+        "xe hơi nhỏ cổ điển",
+        "khinh khí cầu xa trên trời",
+        "thuyền buồm xa",
+        "hải đăng xa",
+        "cối xay gió",
+        "tàu điện",
+        "radio cổ",
+        "máy hát đĩa",
+        "điện thoại quay số",
+        "máy ảnh cổ",
+        "vali cổ",
+        "mũ cói",
+        "kính mát",
+        "ô dù",
+        "đèn bão",
+        "đèn lồng",
+        "bó tulip gói giấy",
+        "giỏ mây",
+        "bình tưới",
+        "ủng cao su",
+        "chăn len",
+        "sách mở",
+        "thư và phong bì",
+        "cờ dây",
+        "chuông gió",
+        "phao bơi",
+        "vịt đồ chơi",
+        "gấu bông",
+        "hộp quà thắt nơ",
+        "nến thơm",
+        "đồng hồ quả lắc",
+        "quả địa cầu",
+        "bản đồ cũ",
+        "xe đẩy gỗ",
+        "giá vẽ",
+        "đàn guitar"
+      ]
+    },
+    {
+      "id": "motif",
+      "label": "Họa tiết",
+      "weight": 0.6,
+      "values": [
+        "khăn caro đỏ trắng",
+        "caro xanh dương",
+        "kẻ ô gingham nhỏ",
+        "sọc ngang",
+        "sọc mái hiên",
+        "chấm bi",
+        "hoa nhí",
+        "hoa lớn nhiệt đới",
+        "gạch bông xi măng",
+        "azulejo xanh trắng",
+        "zellige Maroc",
+        "talavera Mexico",
+        "sứ Delft",
+        "men lam vẽ rồng phượng",
+        "thổ cẩm",
+        "paisley",
+        "ikat",
+        "chevron",
+        "vảy cá",
+        "terrazzo",
+        "ren móc",
+        "thêu chữ thập",
+        "chắp vá patchwork",
+        "tartan Scotland",
+        "sọc kẹo xoắn",
+        "lá chuối",
+        "Art Deco hình quạt",
+        "sóng biển Nhật",
+        "hoa văn dệt kim Bắc Âu",
+        "họa tiết chanh và cherry",
+        "mosaic",
+        "tre đan mắt cáo",
+        "lông công",
+        "hoa anh đào",
+        "hình học Memphis",
+        "cầu vồng",
+        "sao và trăng",
+        "trái tim",
+        "kẻ sọc thủy thủ",
+        "hoa hồng cổ điển"
       ]
     },
     {
       "id": "form",
       "label": "Hình thức",
-      "weight": 0.4,
+      "weight": 0.2,
       "values": [
         "cảnh thật trau chuốt",
         "mô hình thu nhỏ kiểu diorama",
-        "đồ chơi cổ được bày như cảnh thật",
-        "cảnh nhìn qua tủ kính trưng bày"
+        "khối đồ chơi xếp hình",
+        "đồ chơi gỗ bày như cảnh thật",
+        "đất sét nặn dễ thương",
+        "thú len móc amigurumi",
+        "cảnh trong quả cầu tuyết",
+        "cảnh trong hộp kính terrarium",
+        "sách pop-up dựng cảnh",
+        "tranh giấy cắt lớp có chiều sâu",
+        "tranh thêu",
+        "tranh kính màu",
+        "tranh khảm gạch",
+        "tranh gạch men vẽ tay",
+        "tranh giấy cuộn quilling",
+        "tranh sơn dầu kiểu ấn tượng",
+        "tranh màu nước tươi",
+        "minh họa sách thiếu nhi chi tiết có chiều sâu",
+        "thú bông trong cảnh thật",
+        "đồ ăn tạo hình con vật",
+        "cảnh nhìn qua tủ kính trưng bày",
+        "cảnh phản chiếu trong gương",
+        "tranh treo trong phòng thật"
       ]
     }
   ],
@@ -239,25 +738,70 @@
       "if": {
         "axis": "region",
         "values": [
-          "núi Alps Thụy Sĩ",
-          "Peru vùng Andes"
+          "Việt Nam - Hà Nội phố cổ",
+          "Việt Nam - Đà Lạt đồi thông",
+          "Nhật Bản - Kyoto phố gỗ",
+          "Hàn Quốc - làng nhà hanok",
+          "Ấn Độ - cung điện Rajasthan",
+          "Ai Cập - ven sông Nile",
+          "Ý - đồi Tuscany",
+          "Ý - Rome",
+          "Pháp - Paris",
+          "Pháp - Provence",
+          "Tây Ban Nha - Seville",
+          "Bỉ - Bruges",
+          "Séc - Praha",
+          "Áo - Hallstatt",
+          "Thụy Sĩ - núi Alps",
+          "Slovenia - hồ Bled",
+          "Anh - làng Cotswolds",
+          "Mỹ - Route 66 sa mạc",
+          "Peru - vùng Andes",
+          "Đức - phố nhà gỗ nửa khung",
+          "Canada - Québec phố cổ",
+          "Đài Loan - phố núi đèn lồng"
         ]
       },
       "then": {
         "axis": "setting",
         "values": [
-          "bờ biển"
+          "bến cảng",
+          "bãi biển",
+          "vách đá ven biển",
+          "đường ven biển",
+          "trên boong thuyền",
+          "khoang du thuyền"
         ]
       },
-      "note": "Vùng núi sâu trong lục địa không có bờ biển."
+      "note": "Vùng sâu trong lục địa không có biển."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "region",
         "values": [
-          "núi Alps Thụy Sĩ",
-          "Peru vùng Andes"
+          "Việt Nam - Hà Nội phố cổ",
+          "Việt Nam - Đà Lạt đồi thông",
+          "Nhật Bản - Kyoto phố gỗ",
+          "Hàn Quốc - làng nhà hanok",
+          "Ấn Độ - cung điện Rajasthan",
+          "Ai Cập - ven sông Nile",
+          "Ý - đồi Tuscany",
+          "Ý - Rome",
+          "Pháp - Paris",
+          "Pháp - Provence",
+          "Tây Ban Nha - Seville",
+          "Bỉ - Bruges",
+          "Séc - Praha",
+          "Áo - Hallstatt",
+          "Thụy Sĩ - núi Alps",
+          "Slovenia - hồ Bled",
+          "Anh - làng Cotswolds",
+          "Mỹ - Route 66 sa mạc",
+          "Peru - vùng Andes",
+          "Đức - phố nhà gỗ nửa khung",
+          "Canada - Québec phố cổ",
+          "Đài Loan - phố núi đèn lồng"
         ]
       },
       "then": {
@@ -265,14 +809,18 @@
           "coast"
         ]
       },
-      "note": "Nhóm biển không đặt ở vùng núi lục địa."
+      "note": "Nhóm biển không đặt ở vùng lục địa."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "setting",
         "values": [
-          "vùng núi"
+          "rừng thông",
+          "đồi nho",
+          "sa mạc",
+          "đường đèo",
+          "đồng cỏ trang trại"
         ]
       },
       "then": {
@@ -280,65 +828,93 @@
           "coast"
         ]
       },
-      "note": "Nhóm biển cần bờ biển, không phải vùng núi."
+      "note": "Nhóm biển cần bờ nước."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "season",
         "values": [
-          "mùa đông tuyết trắng sáng"
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ"
         ]
       },
       "then": {
         "axis": "region",
         "values": [
-          "Thái Lan",
-          "Ấn Độ",
-          "Ma-rốc",
-          "Mexico"
+          "Việt Nam - Hội An phố đèn lồng",
+          "Việt Nam - vịnh Hạ Long",
+          "Singapore - nhà phố Peranakan",
+          "Thái Lan - đảo nhiệt đới",
+          "Indonesia - Bali ruộng bậc thang",
+          "Ấn Độ - cung điện Rajasthan",
+          "Ma-rốc - sân nhà riad",
+          "Ai Cập - ven sông Nile",
+          "UAE - Dubai",
+          "Mỹ - Miami Art Deco",
+          "Mỹ - Hawaii",
+          "Mexico - phố nhà màu",
+          "Cuba - Havana",
+          "Brazil - Rio de Janeiro",
+          "Nam Phi - Bo-Kaap Cape Town",
+          "Hy Lạp - Santorini",
+          "Ý - bờ biển Amalfi",
+          "Ý - Cinque Terre",
+          "Pháp - Nice ven biển",
+          "Tây Ban Nha - Seville",
+          "Bồ Đào Nha - Lisbon",
+          "Mỹ - Route 66 sa mạc"
         ]
       },
-      "note": "Không có cảnh tuyết điển hình ở vùng nóng."
+      "note": "Vùng nóng không có cảnh tuyết điển hình."
     },
     {
       "type": "exclude",
       "if": {
-        "axis": "season",
+        "axis": "light",
         "values": [
-          "mùa đông tuyết trắng sáng"
+          "ánh tuyết hắt sáng trong trẻo",
+          "cực quang trên nền tuyết sáng"
         ]
       },
       "then": {
-        "axis": "era",
+        "axis": "region",
         "values": [
-          "nhiệt đới"
+          "Việt Nam - Hội An phố đèn lồng",
+          "Việt Nam - vịnh Hạ Long",
+          "Singapore - nhà phố Peranakan",
+          "Thái Lan - đảo nhiệt đới",
+          "Indonesia - Bali ruộng bậc thang",
+          "Ấn Độ - cung điện Rajasthan",
+          "Ma-rốc - sân nhà riad",
+          "Ai Cập - ven sông Nile",
+          "UAE - Dubai",
+          "Mỹ - Miami Art Deco",
+          "Mỹ - Hawaii",
+          "Mexico - phố nhà màu",
+          "Cuba - Havana",
+          "Brazil - Rio de Janeiro",
+          "Nam Phi - Bo-Kaap Cape Town",
+          "Hy Lạp - Santorini",
+          "Ý - bờ biển Amalfi",
+          "Ý - Cinque Terre",
+          "Pháp - Nice ven biển",
+          "Tây Ban Nha - Seville",
+          "Bồ Đào Nha - Lisbon",
+          "Mỹ - Route 66 sa mạc"
         ]
       },
-      "note": "Tuyết mâu thuẫn phong cách nhiệt đới."
+      "note": "Vùng nóng không có tuyết hay cực quang."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "season",
         "values": [
-          "mùa đông tuyết trắng sáng"
-        ]
-      },
-      "then": {
-        "axis": "setting",
-        "values": [
-          "bờ biển"
-        ]
-      },
-      "note": "Biển tuyết dễ ra cảnh lạnh lẽo, trái hướng nội dung."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "season",
-        "values": [
-          "mùa đông tuyết trắng sáng"
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ"
         ]
       },
       "then": {
@@ -351,18 +927,187 @@
     {
       "type": "exclude",
       "if": {
+        "axis": "season",
+        "values": [
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "bãi biển",
+          "hồ bơi",
+          "sa mạc",
+          "vách đá ven biển"
+        ]
+      },
+      "note": "Tuyết mâu thuẫn không gian nóng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "season",
+        "values": [
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ"
+        ]
+      },
+      "then": {
         "axis": "era",
         "values": [
-          "nhiệt đới"
+          "tiki nhiệt đới"
+        ]
+      },
+      "note": "Tuyết mâu thuẫn phong cách nhiệt đới."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "light",
+        "values": [
+          "ánh tuyết hắt sáng trong trẻo",
+          "cực quang trên nền tuyết sáng"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "đầu xuân chồi non",
+          "mùa hoa anh đào",
+          "mùa hoa tulip",
+          "mùa xuân hoa nở",
+          "mùa hoa mai hoa đào ngày Tết",
+          "mùa hoa cải vàng",
+          "mùa hoa tử đằng",
+          "mùa hè nắng rực",
+          "giữa hè trái cây chín",
+          "mùa hướng dương",
+          "mùa hoa oải hương",
+          "mùa sen",
+          "mùa dưa hấu",
+          "mùa dâu tây",
+          "mùa đào",
+          "ngày hè oi nóng bên hồ bơi",
+          "ngày nắng có gió biển",
+          "mùa thu lá vàng đỏ",
+          "cuối thu lá rụng đầy sân",
+          "mùa bí ngô",
+          "mùa nấm rừng",
+          "mùa táo chín",
+          "mùa nho chín",
+          "mùa gặt lúa vàng",
+          "mùa ô liu",
+          "mùa khô sa mạc nắng gắt",
+          "ngày hè oi nóng bên hồ bơi"
+        ]
+      },
+      "note": "Ánh tuyết cần mùa đông."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "light",
+        "values": [
+          "cực quang trên nền tuyết sáng"
         ]
       },
       "then": {
         "axis": "region",
         "values": [
-          "Bắc Âu",
-          "núi Alps Thụy Sĩ",
-          "Hà Lan",
-          "đồng quê nước Anh"
+          "Na Uy - làng ven vịnh hẹp",
+          "Scotland - cao nguyên"
+        ]
+      },
+      "note": "Cực quang chỉ ở vùng cực bắc."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "season",
+        "values": [
+          "mùa khô sa mạc nắng gắt"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Mỹ - Route 66 sa mạc",
+          "Ai Cập - ven sông Nile",
+          "UAE - Dubai",
+          "Ma-rốc - sân nhà riad",
+          "Ấn Độ - cung điện Rajasthan"
+        ]
+      },
+      "note": "Mùa khô sa mạc chỉ ở vùng sa mạc."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "season",
+        "values": [
+          "mùa khô sa mạc nắng gắt"
+        ]
+      },
+      "then": {
+        "category": [
+          "garden"
+        ]
+      },
+      "note": "Vườn hoa không hợp mùa khô sa mạc."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "setting",
+        "values": [
+          "sa mạc"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "đầu xuân chồi non",
+          "mùa hoa anh đào",
+          "mùa hoa tulip",
+          "mùa xuân hoa nở",
+          "mùa hoa mai hoa đào ngày Tết",
+          "mùa hoa cải vàng",
+          "mùa hoa tử đằng",
+          "mùa thu lá vàng đỏ",
+          "cuối thu lá rụng đầy sân",
+          "mùa bí ngô",
+          "mùa nấm rừng",
+          "mùa táo chín",
+          "mùa nho chín",
+          "mùa gặt lúa vàng",
+          "mùa ô liu",
+          "mùa sen",
+          "mùa cẩm tú cầu",
+          "mùa lúa non xanh",
+          "mùa thu hoạch chè"
+        ]
+      },
+      "note": "Sa mạc không có các mùa hoa và vụ mùa vùng ẩm."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "era",
+        "values": [
+          "tiki nhiệt đới"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Na Uy - làng ven vịnh hẹp",
+          "Thụy Sĩ - núi Alps",
+          "Áo - Hallstatt",
+          "Scotland - cao nguyên",
+          "Hà Lan - kênh Amsterdam"
         ]
       },
       "note": "Phong cách nhiệt đới không hợp vùng lạnh."
@@ -378,12 +1123,18 @@
       "then": {
         "axis": "region",
         "values": [
-          "Việt Nam",
-          "Trung Hoa",
-          "Hàn Quốc"
+          "Việt Nam - Hội An phố đèn lồng",
+          "Việt Nam - Hà Nội phố cổ",
+          "Việt Nam - vịnh Hạ Long",
+          "Việt Nam - Đà Lạt đồi thông",
+          "Trung Hoa - phố cổ nhiều tầng",
+          "Trung Hoa - Thượng Hải ven sông",
+          "Đài Loan - phố núi đèn lồng",
+          "Singapore - nhà phố Peranakan",
+          "Hàn Quốc - làng nhà hanok"
         ]
       },
-      "note": "Tết Nguyên đán chỉ ở vùng đón Tết âm lịch."
+      "note": "Tết Nguyên đán ở vùng đón Tết âm lịch."
     },
     {
       "type": "require",
@@ -396,13 +1147,224 @@
       "then": {
         "axis": "region",
         "values": [
-          "Việt Nam",
-          "Trung Hoa",
-          "Hàn Quốc",
-          "Nhật Bản"
+          "Việt Nam - Hội An phố đèn lồng",
+          "Việt Nam - Hà Nội phố cổ",
+          "Việt Nam - vịnh Hạ Long",
+          "Việt Nam - Đà Lạt đồi thông",
+          "Trung Hoa - phố cổ nhiều tầng",
+          "Trung Hoa - Thượng Hải ven sông",
+          "Đài Loan - phố núi đèn lồng",
+          "Singapore - nhà phố Peranakan",
+          "Hàn Quốc - làng nhà hanok",
+          "Nhật Bản - Kyoto phố gỗ",
+          "Nhật Bản - Hokkaido đồng hoa",
+          "Nhật Bản - làng chài ven biển"
         ]
       },
-      "note": "Trung thu chỉ ở vùng Đông Á."
+      "note": "Trung thu ở Đông Á."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "ngắm hoa anh đào Hanami",
+          "lễ Thất tịch Tanabata"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Nhật Bản - Kyoto phố gỗ",
+          "Nhật Bản - Hokkaido đồng hoa",
+          "Nhật Bản - làng chài ven biển",
+          "Hàn Quốc - làng nhà hanok"
+        ]
+      },
+      "note": "Lễ hội Nhật Bản."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Diwali lễ hội ánh sáng",
+          "Holi lễ hội sắc màu"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Ấn Độ - cung điện Rajasthan"
+        ]
+      },
+      "note": "Lễ hội Ấn Độ."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Songkran Tết té nước",
+          "Loy Krathong thả đèn hoa đăng"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Thái Lan - đảo nhiệt đới"
+        ]
+      },
+      "note": "Lễ hội Thái Lan."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Día de Muertos với hoa cúc vạn thọ"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Mexico - phố nhà màu"
+        ]
+      },
+      "note": "Lễ hội Mexico."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Oktoberfest"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Đức - phố nhà gỗ nửa khung"
+        ]
+      },
+      "note": "Lễ hội Đức."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "lễ hội hóa trang Venice"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Ý - Venice kênh đào"
+        ]
+      },
+      "note": "Lễ hội Venice."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Lễ Tạ ơn"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Mỹ - San Francisco phố dốc",
+          "Mỹ - New York",
+          "Mỹ - Miami Art Deco",
+          "Mỹ - Route 66 sa mạc",
+          "Mỹ - New England mùa lá",
+          "Mỹ - Hawaii",
+          "Canada - Québec phố cổ"
+        ]
+      },
+      "note": "Lễ Tạ ơn ở Bắc Mỹ."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "lễ hội hoa tulip"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Hà Lan - kênh Amsterdam",
+          "Hà Lan - đồng tulip và cối xay gió",
+          "Nhật Bản - Hokkaido đồng hoa",
+          "Canada - Québec phố cổ"
+        ]
+      },
+      "note": "Lễ hội tulip ở vùng trồng tulip."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Giáng sinh",
+          "chợ Giáng sinh",
+          "Halloween dễ thương",
+          "Phục sinh"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Mỹ - San Francisco phố dốc",
+          "Mỹ - New York",
+          "Mỹ - Miami Art Deco",
+          "Mỹ - Route 66 sa mạc",
+          "Mỹ - New England mùa lá",
+          "Mỹ - Hawaii",
+          "Canada - Québec phố cổ",
+          "Mexico - phố nhà màu",
+          "Đức - phố nhà gỗ nửa khung",
+          "Ý - Venice kênh đào",
+          "Hà Lan - kênh Amsterdam",
+          "Hà Lan - đồng tulip và cối xay gió",
+          "Hy Lạp - Santorini",
+          "Ý - bờ biển Amalfi",
+          "Ý - đồi Tuscany",
+          "Ý - Cinque Terre",
+          "Ý - Rome",
+          "Pháp - Paris",
+          "Pháp - Provence",
+          "Pháp - Nice ven biển",
+          "Tây Ban Nha - Seville",
+          "Bồ Đào Nha - Lisbon",
+          "Bồ Đào Nha - Porto",
+          "Đan Mạch - bến Nyhavn",
+          "Bỉ - Bruges",
+          "Séc - Praha",
+          "Áo - Hallstatt",
+          "Thụy Sĩ - núi Alps",
+          "Slovenia - hồ Bled",
+          "Anh - London",
+          "Anh - làng Cotswolds",
+          "Scotland - cao nguyên",
+          "Na Uy - làng ven vịnh hẹp",
+          "Cuba - Havana",
+          "Peru - vùng Andes",
+          "Brazil - Rio de Janeiro",
+          "Úc - Sydney",
+          "Nam Phi - Bo-Kaap Cape Town",
+          "Nhật Bản - Kyoto phố gỗ",
+          "Nhật Bản - Hokkaido đồng hoa",
+          "Nhật Bản - làng chài ven biển",
+          "Hàn Quốc - làng nhà hanok"
+        ]
+      },
+      "note": "Lễ phương Tây ở vùng có truyền thống tổ chức."
     },
     {
       "type": "require",
@@ -415,80 +1377,59 @@
       "then": {
         "axis": "season",
         "values": [
+          "đầu xuân chồi non",
+          "mùa hoa mai hoa đào ngày Tết",
           "mùa xuân hoa nở",
-          "ngày gió nhẹ"
-        ]
-      },
-      "note": "Tết rơi vào đầu xuân."
-    },
-    {
-      "type": "require",
-      "if": {
-        "axis": "occasion",
-        "values": [
-          "Trung thu"
-        ]
-      },
-      "then": {
-        "axis": "season",
-        "values": [
-          "mùa thu lá vàng đỏ",
-          "ngày gió nhẹ"
-        ]
-      },
-      "note": "Trung thu vào mùa thu."
-    },
-    {
-      "type": "require",
-      "if": {
-        "axis": "occasion",
-        "values": [
-          "Giáng sinh"
-        ]
-      },
-      "then": {
-        "axis": "season",
-        "values": [
-          "mùa đông tuyết trắng sáng",
-          "ngày gió nhẹ"
-        ]
-      },
-      "note": "Giáng sinh vào mùa đông."
-    },
-    {
-      "type": "require",
-      "if": {
-        "axis": "occasion",
-        "values": [
-          "Halloween dễ thương"
-        ]
-      },
-      "then": {
-        "axis": "season",
-        "values": [
-          "mùa thu lá vàng đỏ",
-          "ngày gió nhẹ"
-        ]
-      },
-      "note": "Halloween vào mùa thu."
-    },
-    {
-      "type": "require",
-      "if": {
-        "axis": "occasion",
-        "values": [
-          "Phục sinh"
-        ]
-      },
-      "then": {
-        "axis": "season",
-        "values": [
-          "mùa xuân hoa nở",
+          "mùa hoa cải vàng",
           "ngày gió nhẹ",
-          "ngay sau mưa, trời trong và mặt đường sạch"
+          "mùa cam quýt"
         ]
       },
-      "note": "Phục sinh vào mùa xuân."
+      "note": "Tết vào đầu xuân."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Trung thu",
+          "Halloween dễ thương",
+          "Lễ Tạ ơn",
+          "Oktoberfest",
+          "lễ hội thu hoạch nho"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "mùa thu lá vàng đỏ",
+          "cuối thu lá rụng đầy sân",
+          "mùa bí ngô",
+          "mùa nấm rừng",
+          "mùa táo chín",
+          "mùa nho chín",
+          "mùa gặt lúa vàng",
+          "mùa ô liu",
+          "ngày gió nhẹ"
+        ]
+      },
+      "note": "Lễ hội mùa thu."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "ngắm hoa anh đào Hanami"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "mùa hoa anh đào"
+        ]
+      },
+      "note": "Hanami vào mùa hoa anh đào."
     },
     {
       "type": "require",
@@ -496,220 +1437,421 @@
         "axis": "occasion",
         "values": [
           "Giáng sinh",
-          "Halloween dễ thương",
-          "Phục sinh"
-        ]
-      },
-      "then": {
-        "axis": "region",
-        "values": [
-          "Ý",
-          "Provence nước Pháp",
-          "đồng quê nước Anh",
-          "Bắc Âu",
-          "Hà Lan",
-          "Mexico",
-          "núi Alps Thụy Sĩ",
-          "thị trấn ven biển Bồ Đào Nha",
-          "Mỹ retro",
-          "Hy Lạp và Địa Trung Hải",
-          "Nhật Bản",
-          "Hàn Quốc"
-        ]
-      },
-      "note": "Lễ phương Tây chỉ ở vùng có truyền thống tổ chức rộng rãi."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "setting",
-        "values": [
-          "trong nhà"
+          "chợ Giáng sinh",
+          "Năm mới dương lịch"
         ]
       },
       "then": {
         "axis": "season",
         "values": [
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ",
+          "ngày gió nhẹ"
+        ]
+      },
+      "note": "Lễ mùa đông."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Phục sinh",
+          "lễ hội hoa tulip"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "đầu xuân chồi non",
+          "mùa hoa tulip",
+          "mùa xuân hoa nở",
+          "mùa hoa anh đào",
+          "ngày gió nhẹ",
           "ngay sau mưa, trời trong và mặt đường sạch"
         ]
       },
-      "note": "Mặt đường sau mưa không thấy trong nhà."
+      "note": "Lễ mùa xuân."
+    },
+    {
+      "type": "require",
+      "if": {
+        "axis": "occasion",
+        "values": [
+          "Songkran Tết té nước",
+          "kỳ nghỉ hè",
+          "tiệc bể bơi",
+          "lễ hội dâu tây"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "mùa hè nắng rực",
+          "giữa hè trái cây chín",
+          "mùa hướng dương",
+          "mùa hoa oải hương",
+          "mùa sen",
+          "mùa dưa hấu",
+          "mùa dâu tây",
+          "mùa đào",
+          "ngày hè oi nóng bên hồ bơi",
+          "ngày nắng có gió biển",
+          "ngày gió nhẹ",
+          "mùa dâu tây"
+        ]
+      },
+      "note": "Dịp mùa hè."
     },
     {
       "type": "exclude",
       "if": {
-        "axis": "setting",
+        "axis": "occasion",
         "values": [
-          "trong nhà"
+          "tiệc bể bơi"
         ]
       },
       "then": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trong nhà kính",
+          "garage"
+        ]
+      },
+      "note": "Tiệc bể bơi ngoài trời."
+    },
+    {
+      "type": "exclude",
+      "if": {
         "axis": "viewpoint",
         "values": [
-          "nhìn từ ban công hoặc chỗ cao xuống"
+          "từ dưới gốc cây nhìn lên tán và trời",
+          "nhìn từ ban công xuống phố",
+          "nhìn từ sân thượng ra các mái nhà",
+          "từ boong thuyền nhìn vào bờ",
+          "từ chân bậc thang nhìn lên",
+          "từ đầu ngõ nhìn sâu vào ngõ",
+          "nhìn dọc thân cầu",
+          "nhìn chéo dọc dãy mặt tiền",
+          "từ bờ hồ nhìn ra giữa hồ",
+          "nhìn từ ngoài vào qua cửa tiệm mở",
+          "nhìn từ trên cao xuống góc phố như sa bàn",
+          "đứng ở góc phố thấy hai mặt tiền",
+          "từ trên đồi nhìn xuống làng",
+          "nhìn dọc đường ray hoặc đường mòn vào xa",
+          "nhìn qua cổng vườn mở",
+          "cảnh xa kiểu bưu thiếp, tiền cảnh có vật lớn",
+          "nhìn ngang mép hồ bơi"
         ]
       },
-      "note": "Trong nhà không có góc ban công nhìn xuống phố."
-    },
-    {
-      "type": "exclude",
-      "if": {
+      "then": {
         "axis": "setting",
         "values": [
-          "trong nhà",
-          "sau cửa kính tiệm"
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trong nhà kính",
+          "garage"
         ]
       },
-      "then": {
-        "axis": "framing",
-        "values": [
-          "cảnh xa kiểu bưu thiếp nhưng tiền cảnh vẫn có vật lớn"
-        ]
-      },
-      "note": "Không gian kín không chụp kiểu bưu thiếp."
+      "note": "Góc nhìn ngoài trời mâu thuẫn không gian trong nhà."
     },
     {
       "type": "exclude",
       "if": {
-        "axis": "framing",
-        "values": [
-          "cận cảnh một nhóm vật lấp đầy khung"
-        ]
-      },
-      "then": {
         "axis": "viewpoint",
         "values": [
-          "nhìn từ ban công hoặc chỗ cao xuống"
-        ]
-      },
-      "note": "Cận cảnh mâu thuẫn góc nhìn từ xa trên cao."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "framing",
-        "values": [
-          "cận cảnh một nhóm vật lấp đầy khung"
-        ]
-      },
-      "then": {
-        "axis": "setting",
-        "values": [
-          "vùng núi",
-          "bờ biển",
-          "đường phố"
-        ]
-      },
-      "note": "Cận cảnh không thể hiện được không gian rộng."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "quantity",
-        "values": [
-          "một chủ thể"
-        ]
-      },
-      "then": {
-        "axis": "arrangement",
-        "values": [
-          "bộ sưu tập nhiều vật cùng loại xếp kín, mỗi vật khác màu",
-          "cặp chủ thể đặt cạnh nhau",
-          "bàn hoặc kệ bày nhiều món khác nhau"
-        ]
-      },
-      "note": "Một chủ thể mâu thuẫn bố cục nhiều vật."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "quantity",
-        "values": [
-          "một cặp"
-        ]
-      },
-      "then": {
-        "axis": "arrangement",
-        "values": [
-          "bộ sưu tập nhiều vật cùng loại xếp kín, mỗi vật khác màu",
-          "một chủ thể lớn chiếm phần lớn khung"
-        ]
-      },
-      "note": "Một cặp mâu thuẫn bố cục."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "quantity",
-        "values": [
-          "rất nhiều vật cùng loại"
-        ]
-      },
-      "then": {
-        "axis": "arrangement",
-        "values": [
-          "một chủ thể lớn chiếm phần lớn khung",
-          "cặp chủ thể đặt cạnh nhau"
-        ]
-      },
-      "note": "Nhiều vật mâu thuẫn bố cục một/hai chủ thể."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "form",
-        "values": [
-          "mô hình thu nhỏ kiểu diorama",
-          "đồ chơi cổ được bày như cảnh thật"
-        ]
-      },
-      "then": {
-        "axis": "companion"
-      },
-      "note": "Con vật thật lẫn trong mô hình thu nhỏ dễ sai tỷ lệ."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "form",
-        "values": [
-          "mô hình thu nhỏ kiểu diorama",
-          "đồ chơi cổ được bày như cảnh thật",
-          "cảnh nhìn qua tủ kính trưng bày"
+          "từ dưới gốc cây nhìn lên tán và trời",
+          "nhìn từ ban công xuống phố",
+          "nhìn từ sân thượng ra các mái nhà",
+          "từ boong thuyền nhìn vào bờ",
+          "từ chân bậc thang nhìn lên",
+          "từ đầu ngõ nhìn sâu vào ngõ",
+          "nhìn dọc thân cầu",
+          "nhìn chéo dọc dãy mặt tiền",
+          "từ bờ hồ nhìn ra giữa hồ",
+          "nhìn từ ngoài vào qua cửa tiệm mở",
+          "nhìn từ trên cao xuống góc phố như sa bàn",
+          "đứng ở góc phố thấy hai mặt tiền",
+          "từ trên đồi nhìn xuống làng",
+          "nhìn dọc đường ray hoặc đường mòn vào xa",
+          "nhìn qua cổng vườn mở",
+          "cảnh xa kiểu bưu thiếp, tiền cảnh có vật lớn",
+          "nhìn ngang mép hồ bơi"
         ]
       },
       "then": {
         "category": [
-          "animal"
+          "interior"
         ]
       },
-      "note": "Động vật phải là con vật thật."
+      "note": "Nhóm nội thất cần góc nhìn trong nhà."
     },
     {
       "type": "exclude",
       "if": {
-        "axis": "form",
+        "axis": "viewpoint",
         "values": [
-          "cảnh nhìn qua tủ kính trưng bày"
+          "từ trong bếp nhìn ra cửa sau",
+          "nhìn qua gương phản chiếu căn phòng",
+          "từ trong xe cắm trại nhìn ra ngoài",
+          "từ ghế lái nhìn qua kính chắn gió",
+          "nhìn xuống từ cầu thang xoắn",
+          "từ sau quầy pha chế nhìn ra quán",
+          "từ góc phòng bao quát hai bức tường",
+          "nhìn qua rèm voan vén sang hai bên",
+          "từ trong toa tàu nhìn ra cửa sổ",
+          "nhìn qua cửa sổ máy bay"
         ]
       },
       "then": {
         "axis": "setting",
         "values": [
-          "vùng núi",
-          "bờ biển",
-          "trên tàu, thuyền hoặc xe"
+          "ban công",
+          "sân thượng",
+          "hiên nhà",
+          "sân vườn",
+          "vườn rau",
+          "vườn cây ăn trái",
+          "ngõ bậc thang",
+          "đường phố",
+          "quảng trường",
+          "khu chợ",
+          "bến cảng",
+          "bến thuyền gỗ",
+          "bãi biển",
+          "vách đá ven biển",
+          "bờ hồ núi",
+          "bờ sông",
+          "cánh đồng hoa",
+          "đồi nho",
+          "rừng thông",
+          "đồng cỏ trang trại",
+          "sân ga",
+          "trạm xăng ven đường",
+          "đường ven biển",
+          "đường đèo",
+          "sa mạc",
+          "công viên",
+          "hồ bơi",
+          "trên boong thuyền",
+          "bên đài phun nước",
+          "dưới mái hiên tiệm"
         ]
       },
-      "note": "Tủ kính không đặt giữa thiên nhiên hoặc trên phương tiện."
+      "note": "Góc nhìn trong nhà mâu thuẫn không gian ngoài trời."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "viewpoint",
+        "values": [
+          "nhìn qua cửa sổ máy bay",
+          "từ ghế lái nhìn qua kính chắn gió",
+          "từ trong toa tàu nhìn ra cửa sổ",
+          "từ trong xe cắm trại nhìn ra ngoài"
+        ]
+      },
+      "then": {
+        "category": [
+          "food",
+          "drink",
+          "objects",
+          "shop",
+          "facade",
+          "garden",
+          "animal",
+          "interior"
+        ]
+      },
+      "note": "Góc nhìn từ phương tiện dành cho nhóm phương tiện và biển."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "viewpoint",
+        "values": [
+          "cận cảnh một nhóm vật lấp đầy khung",
+          "cận cảnh vật bổ đôi lộ ruột",
+          "nhìn thẳng từ trên xuống kiểu flat-lay"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "vách đá ven biển",
+          "bờ hồ núi",
+          "đường đèo",
+          "sa mạc",
+          "rừng thông",
+          "đồng cỏ trang trại",
+          "cánh đồng hoa",
+          "quảng trường"
+        ]
+      },
+      "note": "Cận cảnh không thể hiện không gian rộng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "viewpoint",
+        "values": [
+          "cận cảnh vật bổ đôi lộ ruột"
+        ]
+      },
+      "then": {
+        "category": [
+          "facade",
+          "vehicle",
+          "coast",
+          "interior",
+          "animal",
+          "shop"
+        ]
+      },
+      "note": "Bổ đôi chỉ hợp đồ ăn, đồ vật, cây quả."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "arrangement",
+        "values": [
+          "dãy nhà nhiều màu nối tiếp"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trong nhà kính",
+          "garage"
+        ]
+      },
+      "note": "Dãy nhà là cảnh ngoài trời."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "arrangement",
+        "values": [
+          "xe hoặc thuyền nhiều màu xếp hàng"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trong nhà kính"
+        ]
+      },
+      "note": "Xe/thuyền xếp hàng cần không gian rộng."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "arrangement",
+        "values": [
+          "một chủ thể lớn chiếm phần lớn khung"
+        ]
+      },
+      "then": {
+        "axis": "viewpoint",
+        "values": [
+          "toàn cảnh có nhiều mốc rõ",
+          "cảnh xa kiểu bưu thiếp, tiền cảnh có vật lớn",
+          "nhìn từ trên cao xuống góc phố như sa bàn",
+          "từ trên đồi nhìn xuống làng"
+        ]
+      },
+      "note": "Chủ thể lớn mâu thuẫn cảnh xa."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "material",
         "values": [
-          "vải thêu và len đan",
-          "giấy thủ công"
+          "len đan",
+          "len móc",
+          "vải thêu",
+          "ren trắng",
+          "lụa",
+          "nhung",
+          "vải lanh",
+          "vải bông kẻ caro",
+          "giấy thủ công",
+          "giấy gấp origami",
+          "bìa và hộp giấy in hoa",
+          "nến sáp",
+          "đất sét nặn",
+          "vỏ sò và san hô"
         ]
       },
       "then": {
@@ -719,7 +1861,7 @@
           "coast"
         ]
       },
-      "note": "Công trình, phương tiện, biển không làm bằng vải hoặc giấy."
+      "note": "Công trình, phương tiện, biển không làm bằng vật liệu mềm/thủ công."
     },
     {
       "type": "exclude",
@@ -727,7 +1869,17 @@
         "axis": "material",
         "values": [
           "đá cẩm thạch",
-          "gạch men họa tiết"
+          "đá vôi sáng",
+          "đá cuội",
+          "gạch đỏ",
+          "gạch men họa tiết",
+          "gạch zellige Maroc",
+          "gạch azulejo",
+          "terrazzo",
+          "vữa trát màu",
+          "tre",
+          "cói",
+          "mây tre đan"
         ]
       },
       "then": {
@@ -735,58 +1887,441 @@
           "vehicle"
         ]
       },
-      "note": "Phương tiện không làm bằng đá hoặc gạch."
+      "note": "Phương tiện không làm bằng đá, gạch hay tre."
     },
     {
       "type": "exclude",
       "if": {
-        "axis": "setting",
+        "axis": "material",
         "values": [
-          "khu chợ",
-          "đường phố"
+          "len đan",
+          "len móc",
+          "vải thêu",
+          "ren trắng",
+          "lụa",
+          "nhung",
+          "vải lanh",
+          "vải bông kẻ caro",
+          "giấy thủ công",
+          "giấy gấp origami",
+          "bìa và hộp giấy in hoa",
+          "nến sáp",
+          "đất sét nặn",
+          "vỏ sò và san hô",
+          "gốm đất nung",
+          "sứ vẽ hoa",
+          "sứ trắng viền vàng",
+          "thủy tinh trong"
         ]
       },
       "then": {
         "category": [
-          "interior"
+          "animal"
         ]
       },
-      "note": "Nhóm nội thất cần không gian trong nhà."
-    },
-    {
-      "type": "exclude",
-      "if": {
-        "axis": "setting",
-        "values": [
-          "trên tàu, thuyền hoặc xe"
-        ]
-      },
-      "then": {
-        "category": [
-          "facade",
-          "garden"
-        ]
-      },
-      "note": "Mặt tiền và vườn không nằm trên phương tiện."
+      "note": "Động vật thật không làm bằng vật liệu."
     },
     {
       "type": "exclude",
       "if": {
         "axis": "companion",
         "values": [
-          "cá vàng trong bình"
+          "một chú mèo cam",
+          "một chú mèo đen",
+          "một chú mèo trắng",
+          "một chú chó corgi",
+          "một chú chó con",
+          "chim sẻ nhỏ",
+          "vẹt nhiều màu",
+          "bướm",
+          "ong mật",
+          "vịt con",
+          "cá vàng trong bình",
+          "thỏ con"
+        ]
+      },
+      "then": {
+        "category": [
+          "animal"
+        ]
+      },
+      "note": "Nhóm động vật đã có con vật chính."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "companion",
+        "values": [
+          "một chú mèo cam",
+          "một chú mèo đen",
+          "một chú mèo trắng",
+          "một chú chó corgi",
+          "một chú chó con",
+          "chim sẻ nhỏ",
+          "vẹt nhiều màu",
+          "bướm",
+          "ong mật",
+          "vịt con",
+          "cá vàng trong bình",
+          "thỏ con"
+        ]
+      },
+      "then": {
+        "axis": "form",
+        "values": [
+          "mô hình thu nhỏ kiểu diorama",
+          "khối đồ chơi xếp hình",
+          "đồ chơi gỗ bày như cảnh thật",
+          "đất sét nặn dễ thương",
+          "thú len móc amigurumi",
+          "cảnh trong quả cầu tuyết",
+          "cảnh trong hộp kính terrarium",
+          "sách pop-up dựng cảnh"
+        ]
+      },
+      "note": "Con vật thật trong mô hình thu nhỏ dễ sai tỷ lệ."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "companion",
+        "values": [
+          "cá vàng trong bình",
+          "đồng hồ quả lắc",
+          "quả địa cầu",
+          "nến thơm",
+          "chăn len"
         ]
       },
       "then": {
         "axis": "setting",
         "values": [
-          "vùng núi",
-          "bờ biển",
+          "ban công",
+          "sân thượng",
+          "hiên nhà",
+          "sân vườn",
+          "vườn rau",
+          "vườn cây ăn trái",
+          "ngõ bậc thang",
           "đường phố",
-          "khu chợ"
+          "quảng trường",
+          "khu chợ",
+          "bến cảng",
+          "bến thuyền gỗ",
+          "bãi biển",
+          "vách đá ven biển",
+          "bờ hồ núi",
+          "bờ sông",
+          "cánh đồng hoa",
+          "đồi nho",
+          "rừng thông",
+          "đồng cỏ trang trại",
+          "sân ga",
+          "trạm xăng ven đường",
+          "đường ven biển",
+          "đường đèo",
+          "sa mạc",
+          "công viên",
+          "hồ bơi",
+          "trên boong thuyền",
+          "bên đài phun nước",
+          "dưới mái hiên tiệm"
         ]
       },
-      "note": "Bình cá vàng thuộc trong nhà."
+      "note": "Vật trong nhà."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "companion",
+        "values": [
+          "khinh khí cầu xa trên trời",
+          "thuyền buồm xa",
+          "hải đăng xa",
+          "cối xay gió",
+          "tàu điện",
+          "xe hơi nhỏ cổ điển"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà",
+          "tiệm bánh",
+          "tiệm hoa",
+          "quán cà phê",
+          "quán diner",
+          "tiệm đồ cổ",
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trong nhà kính",
+          "garage"
+        ]
+      },
+      "note": "Vật ngoài trời xa."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "companion",
+        "values": [
+          "thuyền buồm xa",
+          "hải đăng xa"
+        ]
+      },
+      "then": {
+        "axis": "region",
+        "values": [
+          "Việt Nam - Hà Nội phố cổ",
+          "Việt Nam - Đà Lạt đồi thông",
+          "Nhật Bản - Kyoto phố gỗ",
+          "Hàn Quốc - làng nhà hanok",
+          "Ấn Độ - cung điện Rajasthan",
+          "Ai Cập - ven sông Nile",
+          "Ý - đồi Tuscany",
+          "Ý - Rome",
+          "Pháp - Paris",
+          "Pháp - Provence",
+          "Tây Ban Nha - Seville",
+          "Bỉ - Bruges",
+          "Séc - Praha",
+          "Áo - Hallstatt",
+          "Thụy Sĩ - núi Alps",
+          "Slovenia - hồ Bled",
+          "Anh - làng Cotswolds",
+          "Mỹ - Route 66 sa mạc",
+          "Peru - vùng Andes",
+          "Đức - phố nhà gỗ nửa khung",
+          "Canada - Québec phố cổ",
+          "Đài Loan - phố núi đèn lồng"
+        ]
+      },
+      "note": "Biển cả không có ở vùng lục địa."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "companion",
+        "values": [
+          "phao bơi",
+          "kính mát"
+        ]
+      },
+      "then": {
+        "axis": "season",
+        "values": [
+          "mùa đông tuyết trắng sáng",
+          "tuyết đầu mùa phủ mỏng",
+          "băng đóng trên hồ"
+        ]
+      },
+      "note": "Đồ đi biển không hợp mùa tuyết."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "form",
+        "values": [
+          "mô hình thu nhỏ kiểu diorama",
+          "khối đồ chơi xếp hình",
+          "đồ chơi gỗ bày như cảnh thật",
+          "đất sét nặn dễ thương",
+          "thú len móc amigurumi",
+          "cảnh trong quả cầu tuyết",
+          "cảnh trong hộp kính terrarium",
+          "sách pop-up dựng cảnh",
+          "đồ ăn tạo hình con vật"
+        ]
+      },
+      "then": {
+        "category": [
+          "animal"
+        ]
+      },
+      "note": "Nhóm động vật cần con vật thật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "form",
+        "values": [
+          "cảnh nhìn qua tủ kính trưng bày",
+          "cảnh phản chiếu trong gương",
+          "tranh treo trong phòng thật"
+        ]
+      },
+      "then": {
+        "axis": "setting",
+        "values": [
+          "ban công",
+          "sân thượng",
+          "hiên nhà",
+          "sân vườn",
+          "vườn rau",
+          "vườn cây ăn trái",
+          "ngõ bậc thang",
+          "đường phố",
+          "quảng trường",
+          "khu chợ",
+          "bến cảng",
+          "bến thuyền gỗ",
+          "bãi biển",
+          "vách đá ven biển",
+          "bờ hồ núi",
+          "bờ sông",
+          "cánh đồng hoa",
+          "đồi nho",
+          "rừng thông",
+          "đồng cỏ trang trại",
+          "sân ga",
+          "trạm xăng ven đường",
+          "đường ven biển",
+          "đường đèo",
+          "sa mạc",
+          "công viên",
+          "hồ bơi",
+          "trên boong thuyền",
+          "bên đài phun nước",
+          "dưới mái hiên tiệm"
+        ]
+      },
+      "note": "Tủ kính, gương, tranh treo nằm trong nhà."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "form",
+        "values": [
+          "đồ ăn tạo hình con vật"
+        ]
+      },
+      "then": {
+        "category": [
+          "facade",
+          "vehicle",
+          "coast",
+          "garden",
+          "interior"
+        ]
+      },
+      "note": "Đồ ăn tạo hình chỉ hợp nhóm ăn uống và đồ vật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "form",
+        "values": [
+          "mô hình thu nhỏ kiểu diorama",
+          "khối đồ chơi xếp hình",
+          "đồ chơi gỗ bày như cảnh thật",
+          "đất sét nặn dễ thương",
+          "thú len móc amigurumi",
+          "cảnh trong quả cầu tuyết",
+          "cảnh trong hộp kính terrarium",
+          "sách pop-up dựng cảnh",
+          "tranh giấy cắt lớp có chiều sâu",
+          "tranh thêu",
+          "tranh kính màu",
+          "tranh khảm gạch",
+          "tranh gạch men vẽ tay",
+          "tranh giấy cuộn quilling",
+          "tranh sơn dầu kiểu ấn tượng",
+          "tranh màu nước tươi",
+          "minh họa sách thiếu nhi chi tiết có chiều sâu",
+          "thú bông trong cảnh thật",
+          "đồ ăn tạo hình con vật",
+          "cảnh nhìn qua tủ kính trưng bày",
+          "cảnh phản chiếu trong gương",
+          "tranh treo trong phòng thật"
+        ]
+      },
+      "then": {
+        "axis": "viewpoint",
+        "values": [
+          "nhìn qua cửa sổ máy bay",
+          "từ ghế lái nhìn qua kính chắn gió",
+          "từ trong toa tàu nhìn ra cửa sổ"
+        ]
+      },
+      "note": "Góc nhìn từ phương tiện cần cảnh thật."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "setting",
+        "values": [
+          "toa tàu",
+          "khoang du thuyền",
+          "trong xe cắm trại",
+          "trên boong thuyền"
+        ]
+      },
+      "then": {
+        "category": [
+          "facade",
+          "garden",
+          "shop"
+        ]
+      },
+      "note": "Mặt tiền, vườn, cửa tiệm không nằm trên phương tiện."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "setting",
+        "values": [
+          "phòng ngủ",
+          "phòng tắm",
+          "phòng giặt",
+          "gác mái",
+          "phòng trẻ em",
+          "garage"
+        ]
+      },
+      "then": {
+        "category": [
+          "shop",
+          "coast",
+          "garden",
+          "facade"
+        ]
+      },
+      "note": "Không gian riêng trong nhà không hợp nhóm này."
+    },
+    {
+      "type": "exclude",
+      "if": {
+        "axis": "setting",
+        "values": [
+          "trong bếp",
+          "phòng khách",
+          "phòng ngủ",
+          "gác mái",
+          "phòng tắm",
+          "phòng giặt",
+          "thư viện tại gia",
+          "phòng làm việc",
+          "phòng trẻ em",
+          "lối vào nhà"
+        ]
+      },
+      "then": {
+        "category": [
+          "facade",
+          "vehicle"
+        ]
+      },
+      "note": "Mặt tiền và phương tiện không đặt trong phòng."
     }
   ]
 }

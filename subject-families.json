@@ -494,7 +494,10 @@
         "mug",
         "teacup"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "coffee maker"
+      ]
     },
     {
       "id": "cold_drink",
@@ -656,7 +659,10 @@
         "jar",
         "urn"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "cookie jar"
+      ]
     },
     {
       "id": "clothes",
@@ -802,7 +808,10 @@
         "lilac",
         "geranium"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "hydrangea shrub"
+      ]
     },
     {
       "id": "flower_field",
@@ -942,6 +951,9 @@
         "balcony",
         "veranda",
         "hillside house"
+      ],
+      "learned": [
+        "shutter"
       ]
     },
     {
@@ -1034,6 +1046,9 @@
         "pool",
         "pond",
         "well"
+      ],
+      "learned": [
+        "tide pool"
       ]
     },
     {
@@ -1187,6 +1202,15 @@
         "wagon",
         "carriage"
       ]
+    },
+    {
+      "id": "coin_collection",
+      "label": "sưu tập tiền xu",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "coin"
+      ]
     }
   ],
   "props": {
@@ -1292,6 +1316,90 @@
       "armchair",
       "bench",
       "railing"
+    ],
+    "learned": [
+      "fig",
+      "savory cracker",
+      "cheese knife",
+      "ceramic plate",
+      "starfish",
+      "seashell",
+      "shoreline rock",
+      "clean sand",
+      "clear water",
+      "pastry counter",
+      "ceramic pot",
+      "glass window",
+      "coral awning",
+      "paving stone",
+      "patterned tin",
+      "wooden tabletop",
+      "glass marble",
+      "folded cloth",
+      "white fence",
+      "paved path",
+      "wooden gate",
+      "broad garden leaf",
+      "hangar",
+      "runway marking",
+      "propeller",
+      "landing gear",
+      "cockpit glass",
+      "bean leaf",
+      "bean vine",
+      "wooden support",
+      "white blossom",
+      "garden stake",
+      "flatbread",
+      "sauce bowl",
+      "ceramic platter",
+      "blue cloth",
+      "wooden dining table",
+      "ceramic serving bowl",
+      "dinner plate",
+      "brass ceiling chain",
+      "stone basin",
+      "lotus leaf",
+      "water surface",
+      "pale paving",
+      "velvet tray",
+      "brass coin",
+      "silver coin",
+      "wooden desk",
+      "magnifier",
+      "ceramic urn",
+      "broad leaf",
+      "stone paving",
+      "garden wall",
+      "ceramic bowl",
+      "kitchen doorway",
+      "floor tile",
+      "cotton cloth",
+      "wire rack",
+      "baking tin",
+      "cake plate",
+      "ceramic pitcher",
+      "curved awning",
+      "window",
+      "front door",
+      "stone step",
+      "coffee tin",
+      "ceramic cup",
+      "glass carafe",
+      "folded tea towel",
+      "glass cake stand",
+      "dessert plate",
+      "dessert fork",
+      "berry",
+      "wooden ladder",
+      "tree trunk",
+      "green leaf",
+      "apple branch",
+      "cookbook",
+      "spice jar",
+      "velvet shelf liner",
+      "doorstep",
+      "herb plant"
     ]
   }
 }

@@ -61,6 +61,13 @@ _IMAGE_RULES = (
     "Avoid carpets of tiny repeated details, large empty areas, and dark, cold, grey or washed-out palettes."
 )
 
+# Contexts planned before the Final style update still carry the old muted-realism rules
+# in their saved prompt; image_prompt removes them so they cannot contradict the new ones.
+_LEGACY_IMAGE_RULES = re.compile(
+    r"Portrait 600x900 pixels, 2:3 aspect ratio\. Bright, crisp, realistic photography.*?tiny repeated details\.",
+    re.IGNORECASE | re.DOTALL,
+)
+
 ART_DIRECTION_PATH = Path(__file__).resolve().parent.parent / 'art-direction.json'
 CONTENT_MOTIFS_PATH = Path(__file__).resolve().parent.parent / 'content-motifs.json'
 _DIRECTION_START = '[CURRENT_CONTENT_DIRECTION]'
@@ -527,6 +534,7 @@ def image_prompt(concept: dict[str, Any]) -> str:
     base = _clean(str(concept.get("prompt", "")))
     # Replace the prior version when retrying or using a previously planned prompt.
     base = re.sub(re.escape(_DIRECTION_START) + r'.*?' + re.escape(_DIRECTION_END), '', base, flags=re.DOTALL).strip()
+    base = _clean(_LEGACY_IMAGE_RULES.sub('', base))
     if _IMAGE_RULES.lower() not in base.lower():
         base = f"{base.rstrip(' .')}. {_IMAGE_RULES}" if base else _IMAGE_RULES
     guidance = content_direction('en')

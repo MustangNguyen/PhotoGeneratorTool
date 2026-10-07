@@ -66,6 +66,7 @@ const elements = {
   batchTitle: $("#batchTitle"),
   batchSummary: $("#batchSummary"),
   pauseButton: $("#pauseButton"),
+  retryFailedButton: $("#retryFailedButton"),
   exportButton: $("#exportButton"),
   exportAllButton: $("#exportAllButton"),
   progressText: $("#progressText"),
@@ -331,6 +332,8 @@ function renderBatch() {
   elements.pauseButton.textContent = canResume ? "Tiếp tục" : "Tạm dừng";
   elements.pauseButton.title = canPause ? "Các ảnh đang tạo sẽ hoàn tất trước khi lô tạm dừng." : "";
   elements.pauseButton.dataset.action = canResume ? "start" : "pause";
+  elements.retryFailedButton.hidden = !failed || ACTIVE_STATUSES.has(meta.key);
+  elements.retryFailedButton.textContent = `Tạo lại ${formatNumber(failed)} ảnh lỗi`;
   const approvedCount = state.items.filter((item) => item.status === "completed" && item.review === "approved").length;
   setExportLink(elements.exportButton, approvedCount > 0, `/api/batches/${encodeURIComponent(batch.id)}/export?approved=1`, "Chưa có ảnh đã duyệt để tải.");
   setExportLink(elements.exportAllButton, completed > 0, `/api/batches/${encodeURIComponent(batch.id)}/export`, "Chưa có ảnh hoàn thành để tải.");
@@ -658,6 +661,22 @@ async function retryItem() {
   }
 }
 
+async function retryFailedItems() {
+  const batch = state.activeBatch;
+  if (!batch) return;
+  const button = elements.retryFailedButton;
+  setButtonBusy(button, true, "Đang xếp hàng…");
+  try {
+    await api(`/api/batches/${encodeURIComponent(batch.id)}/retry-failed`, { method: "POST" });
+    await selectBatch(batch.id);
+    showToast("Các ảnh lỗi đã được xếp hàng tạo lại.");
+  } catch (error) {
+    showToast(error.message, "error");
+  } finally {
+    setButtonBusy(button, false);
+  }
+}
+
 async function openSettings() {
   try {
     const settings = await api("/api/settings");
@@ -789,6 +808,7 @@ function wireEvents() {
     if (button) selectBatch(button.dataset.batchId);
   });
   elements.pauseButton.addEventListener("click", toggleBatch);
+  elements.retryFailedButton.addEventListener("click", retryFailedItems);
   $("#mobileBackButton").addEventListener("click", () => $(".sidebar").scrollIntoView({ behavior: "smooth" }));
   $("#filterTabs").addEventListener("click", (event) => {
     const tab = event.target.closest("[data-filter]");

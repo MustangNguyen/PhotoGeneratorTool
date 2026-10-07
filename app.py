@@ -181,8 +181,10 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                             raise ValueError('Đang có batch chạy. Tạm dừng hoặc đợi batch đó xong trước.')
                         batch = store.create(payload.get('count'))
                         return self.send(engine.start(batch['id']), status=201)
-                match = re.fullmatch(f'/api/batches/({ID})/(start|pause)', path)
+                match = re.fullmatch(f'/api/batches/({ID})/(start|pause|retry-failed)', path)
                 if match:
+                    if match[2] == 'retry-failed':
+                        return self.send(engine.retry_failed(match[1]))
                     return self.send(engine.start(match[1]) if match[2] == 'start' else engine.pause(match[1]))
                 match = re.fullmatch(f'/api/items/({ID})/(review|retry)', path)
                 if match:

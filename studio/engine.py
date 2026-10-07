@@ -73,6 +73,19 @@ class Engine:
             self.store.event(item['batch_id'], f"Đã xếp lại ảnh lỗi: {item['title']}.")
             return self.start(item['batch_id'])
 
+    def retry_failed(self, batch_id):
+        with self.lock:
+            if self.active:
+                raise ValueError('Tạm dừng batch đang chạy trước khi thử lại ảnh lỗi.')
+            failed = [item for item in self.store.items(batch_id) if item['status'] == 'failed']
+            if not failed:
+                raise ValueError('Lô này không có ảnh lỗi để thử lại.')
+            for item in failed:
+                self.store.set_item(item['id'], status='planned', error='', stage='queued', progress_message='Đang chờ thử lại.', started_at='', finished_at='', stage_changed_at=now())
+            self.store.set_batch(batch_id, 'paused')
+            self.store.event(batch_id, f'Đã xếp lại {len(failed)} ảnh lỗi.')
+            return self.start(batch_id)
+
     def stopped(self, batch_id):
         if self.pause_requested.is_set():
             self.store.set_batch(batch_id, 'paused')

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Manually reviewed contact sheets and 96-image stratified-by-path sample from Final; not a full semantic index or approval list.",
+  "source": "Manually reviewed contact sheets and 96-image stratified-by-path sample from Final; not a full semantic index or approval list. Two animal/water behavior families added from observed generation history; Final evidence illustrates the shared waterside composition, not every behavior.",
   "motifs": [
     {
       "id": "bouquet-books-window",
@@ -1005,6 +1005,199 @@
             "hummingbird",
             "lily",
             "lilies"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "animal-drinking-shore",
+      "label": "động vật cúi uống nước cạnh bờ",
+      "evidence": [
+        "Final/Chap42/1033-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "động vật",
+            "con vật",
+            "hươu",
+            "nai",
+            "voi",
+            "bò rừng",
+            "bò",
+            "trâu",
+            "ngựa",
+            "dê",
+            "cừu",
+            "cáo",
+            "sói",
+            "gấu",
+            "rái cá",
+            "hải cẩu",
+            "sư tử",
+            "hổ",
+            "animal",
+            "deer",
+            "elk",
+            "elephant",
+            "bison",
+            "buffalo",
+            "cow",
+            "horse",
+            "goat",
+            "sheep",
+            "fox",
+            "wolf",
+            "bear",
+            "otter",
+            "seal",
+            "lion",
+            "tiger"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "key"
+          ],
+          "phrases": [
+            "suối",
+            "hồ",
+            "sông",
+            "bờ nước",
+            "mặt nước",
+            "bờ biển",
+            "vịnh",
+            "vùng triều",
+            "stream",
+            "lake",
+            "river",
+            "waterhole",
+            "pond",
+            "shore",
+            "waterside",
+            "waterfront",
+            "bay",
+            "tidal"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition",
+            "key"
+          ],
+          "phrases": [
+            "uống nước",
+            "cúi uống",
+            "drinking",
+            "drinks",
+            "drink water"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "animal-resting-shore",
+      "label": "động vật nghỉ cạnh mặt nước",
+      "evidence": [
+        "Final/Chap42/1033-4x4.jpg"
+      ],
+      "groups": [
+        {
+          "fields": [
+            "subject"
+          ],
+          "phrases": [
+            "động vật",
+            "con vật",
+            "hươu",
+            "nai",
+            "voi",
+            "bò rừng",
+            "bò",
+            "trâu",
+            "ngựa",
+            "dê",
+            "cừu",
+            "cáo",
+            "sói",
+            "gấu",
+            "rái cá",
+            "hải cẩu",
+            "sư tử",
+            "hổ",
+            "animal",
+            "deer",
+            "elk",
+            "elephant",
+            "bison",
+            "buffalo",
+            "cow",
+            "horse",
+            "goat",
+            "sheep",
+            "fox",
+            "wolf",
+            "bear",
+            "otter",
+            "seal",
+            "lion",
+            "tiger"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "key"
+          ],
+          "phrases": [
+            "suối",
+            "hồ",
+            "sông",
+            "bờ nước",
+            "mặt nước",
+            "bờ biển",
+            "vịnh",
+            "vùng triều",
+            "stream",
+            "lake",
+            "river",
+            "waterhole",
+            "pond",
+            "shore",
+            "waterside",
+            "waterfront",
+            "bay",
+            "tidal"
+          ]
+        },
+        {
+          "fields": [
+            "subject",
+            "scene",
+            "composition",
+            "key"
+          ],
+          "phrases": [
+            "nằm nghỉ",
+            "nằm ngửa",
+            "nằm trên",
+            "nằm bên",
+            "nghỉ bên",
+            "nghỉ cạnh",
+            "nghỉ trên",
+            "resting",
+            "rests",
+            "lying",
+            "lounging",
+            "reclining"
           ]
         }
       ]

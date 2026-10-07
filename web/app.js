@@ -97,8 +97,11 @@ const elements = {
   settingsForm: $("#settingsForm"),
   settingsStatus: $("#settingsStatus"),
   providerSelect: $("#providerSelect"),
+  providerHint: $("#providerHint"),
   textModelInput: $("#textModelInput"),
+  textModelHint: $("#textModelHint"),
   imageModelInput: $("#imageModelInput"),
+  imageModelHint: $("#imageModelHint"),
   concurrencyInput: $("#concurrencyInput"),
   apiKeyInput: $("#apiKeyInput"),
   apiKeyHint: $("#apiKeyHint"),
@@ -508,6 +511,8 @@ function updateModalDetails(item) {
   $("#modalPalette").textContent = item.palette || "—";
   $("#modalSimilarityRow").hidden = !item.similarity;
   $("#modalSimilarity").textContent = item.similarity || "—";
+  $("#modalStyleRow").hidden = !item.style_warning;
+  $("#modalStyle").textContent = item.style_warning || "—";
   $("#modalError").hidden = !item.error;
   $("#modalError").textContent = item.error || "";
   $("#modalPrompt").textContent = item.prompt || "Prompt chưa được tạo.";
@@ -654,27 +659,69 @@ async function openSettings() {
   try {
     const settings = await api("/api/settings");
     elements.providerSelect.value = settings.provider || "codex";
-    elements.textModelInput.value = settings.text_model || "";
+    elements.settingsModal.dataset.standardTextModel = settings.text_model || "";
+    elements.settingsModal.dataset.antigravityTextModel = settings.antigravity_text_model || "";
+    elements.settingsModal.dataset.activeProvider = elements.providerSelect.value;
+    elements.textModelInput.value = elements.providerSelect.value === "antigravity"
+      ? elements.settingsModal.dataset.antigravityTextModel
+      : elements.settingsModal.dataset.standardTextModel;
     elements.imageModelInput.value = settings.image_model || "";
     elements.concurrencyInput.value = String(settings.concurrency ?? 4);
     elements.apiKeyInput.value = "";
     elements.apiKeyHint.textContent = settings.has_api_key ? "Đã có khóa API. Để trống nếu không thay đổi." : "Khóa hiện tại chưa được thiết lập.";
     elements.settingsModal.dataset.codexAvailable = String(Boolean(settings.codex_available));
-    updateSettingsFields();
-    elements.settingsStatus.className = `settings-status ${state.status?.provider?.ready ? "" : "error"}`;
-    elements.settingsStatus.textContent = state.status?.provider?.message || "Kiểm tra cấu hình trước khi tạo ảnh.";
+    elements.settingsModal.dataset.antigravityAvailable = String(Boolean(settings.antigravity_available));
+    elements.settingsModal.dataset.savedProvider = elements.providerSelect.value;
+    updateSettingsFields(false);
     elements.settingsModal.showModal();
   } catch (error) {
     showToast(error.message, "error");
   }
 }
 
-function updateSettingsFields() {
-  const openai = elements.providerSelect.value === "openai";
+function updateSettingsFields(preserveCurrent = true) {
+  const provider = elements.providerSelect.value;
+  const previous = elements.settingsModal.dataset.activeProvider;
+  if (preserveCurrent && previous) {
+    const key = previous === "antigravity" ? "antigravityTextModel" : "standardTextModel";
+    elements.settingsModal.dataset[key] = elements.textModelInput.value.trim();
+  }
+  if (previous !== provider) {
+    const key = provider === "antigravity" ? "antigravityTextModel" : "standardTextModel";
+    elements.textModelInput.value = elements.settingsModal.dataset[key] || "";
+  }
+  elements.settingsModal.dataset.activeProvider = provider;
+
+  const openai = provider === "openai";
   elements.apiKeyField.hidden = !openai;
-  if (!openai && elements.settingsModal.dataset.codexAvailable === "false") {
+  elements.imageModelInput.disabled = !openai;
+  elements.providerHint.textContent = provider === "openai"
+    ? "OpenAI API dùng API key và được tính phí riêng."
+    : provider === "antigravity"
+      ? "Dùng phiên đăng nhập Antigravity CLI và hạn mức của tài khoản đó."
+      : "Dùng phiên đăng nhập Codex CLI và hạn mức của tài khoản đó.";
+  elements.textModelHint.textContent = provider === "antigravity"
+    ? "Model riêng cho Antigravity; để trống để agy dùng mặc định."
+    : openai
+      ? "Model dùng để lên và duyệt context qua OpenAI API."
+      : "Model riêng cho Codex; để trống để Codex dùng mặc định.";
+  elements.imageModelHint.textContent = openai
+    ? "Model tạo ảnh được gọi qua OpenAI API."
+    : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
+  if (provider === "codex" && elements.settingsModal.dataset.codexAvailable === "false") {
     elements.settingsStatus.className = "settings-status error";
     elements.settingsStatus.textContent = "Không tìm thấy Codex cục bộ trên máy này.";
+  } else if (provider === "antigravity" && elements.settingsModal.dataset.antigravityAvailable === "false") {
+    elements.settingsStatus.className = "settings-status error";
+    elements.settingsStatus.textContent = "Không tìm thấy Antigravity CLI (agy) trên máy này.";
+  } else if (provider === elements.settingsModal.dataset.savedProvider) {
+    elements.settingsStatus.className = `settings-status ${state.status?.provider?.ready ? "" : "error"}`;
+    elements.settingsStatus.textContent = state.status?.provider?.message || "Kiểm tra cấu hình trước khi tạo ảnh.";
+  } else {
+    elements.settingsStatus.className = "settings-status";
+    elements.settingsStatus.textContent = openai
+      ? "Nhập model và API key, sau đó lưu để kiểm tra kết nối."
+      : `${provider === "antigravity" ? "Antigravity" : "Codex"} CLI đã được tìm thấy. Lưu để kiểm tra phiên đăng nhập.`;
   }
 }
 
@@ -688,9 +735,11 @@ async function saveSettings(event) {
     return;
   }
   elements.concurrencyInput.setCustomValidity("");
+  updateSettingsFields();
   const body = {
     provider: elements.providerSelect.value,
-    text_model: elements.textModelInput.value.trim(),
+    text_model: elements.settingsModal.dataset.standardTextModel || "",
+    antigravity_text_model: elements.settingsModal.dataset.antigravityTextModel || "",
     image_model: elements.imageModelInput.value.trim(),
     concurrency,
   };

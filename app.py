@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent
 ID = r'[a-f0-9]{32}'
 
 
-def build_server(data_root, port=8787, provider_factory=None):
+def build_server(data_root, port=8787, provider_factory=None, final_root=None):
     Path(data_root).mkdir(parents=True, exist_ok=True)
     process_lock = (Path(data_root) / '.server.lock').open('a')
     try:
@@ -33,7 +33,7 @@ def build_server(data_root, port=8787, provider_factory=None):
     store = Store(data_root)
     store.recover()
     factory = provider_factory or (lambda: create_provider(store))
-    engine = Engine(store, factory)
+    engine = Engine(store, factory, final_root=final_root)
     status_cache = {'at': 0, 'value': None}
     status_lock = threading.Lock()
 
@@ -114,7 +114,12 @@ def build_server(data_root, port=8787, provider_factory=None):
                         return self.send({'provider': provider_status(), 'counts': {'images': sum(b['completed'] for b in batches), 'concepts': sum(b['planned'] for b in batches), 'batches': len(batches)}, 'activeBatchId': engine.active, 'concurrency': engine.concurrency(), 'inFlight': engine.in_flight})
                     if path == '/api/settings':
                         settings = {**DEFAULTS, **store.settings()}
-                        return self.send({**settings, 'has_api_key': bool(read_secret(store.root)), 'codex_available': bool(shutil.which('codex'))})
+                        return self.send({
+                            **settings,
+                            'has_api_key': bool(read_secret(store.root)),
+                            'codex_available': bool(shutil.which('codex')),
+                            'antigravity_available': bool(shutil.which('agy')),
+                        })
                     if path == '/api/batches':
                         return self.send(store.batches())
                     match = re.fullmatch(f'/api/batches/({ID})', path)
@@ -144,16 +149,17 @@ def build_server(data_root, port=8787, provider_factory=None):
                     with engine.lock:
                         if engine.active:
                             raise ValueError('Tạm dừng batch trước khi đổi kết nối.')
-                        allowed = {'provider', 'text_model', 'image_model', 'api_key', 'concurrency'}
+                        allowed = {'provider', 'text_model', 'antigravity_text_model', 'image_model', 'api_key', 'concurrency'}
                         if not payload.keys() <= allowed:
                             raise ValueError('Cài đặt không hợp lệ.')
                         settings = {**DEFAULTS, **store.settings(), **{k: v for k, v in payload.items() if k != 'api_key'}}
                         value = settings['concurrency']
                         if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 8:
                             raise ValueError('Số ảnh đồng thời phải là số nguyên từ 1 đến 8.')
-                        if settings['provider'] not in {'codex', 'openai'}:
+                        if settings['provider'] not in {'codex', 'antigravity', 'openai'}:
                             raise ValueError('Provider không hợp lệ.')
-                        for key in ('text_model', 'image_model'):
+                        for key in ('text_model', 'antigravity_text_model', 'image_model'):
+                            settings.setdefault(key, '')
                             if not isinstance(settings[key], str) or not re.fullmatch(r'[a-zA-Z0-9._:/-]{0,100}', settings[key]):
                                 raise ValueError('Tên model không hợp lệ.')
                         if settings['provider'] == 'openai' and not (settings['text_model'] and settings['image_model']):
@@ -215,7 +221,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=8787)
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'data')
     args = parser.parse_args()
-    server = build_server(args.data_dir.resolve(), args.port)
+    server = build_server(args.data_dir.resolve(), args.port, final_root=ROOT / 'Final')
     print(f'Puzzle Atelier: http://127.0.0.1:{server.server_port}', flush=True)
     def stop(signum, frame):
         raise KeyboardInterrupt

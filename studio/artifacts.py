@@ -67,6 +67,24 @@ def near_image(path, candidates, cache=None):
     return best
 
 
+def load_fingerprint_cache(path):
+    """Read a near_image cache saved by save_fingerprint_cache; a bad file is ignored."""
+    try:
+        raw = json.loads(Path(path).read_text(encoding='utf-8'))
+        return {key: ((value[0], value[1]), value[2], bytes.fromhex(value[3])) for key, value in raw.items()}
+    except (OSError, ValueError, TypeError, IndexError, AttributeError):
+        return {}
+
+
+def save_fingerprint_cache(path, cache, keys):
+    """Persist the cache entries for keys, so a large reference library is fingerprinted once."""
+    path = Path(path)
+    data = {key: [*cache[key][0], cache[key][1], cache[key][2].hex()] for key in keys if key in cache}
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps(data), encoding='utf-8')
+    temporary.replace(path)
+
+
 def export_batch(batch, items, approved=False):
     selected = [item for item in items if item['status'] == 'completed' and (not approved or item['review'] == 'approved')]
     if not selected:

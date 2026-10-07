@@ -4,16 +4,22 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from pathlib import Path
 
-from .artifacts import near_image, normalize_image
+from . import final
+from .artifacts import load_fingerprint_cache, near_image, normalize_image, save_fingerprint_cache
 from .providers import DEFAULTS
 from .store import now
 from .diversity import make_planning_prompt, order_concepts, validate_concepts, image_prompt
+from .review import apply_review, make_review_prompt
+from .style import style_drift, style_stats
 
 
 class Engine:
-    def __init__(self, store, provider_factory):
+    def __init__(self, store, provider_factory, final_root=None):
         self.store = store
         self.provider_factory = provider_factory
+        self.final_root = final_root
+        self.final_candidates = None
+        self.final_cached = 0
         self.lock = threading.RLock()
         self.active = None
         self.thread = None
@@ -98,16 +104,30 @@ class Engine:
                 self.store.event(batch_id, f"Đang lập {requested} context, đối chiếu {len(history)} context đã lưu.")
                 raw = provider.plan(prompt)
                 accepted, rejected = validate_concepts(raw, history, requested)
-                feedback = rejected
-                accepted = order_concepts(accepted, history[-1] if history else None)
+                feedback = list(rejected)
+                if self.stopped(batch_id):
+                    return
+                reviewed = []
+                review_rejected = []
                 if accepted:
-                    self.store.add_concepts(batch_id, accepted)
+                    self.store.event(batch_id, f"Đang duyệt tính tự nhiên và độ rõ ràng của {len(accepted)} context trong một lượt.")
+                    review_raw = provider.review(make_review_prompt(accepted))
+                    if self.stopped(batch_id):
+                        return
+                    reviewed, review_rejected = apply_review(review_raw, accepted, history)
+                    feedback.extend(review_rejected)
+                    kept_count = sum(item.get('context_review', {}).get('decision') == 'keep' for item in reviewed)
+                    revised_count = sum(item.get('context_review', {}).get('decision') == 'revise' for item in reviewed)
+                    self.store.event(batch_id, f"Kết quả duyệt context: giữ nguyên {kept_count}, sửa {revised_count}, loại {len(review_rejected)}.")
+                    reviewed = order_concepts(reviewed, history[-1] if history else None)
+                if reviewed:
+                    self.store.add_concepts(batch_id, reviewed)
                     stalled = 0
                 else:
                     stalled += 1
-                self.store.event(batch_id, f"Đã giữ {len(accepted)} context; loại {len(rejected)} đề xuất thiếu thông tin hoặc gần trùng.")
-                if rejected:
-                    self.store.event(batch_id, 'Kiểm tra context: ' + '; '.join(rejected[:3])[:700])
+                self.store.event(batch_id, f"Đã duyệt và giữ {len(reviewed)} context; loại {len(feedback)} đề xuất chưa đạt.")
+                if feedback:
+                    self.store.event(batch_id, 'Kiểm tra context: ' + '; '.join(feedback[:3])[:700])
                 if stalled >= 3:
                     raise RuntimeError('Ba lượt lập context không có đề xuất mới hợp lệ. Batch được giữ lại; đổi model hoặc tiếp tục sau.')
             if self.stopped(batch_id):
@@ -169,6 +189,22 @@ class Engine:
         if first_error is not None:
             raise first_error
 
+    def final_reference(self):
+        """Final sample images on this machine; fingerprints are cached in the data folder."""
+        if self.final_candidates is None:
+            self.final_candidates = final.image_candidates(self.final_root) if self.final_root else []
+            if self.final_candidates:
+                self.image_cache.update(load_fingerprint_cache(self.store.root / 'final-fingerprints.json'))
+                self.final_cached = sum(c['image_path'] in self.image_cache for c in self.final_candidates)
+        return self.final_candidates
+
+    def save_final_fingerprints(self):
+        keys = [c['image_path'] for c in self.final_candidates or ()]
+        cached = sum(key in self.image_cache for key in keys)
+        if cached > self.final_cached:
+            save_fingerprint_cache(self.store.root / 'final-fingerprints.json', self.image_cache, keys)
+            self.final_cached = cached
+
     def generate_one(self, batch_id, count, item):
         provider = None
         started = False
@@ -192,14 +228,18 @@ class Engine:
             target = directory / '600x900.jpg'
             self.store.set_item(item['id'], stage='saving', progress_message='Đã nhận ảnh; đang lưu bản 600×900.', stage_changed_at=now())
             normalize_image(source, target)
+            stats = style_stats(target)
+            drift = style_drift(stats)
+            style_warning = drift['message'] if drift else ''
             self.store.set_item(item['id'], stage='checking', progress_message='Đang kiểm tra gần trùng và lưu thông tin ảnh.', stage_changed_at=now())
             # Compare and commit atomically so simultaneously finished images also see each other.
             with self.artifact_lock:
-                similar = near_image(target, self.store.completed_items(), self.image_cache)
+                similar = near_image(target, self.store.completed_items() + self.final_reference(), self.image_cache)
+                self.save_final_fingerprints()
                 warning = f"Ảnh có bố cục/màu gần ảnh «{similar['title']}». Cần người duyệt đối chiếu." if similar else ''
-                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','prompt']}, ensure_ascii=False, indent=2), encoding='utf-8')
-                self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
-            self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}." + (' Có cảnh báo gần trùng.' if warning else ''))
+                (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','prompt','context_review'] if k in item} | {'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
+                self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, style_warning=style_warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
+            self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}." + (' Có cảnh báo gần trùng.' if warning else '') + (' Màu lệch so với ảnh mẫu Final.' if style_warning else ''))
         except Exception as error:
             self.generation_failed.set()
             if started:

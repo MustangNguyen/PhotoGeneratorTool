@@ -6,9 +6,20 @@ from pathlib import Path
 from unittest import mock
 
 from studio.providers import CodexProvider, OpenAIProvider
+from studio.review import REVIEW_SCHEMA
 
 
 class CodexProviderTests(unittest.TestCase):
+    def test_review_uses_review_schema_and_structured_text_model(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            provider = CodexProvider({'text_model': 'gpt-6-luna'}, temporary)
+            with mock.patch.object(provider, '_exec', return_value='{"reviews":[]}') as execute:
+                provider.review('review this group')
+            kwargs = execute.call_args.kwargs
+            self.assertTrue(kwargs['structured'])
+            self.assertEqual(REVIEW_SCHEMA, kwargs['output_schema'])
+            self.assertIn('text-only editorial review', execute.call_args.args[0])
+
     def test_context_model_and_effort_do_not_change_image_execution(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -91,6 +102,15 @@ class CodexProviderTests(unittest.TestCase):
 
 
 class OpenAIProviderTests(unittest.TestCase):
+    def test_review_uses_same_strict_review_schema(self):
+        provider = OpenAIProvider({"text_model": "gpt-test", "image_model": "gpt-image-2"}, "sk-test")
+        response = {"output": [{"content": [{"type": "output_text", "text": '{"reviews":[]}'}]}]}
+        with mock.patch.object(provider, '_post', return_value=response) as post:
+            self.assertEqual('{"reviews":[]}', provider.review('review this group'))
+        payload = post.call_args.args[1]
+        self.assertEqual(REVIEW_SCHEMA, payload['text']['format']['schema'])
+        self.assertTrue(payload['text']['format']['strict'])
+
     def test_missing_image_model_is_not_ready(self):
         provider = OpenAIProvider(
             {"text_model": "gpt-test", "image_model": ""},

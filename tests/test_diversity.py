@@ -48,7 +48,7 @@ class DiversityTests(unittest.TestCase):
         accepted, errors = validate_concepts({"concepts": [concept()]}, [old], 1)
         self.assertEqual(1, len(accepted), errors)
         self.assertIn("600x900", accepted[0]["prompt"])
-        self.assertIn("calm breathing room", accepted[0]["prompt"])
+        self.assertIn("many medium-to-large distinct objects", accepted[0]["prompt"])
         self.assertNotIn("all four quadrants", accepted[0]["prompt"])
 
     def test_repeated_real_catalogue_visual_motifs_are_rejected(self):
@@ -171,6 +171,8 @@ class DiversityTests(unittest.TestCase):
         self.assertIn("S:", prompt)
         self.assertIn("C:", prompt)
         self.assertIn("B:", prompt)
+        self.assertIn("Màu:", prompt)
+        self.assertIn("Chất:", prompt)
         self.assertLess(len(prompt), 25000)
         for category in CATEGORIES:
             self.assertIn(category, prompt)

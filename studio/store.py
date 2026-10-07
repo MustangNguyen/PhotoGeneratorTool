@@ -41,7 +41,7 @@ class Store:
             columns = {row[1] for row in db.execute('PRAGMA table_info(items)')}
             for name, default in {
                 'stage': 'queued', 'progress_message': 'Đang chờ lượt tạo ảnh.',
-                'started_at': '', 'finished_at': '', 'stage_changed_at': '',
+                'started_at': '', 'finished_at': '', 'stage_changed_at': '', 'style_warning': '',
             }.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE items ADD COLUMN {name} TEXT NOT NULL DEFAULT '{default}'")
@@ -152,7 +152,7 @@ class Store:
             db.execute('UPDATE items SET concept=? WHERE id=?', (json.dumps(concept, ensure_ascii=False), item_id))
 
     def set_item(self, item_id, **fields):
-        allowed = {'status', 'image_path', 'error', 'review', 'similarity', 'attempts', 'stage', 'progress_message', 'started_at', 'finished_at', 'stage_changed_at'}
+        allowed = {'status', 'image_path', 'error', 'review', 'similarity', 'style_warning', 'attempts', 'stage', 'progress_message', 'started_at', 'finished_at', 'stage_changed_at'}
         if not fields or not set(fields) <= allowed:
             raise ValueError('Trường cập nhật không hợp lệ.')
         with self.db() as db:

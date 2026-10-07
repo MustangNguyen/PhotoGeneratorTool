@@ -206,9 +206,11 @@
         <label for="textModelInput">Model lên context</label>
         <input id="textModelInput" name="text_model" type="text" autocomplete="off">
         <small id="textModelHint">Để trống để CLI dùng model mặc định.</small>
-        <label for="imageModelInput">Model tạo ảnh</label>
-        <input id="imageModelInput" name="image_model" type="text" autocomplete="off">
-        <small id="imageModelHint">Chỉ dùng khi chọn OpenAI API; CLI dùng công cụ tạo ảnh tích hợp.</small>
+        <div id="imageModelField">
+          <label for="imageModelInput">Model tạo ảnh</label>
+          <input id="imageModelInput" name="image_model" type="text" autocomplete="off">
+          <small id="imageModelHint">Chỉ dùng khi chọn OpenAI API; CLI dùng công cụ tạo ảnh tích hợp.</small>
+        </div>
         <div id="digenModelField" hidden>
           <label for="digenModelSelect">Model ảnh Digen</label>
           <select id="digenModelSelect" name="digen_image_model"></select>

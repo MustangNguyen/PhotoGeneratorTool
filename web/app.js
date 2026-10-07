@@ -99,6 +99,7 @@ const elements = {
   providerSelect: $("#providerSelect"),
   providerHint: $("#providerHint"),
   digenModelField: $("#digenModelField"),
+  imageModelField: $("#imageModelField"),
   digenModelSelect: $("#digenModelSelect"),
   textModelInput: $("#textModelInput"),
   textModelHint: $("#textModelHint"),
@@ -701,6 +702,8 @@ function updateSettingsFields(preserveCurrent = true) {
   const digen = provider === "digen";
   elements.apiKeyField.hidden = !openai;
   elements.digenModelField.hidden = !digen;
+  // Digen has its own model picker; the OpenAI image model would only confuse here.
+  elements.imageModelField.hidden = digen;
   elements.imageModelInput.disabled = !openai;
   elements.providerHint.textContent = provider === "openai"
     ? "OpenAI API dùng API key và được tính phí riêng."
@@ -716,9 +719,7 @@ function updateSettingsFields(preserveCurrent = true) {
       : "Model riêng cho Codex; để trống để Codex dùng mặc định.";
   elements.imageModelHint.textContent = openai
     ? "Model tạo ảnh được gọi qua OpenAI API."
-    : digen
-      ? "Digen dùng model chọn ở mục Model ảnh Digen."
-      : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
+    : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
   if (provider === "codex" && elements.settingsModal.dataset.codexAvailable === "false") {
     elements.settingsStatus.className = "settings-status error";
     elements.settingsStatus.textContent = "Không tìm thấy Codex cục bộ trên máy này.";

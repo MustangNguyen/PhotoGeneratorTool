@@ -315,6 +315,17 @@ class ProgressHTTPTests(unittest.TestCase):
             for field in ("stage", "progress_message", "started_at", "finished_at", "stage_changed_at"):
                 self.assertIn(field, item)
 
+    def test_shutdown_endpoint_stops_server_loop(self):
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=5)
+        connection.request("POST", "/api/shutdown", body="{}", headers={"Content-Type": "application/json"})
+        response = connection.getresponse()
+        payload = json.loads(response.read())
+        connection.close()
+        self.assertEqual(200, response.status, payload)
+        self.assertEqual({"stopping": True}, payload)
+        self.thread.join(5)
+        self.assertFalse(self.thread.is_alive(), "serve_forever did not exit")
+
 
 if __name__ == "__main__":
     unittest.main()

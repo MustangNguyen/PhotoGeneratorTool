@@ -117,7 +117,8 @@ class FinalPlanningTests(unittest.TestCase):
             # Two small pets fill the family's recent-window cap.
             history = [concept(main_subject='hamster', subject_family='small_pet', title='Chuột hamster'),
                        concept(main_subject='bunny', subject_family='small_pet', title='Thỏ con')]
-            with patch('studio.final.FINAL_INDEX_PATH', index), patch('studio.diversity.category_plan', return_value={'Động vật dễ thương': 1}):
+            with patch('studio.final.FINAL_INDEX_PATH', index), patch('studio.diversity.CATALOGUE_PATH', Path(temp) / 'none.json'), \
+                    patch('studio.diversity.category_plan', return_value={'Động vật dễ thương': 1}):
                 self.assertEqual(0, family_room(history, 1)['small_pet'])
                 seeds = pick_seeds(1, history)
                 prompt = make_planning_prompt(1, history, None, seeds)
@@ -126,6 +127,48 @@ class FinalPlanningTests(unittest.TestCase):
         self.assertIn('(main_subject: parrot, họ parrot)', prompt)
         self.assertIn('HỌ CHỦ THỂ CÒN CHỖ', prompt)
         self.assertNotIn('small_pet (', prompt.split('HỌ ĐÃ ĐẦY')[0].split('HỌ CHỦ THỂ CÒN CHỖ')[1])
+
+    def test_catalogue_subject_drives_the_seed_and_skips_used_or_full_ones(self):
+        from studio.diversity import pick_seeds
+        with tempfile.TemporaryDirectory() as temp:
+            index = Path(temp) / 'final-index.json'
+            index.write_text(json.dumps({'items': [
+                {'path': 'A/1.jpg', 'theme': 'animal', 'caption': 'thỏ trong vườn', 'main_subject': 'rabbit'},
+                {'path': 'A/2.jpg', 'theme': 'animal', 'caption': 'vẹt trên cành', 'main_subject': 'parrot'},
+            ]}), encoding='utf-8')
+            catalogue = Path(temp) / 'subject-catalogue.json'
+            catalogue.write_text(json.dumps({'version': 1, 'themes': {'animal': [
+                {'subject': 'guinea pig', 'vi': 'chuột lang', 'family': 'small_pet'},
+                {'subject': 'okapi', 'vi': 'hươu okapi'},
+                {'subject': 'meerkat', 'vi': 'chồn đất'},
+            ]}}), encoding='utf-8')
+            # small_pet is full and okapi was used recently, so only meerkat is open.
+            history = [concept(main_subject='hamster', subject_family='small_pet', title='Chuột hamster'),
+                       concept(main_subject='bunny', subject_family='small_pet', title='Thỏ con'),
+                       concept(main_subject='okapi', title='Hươu okapi')]
+            with patch('studio.final.FINAL_INDEX_PATH', index), patch('studio.diversity.CATALOGUE_PATH', catalogue), \
+                    patch('studio.diversity.category_plan', return_value={'Động vật dễ thương': 1}):
+                seeds = pick_seeds(1, history)
+                prompt = make_planning_prompt(1, history, None, seeds)
+        self.assertEqual('meerkat', seeds[0]['main_subject'])
+        self.assertTrue(seeds[0]['catalogue'])
+        self.assertIn('CHỦ THỂ: meerkat (chồn đất)', prompt)
+        self.assertIn('ảnh mẫu tham khảo khung cảnh', prompt)
+
+    def test_catalogue_prefers_the_least_used_subject(self):
+        from studio.diversity import pick_seeds
+        with tempfile.TemporaryDirectory() as temp:
+            catalogue = Path(temp) / 'subject-catalogue.json'
+            catalogue.write_text(json.dumps({'version': 1, 'themes': {'animal': [
+                {'subject': 'quokka'}, {'subject': 'meerkat'},
+            ]}}), encoding='utf-8')
+            # quokka was used once long ago (outside the recent window, under the total cap), meerkat never.
+            filler = [concept(title=f'Mục {n}', key=f'filler {n}', main_subject=f'widget{n}') for n in range(520)]
+            history = [concept(main_subject='quokka', title='Quokka')] + filler
+            with patch('studio.final.FINAL_INDEX_PATH', Path(temp) / 'none.json'), patch('studio.diversity.CATALOGUE_PATH', catalogue), \
+                    patch('studio.diversity.category_plan', return_value={'Động vật dễ thương': 2}):
+                seeds = pick_seeds(2, history)
+        self.assertEqual(['meerkat', 'quokka'], [seed['main_subject'] for seed in seeds])
 
 
 class LegacyPromptTests(unittest.TestCase):

@@ -249,6 +249,21 @@ class DiversityTests(unittest.TestCase):
         accepted, errors = validate_concepts({"concepts": [again]}, [squirrel] + fillers, 1)
         self.assertEqual(1, len(accepted), errors)
 
+    def test_toy_is_not_the_real_subject_or_its_family(self):
+        from studio.diversity import _family_of, _same_subject, _subject_label
+        self.assertEqual("toy", _family_of(("toy", "car")))
+        self.assertEqual("toy car", _subject_label(("toy", "car")))
+        self.assertEqual("toy lizard", _subject_label(("toy", "lizard")))
+        self.assertFalse(_same_subject(("toy", "lizard"), ("lizard",)))
+        self.assertTrue(_same_subject(("toy", "lizard"), ("wooden", "toy", "lizard")))
+        self.assertNotEqual("toy", _family_of(("car",)))
+
+    def test_bare_generic_head_repeats_itself(self):
+        from studio.diversity import _same_subject
+        self.assertTrue(_same_subject(("cafe",), ("cafe",)))
+        self.assertFalse(_same_subject(("cafe",), ("seaside", "cafe")))
+        self.assertFalse(_same_subject(("pier", "cafe"), ("seaside", "cafe")))
+
     def test_subject_cap_grows_slowly_with_catalogue_size(self):
         self.assertEqual(1, subject_limit(0))
         self.assertEqual(2, subject_limit(756))

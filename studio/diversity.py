@@ -540,19 +540,28 @@ def _subject_of(concept: dict[str, Any]) -> tuple[str, ...]:
     return tuple(words[-3:])
 
 
+def _is_toy(words: tuple[str, ...]) -> bool:
+    """A toy car is a toy, not a car: it must not use up the real subject or its family."""
+    return "toy" in words[:-1]
+
+
 def _subject_label(words: tuple[str, ...]) -> str:
     if not words:
         return ""
     if words[-1] in _GENERIC_HEADS and len(words) > 1:
-        return " ".join(words[-2:])
-    return words[-1]
+        label = " ".join(words[-2:])
+    else:
+        label = words[-1]
+    return f"toy {label}" if _is_toy(words) and not label.startswith("toy ") else label
 
 
 def _same_subject(left: tuple[str, ...], right: tuple[str, ...]) -> bool:
-    if not left or not right or left[-1] != right[-1]:
+    if not left or not right or left[-1] != right[-1] or _is_toy(left) != _is_toy(right):
         return False
     if left[-1] in _GENERIC_HEADS:
-        return len(left) > 1 and len(right) > 1 and left[-2] == right[-2]
+        if len(left) == 1 or len(right) == 1:  # A bare "cafe" repeats only a bare "cafe".
+            return len(left) == len(right)
+        return left[-2] == right[-2]
     return True
 
 
@@ -634,7 +643,10 @@ def _load_families() -> dict[str, Any]:
 
 def _family_of(words: tuple[str, ...]) -> str | None:
     """Family whose member is the longest trailing phrase of the subject words."""
-    members = _load_families()["members"]
+    families = _load_families()
+    if _is_toy(words) and "toy" in families["labels"]:
+        return "toy"
+    members = families["members"]
     for size in range(min(3, len(words)), 0, -1):
         family = members.get(words[-size:])
         if family:
@@ -803,6 +815,39 @@ def _subject_summary(history: list[dict[str, Any]], limit: int) -> str:
     return ", ".join(blocked[:600]) or "(chưa có)"
 
 
+# --- Subject catalogue ------------------------------------------------------------
+# Final names only ~630 distinct subjects, so seeds ran dry after a few batches and the
+# planner fell back to its favourites.  subject-catalogue.json (build_subject_catalogue.py)
+# lists ~500 concrete subjects per theme; seeds take the least-used open one.
+CATALOGUE_PATH = Path(__file__).resolve().parent.parent / "subject-catalogue.json"
+_CATALOGUE_LOCK = threading.Lock()
+_CATALOGUE_CACHE_KEY: tuple[str, int, int] | None = None
+_CATALOGUE_CACHE: dict[str, list[dict[str, str]]] = {}
+
+
+def _load_catalogue() -> dict[str, list[dict[str, str]]]:
+    """Theme -> [{subject, vi, family?}]; empty when the file is missing or malformed."""
+    global _CATALOGUE_CACHE_KEY, _CATALOGUE_CACHE
+    try:
+        stat = CATALOGUE_PATH.stat()
+    except OSError:
+        return {}
+    key = (str(CATALOGUE_PATH.resolve()), stat.st_mtime_ns, stat.st_size)
+    with _CATALOGUE_LOCK:
+        if key != _CATALOGUE_CACHE_KEY:
+            try:
+                raw = json.loads(CATALOGUE_PATH.read_text(encoding="utf-8"))
+                themes = raw.get("themes") if isinstance(raw, dict) else None
+            except (OSError, ValueError):
+                themes = None
+            _CATALOGUE_CACHE = {
+                theme: [entry for entry in entries if isinstance(entry, dict) and isinstance(entry.get("subject"), str) and entry["subject"].strip()]
+                for theme, entries in (themes or {}).items() if isinstance(entries, list)
+            }
+            _CATALOGUE_CACHE_KEY = key
+        return _CATALOGUE_CACHE
+
+
 def pick_seeds(
     count: int,
     history: list[dict[str, Any]],
@@ -833,6 +878,30 @@ def pick_seeds(
         label, family = subject_family(item)
         return label not in blocked and (family is None or room.get(family, 1) > 0)
 
+    catalogue = _load_catalogue()
+    usage = _subject_counts(history)
+
+    def catalogue_subject(theme: str | None) -> dict[str, str] | None:
+        """Least-used open catalogue subject of the theme, ties broken at random."""
+        options = []
+        for entry in catalogue.get(theme or "", ()):
+            words = tuple(_subject_words(entry["subject"]))[-3:]
+            label = _subject_label(words)
+            # A listed subject keeps its file family (as in _resolve_family); else the catalogue's guess.
+            family = _family_of(words) or (entry.get("family") if entry.get("family") in room else None)
+            if label and label not in blocked and (family is None or room.get(family, 1) > 0):
+                options.append((usage[label], label, family, entry))
+        if not options:
+            return None
+        fewest = min(option[0] for option in options)
+        _, label, family, entry = rng.choice([option for option in options if option[0] == fewest])
+        chosen = {"main_subject": entry["subject"], "label": label}
+        if entry.get("vi"):
+            chosen["vi"] = entry["vi"]
+        if family:
+            chosen["family"] = family
+        return chosen
+
     slots = [category for category, number in category_plan(count, counts).items() for _ in range(number)]
     rng.shuffle(slots)
     assigned_axes = axes.assign_axes(slots, history, rng)
@@ -844,7 +913,12 @@ def pick_seeds(
         pool = [(index, item) for index, item in themed if item["path"] not in used and item["path"] not in taken]
         if not pool:  # Every seed in this theme was used: allow repeats rather than stall.
             pool = [(index, item) for index, item in themed if item["path"] not in taken] or themed
-        pool = [entry for entry in pool if has_room(entry[1])] or pool
+        chosen = catalogue_subject(theme)
+        if chosen:
+            # The Final sample only shows framing and style; one of the same family fits best.
+            pool = [entry for entry in pool if chosen.get("family") and subject_family(entry[1])[1] == chosen["family"]] or pool
+        else:
+            pool = [entry for entry in pool if has_room(entry[1])] or pool
         # Prefer a sample whose framing agrees with the assigned shot type, so a close still
         # life is not seeded with "paella by the sea".
         wants_vista = axes.is_vista_shot(assigned.get("shot", ""))
@@ -854,7 +928,13 @@ def pick_seeds(
             taken.add(item["path"])
             seed = {"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]}
             label, family = subject_family(item)
-            if item.get("main_subject"):
+            if chosen:
+                label, family = chosen["label"], chosen.get("family")
+                seed["catalogue"] = True
+                seed["main_subject"] = chosen["main_subject"]
+                if chosen.get("vi"):
+                    seed["vi"] = chosen["vi"]
+            elif item.get("main_subject"):
                 seed["main_subject"] = item["main_subject"]
             if label:
                 blocked.add(label)  # No two slots of one round share a subject.
@@ -863,6 +943,14 @@ def pick_seeds(
                 seed["family"] = family
         else:  # No Final index on this machine: the slot still carries category and axes.
             seed = {"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""}
+            if chosen:
+                seed.update(catalogue=True, main_subject=chosen["main_subject"])
+                for field in ("vi", "family"):
+                    if chosen.get(field):
+                        seed[field] = chosen[field]
+                blocked.add(chosen["label"])
+                if chosen.get("family"):
+                    room[chosen["family"]] = room.get(chosen["family"], 1) - 1
         seed["axes"] = assigned
         seeds.append(seed)
     return seeds
@@ -873,6 +961,15 @@ _VISTA_CAPTION = re.compile(r"nhìn ra|nhìn xuống|bên biển|ven biển|bên
 
 def _seed_line(seed: dict[str, Any]) -> str:
     line = f"- {seed['id']} [{seed['category']}]"
+    if seed.get("catalogue"):
+        line += f" CHỦ THỂ: {seed['main_subject']}" + (f" ({seed['vi']})" if seed.get("vi") else "")
+        if seed.get("family"):
+            line += f", họ {seed['family']}"
+        if seed.get("caption"):
+            line += f" | ảnh mẫu tham khảo khung cảnh: {seed['caption']}"
+        if seed.get("axes"):
+            line += f" | trục: {axes.describe(seed['axes'])}"
+        return line
     if seed.get("caption"):
         line += f" gợi ý: {seed['caption']}"
     if seed.get("main_subject"):
@@ -945,7 +1042,8 @@ CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL VÀ TRỤC ĐA DẠNG — MỖI CONCEPT 
 - Mỗi concept ghi seed_id là mã dòng (ví dụ F12). Lấy chủ thể chính hoặc ý chủ đạo của gợi ý làm hạt nhân, nhưng tự dựng cảnh, góc máy và bố cục mới; không chép câu gợi ý làm tiêu đề (concept trùng ảnh mẫu sẽ bị loại).
 - "Kiểu ảnh" là BẮT BUỘC và quyết định khung hình. Kiểu ảnh không nói tới tầm nhìn xa thì không mở cửa sổ, cửa, hiên hay ban công ra biển, đồi, phố hoặc phong cảnh; hậu cảnh là tường, khăn, kệ, lá hoặc đồ vật. Vùng/địa danh khi đó chỉ thể hiện qua món ăn, đồ vật, chất liệu và hoa văn.
 - Các trục còn lại chỉ là GỢI Ý để tránh lặp. Dùng trục nào hợp tự nhiên với chủ thể; BỎ trục nào khiến cảnh gượng ép, phải đặt đồ vật sai chỗ, ghép thứ không ai ghép ngoài đời, hoặc thêm vật lạ để "chứng minh" trục. Cảnh phải là thứ có thật, người xem nhận ra ngay.
-- Gợi ý đã được chọn để main_subject và họ của nó còn chỗ: ưu tiên giữ đúng main_subject ghi trên dòng. Nếu đổi, chọn chủ thể thuộc HỌ CHỦ THỂ CÒN CHỖ hoặc chủ thể chưa thuộc họ nào; đừng đổi sang vật phụ trong cảnh (ví dụ phòng khách có ghế thì main_subject vẫn là living room, không phải armchair).
+- Dòng có "CHỦ THỂ:" thì main_subject PHẢI là đúng chủ thể đó (chủ thể được chọn từ danh mục, chưa dùng gần đây); dựng một cảnh đời thực dễ chịu quanh nó. "Ảnh mẫu tham khảo khung cảnh" chỉ gợi khung hình và phong cách, KHÔNG lấy chủ thể của ảnh mẫu.
+- Dòng không có "CHỦ THỂ:": gợi ý đã được chọn để main_subject và họ của nó còn chỗ: ưu tiên giữ đúng main_subject ghi trên dòng. Nếu đổi, chọn chủ thể thuộc HỌ CHỦ THỂ CÒN CHỖ hoặc chủ thể chưa thuộc họ nào; đừng đổi sang vật phụ trong cảnh (ví dụ phòng khách có ghế thì main_subject vẫn là living room, không phải armchair).
 
 HỌ CHỦ THỂ CÒN CHỖ — CHỌN main_subject THUỘC CÁC HỌ NÀY (id (nhãn): số concept họ đó còn nhận; trong {count} concept lần này, mỗi họ không vượt số "còn")
 {open_families}

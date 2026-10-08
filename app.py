@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from studio.artifacts import export_batch, game_jpeg
 from studio.engine import Engine
-from studio.providers import DEFAULTS, DIGEN_MODELS, DigenProvider, create_provider, read_secret, save_secret
+from studio.providers import DEFAULTS, DIGEN_MODELS, PROVIDER_NAMES, DigenProvider, create_provider, image_sources, read_secret, save_secret
 from studio.store import Store
 
 ROOT = Path(__file__).resolve().parent
@@ -33,7 +33,8 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
     store = Store(data_root)
     store.recover()
     factory = provider_factory or (lambda: create_provider(store))
-    engine = Engine(store, factory, final_root=final_root)
+    source_factory = None if provider_factory else (lambda name: create_provider(store, name))
+    engine = Engine(store, factory, final_root=final_root, source_factory=source_factory)
     status_cache = {'at': 0, 'value': None}
     status_lock = threading.Lock()
 
@@ -121,6 +122,7 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                             'antigravity_available': bool(shutil.which('agy')),
                             'digen_available': bool(DigenProvider.mcp_command()),
                             'digen_models': DIGEN_MODELS,
+                            'provider_names': PROVIDER_NAMES,
                         })
                     if path == '/api/batches':
                         return self.send(store.batches())
@@ -151,7 +153,7 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                     with engine.lock:
                         if engine.active:
                             raise ValueError('Tạm dừng batch trước khi đổi kết nối.')
-                        allowed = {'provider', 'text_model', 'antigravity_text_model', 'image_model', 'digen_image_model', 'api_key', 'concurrency'}
+                        allowed = {'provider', 'text_model', 'antigravity_text_model', 'image_model', 'digen_image_model', 'api_key', 'concurrency', 'image_sources'}
                         if not payload.keys() <= allowed:
                             raise ValueError('Cài đặt không hợp lệ.')
                         settings = {**DEFAULTS, **store.settings(), **{k: v for k, v in payload.items() if k != 'api_key'}}
@@ -168,6 +170,9 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                             raise ValueError('Model Digen không hợp lệ.')
                         if settings['provider'] == 'openai' and not (settings['text_model'] and settings['image_model']):
                             raise ValueError('OpenAI API cần model context và model ảnh.')
+                        sources = image_sources(settings)
+                        if 'openai' in sources and not settings['image_model']:
+                            raise ValueError('Nguồn OpenAI API cần model ảnh.')
                         if 'api_key' in payload and payload['api_key']:
                             save_secret(store.root, payload['api_key'])
                         store.save_settings(settings)

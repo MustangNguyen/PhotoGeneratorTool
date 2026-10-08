@@ -20,7 +20,9 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from .diversity import PLAN_FIELDS, _MAX_LENGTH
 from .review import REVIEW_SCHEMA
 
-DEFAULTS = {'provider': 'codex', 'antigravity_text_model': '', 'text_model': '', 'image_model': 'gpt-image-2', 'digen_image_model': 't2i.hd.lite', 'concurrency': 4}
+DEFAULTS = {'provider': 'codex', 'antigravity_text_model': '', 'text_model': '', 'image_model': 'gpt-image-2', 'digen_image_model': 't2i.hd.lite', 'concurrency': 4, 'image_sources': {}}
+# Image sources that can run side by side; each gets its own parallel slot count.
+PROVIDER_NAMES = {'codex': 'Codex', 'antigravity': 'Antigravity', 'digen': 'Digen', 'openai': 'OpenAI API'}
 # Model ids accepted by Digen's skill_agent image tool (credits per image observed 2026-10-07).
 DIGEN_MODELS = {'krea2': 'Krea 2 · 1 credit', 't2i.hd.lite': 'Nano Banana 2 Lite · 15 credit', 't2i.hd': 'GPT Image 2 · 30 credit'}
 SCHEMA = {
@@ -356,7 +358,8 @@ class DigenProvider(CodexProvider):
         if not self.logged_in():
             return {'name': name, 'ready': False, 'text_ready': codex['text_ready'], 'message': 'Digen chưa đăng nhập. Chạy npx digen-cli login trong terminal, sau đó tải lại trạng thái.'}
         if not codex['ready']:
-            return {**codex, 'name': name, 'message': 'Digen tạo ảnh, còn context dùng Codex CLI. ' + codex['message']}
+            # As an extra image source Digen does not need Codex; only contexts do.
+            return {**codex, 'name': name, 'image_ready': True, 'message': 'Digen tạo ảnh, còn context dùng Codex CLI. ' + codex['message']}
         return {'name': name, 'ready': True, 'text_ready': True, 'message': f'Ảnh qua Digen ({DIGEN_MODELS.get(self.settings.get("digen_image_model"), "model mặc định")}), context qua Codex CLI. Ảnh 3:4 được cắt giữa về 2:3.'}
 
     @staticmethod
@@ -594,6 +597,25 @@ class OpenAIProvider:
         return target
 
 
+def image_sources(settings):
+    """Ordered {source: parallel slots}; without a list, the main provider and its concurrency."""
+    sources = settings.get('image_sources') or {}
+    if not sources:
+        value = settings.get('concurrency', DEFAULTS['concurrency'])
+        if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 8:
+            raise ValueError('Số ảnh đồng thời phải là số nguyên từ 1 đến 8.')
+        return {settings.get('provider') or DEFAULTS['provider']: value}
+    if not isinstance(sources, dict) or not sources.keys() <= PROVIDER_NAMES.keys():
+        raise ValueError('Nguồn tạo ảnh không hợp lệ.')
+    for value in sources.values():
+        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 8:
+            raise ValueError('Số luồng mỗi nguồn phải là số nguyên từ 0 đến 8.')
+    active = {name: sources[name] for name in PROVIDER_NAMES if sources.get(name)}
+    if not active:
+        raise ValueError('Bật ít nhất một nguồn tạo ảnh (số luồng lớn hơn 0).')
+    return active
+
+
 def read_secret(root):
     path = Path(root) / 'api-key'
     return os.environ.get('OPENAI_API_KEY', '') or (path.read_text(encoding='utf-8').strip() if path.exists() else '')
@@ -609,12 +631,14 @@ def save_secret(root, secret):
     path.chmod(0o600)
 
 
-def create_provider(store):
+def create_provider(store, name=None):
+    """Provider named by the settings, or `name` when building one image source."""
     settings = {**DEFAULTS, **store.settings()}
-    if settings['provider'] == 'openai':
+    name = name or settings['provider']
+    if name == 'openai':
         return OpenAIProvider(settings, read_secret(store.root))
-    if settings['provider'] == 'antigravity':
+    if name == 'antigravity':
         return AntigravityProvider(settings, store.root / 'jobs')
-    if settings['provider'] == 'digen':
+    if name == 'digen':
         return DigenProvider(settings, store.root / 'jobs')
     return CodexProvider(settings, store.root / 'jobs')

@@ -569,8 +569,9 @@ FAMILY_REPEAT_EVERY = 120
 PROP_REPEAT_EVERY = 25
 # The caps above scale with the whole catalogue, so one batch could still spend a
 # family's entire allowance at once.  These windows spread repeats across batches.
-SUBJECT_RECENT_WINDOW = 100  # the same main subject at most once per 100 recent contexts
-FAMILY_RECENT_WINDOW = 50  # a family at most `weight` times per 50 recent contexts
+# Repeats were showing up one to three batches later, so the windows span several batches.
+SUBJECT_RECENT_WINDOW = 400  # the same main subject at most once per 400 recent contexts
+FAMILY_RECENT_WINDOW = 100  # a family at most `weight` times per 100 recent contexts
 _FAMILY_LOCK = threading.Lock()
 _FAMILY_WRITE_LOCK = threading.Lock()
 _FAMILY_CACHE_KEY: tuple[str, int, int] | None = None
@@ -742,14 +743,41 @@ def _props_of(concept: dict[str, Any]) -> frozenset[tuple[str, ...]]:
     return frozenset(found)
 
 
-def _family_summary(history: list[dict[str, Any]]) -> str:
+def family_room(history: list[dict[str, Any]], planned: int = 0) -> dict[str, int]:
+    """Concepts each family can still take, under both its total cap and its recent-window cap.
+
+    `planned` counts the concepts about to be added, as validate_concepts does for the cap.
+    """
     families = _load_families()
-    counts = Counter(family for item in history if isinstance(item, dict) and (family := _concept_family(item)))
-    full = [
-        f"{families['labels'][family]} ({', '.join(families['examples'][family])})"
-        for family, number in counts.most_common() if number >= family_limit(len(history), family)
-    ]
-    return "; ".join(full) or "(chưa có)"
+    used = [_concept_family(item) for item in history if isinstance(item, dict)]
+    total = Counter(family for family in used if family)
+    recent = Counter(family for family in used[-FAMILY_RECENT_WINDOW:] if family)
+    size = len(used) + planned
+    return {
+        family: max(0, min(family_limit(size, family) - total[family], recent_family_limit(family) - recent[family]))
+        for family in families["labels"]
+    }
+
+
+def blocked_subject_labels(history: list[dict[str, Any]], planned: int = 0) -> set[str]:
+    """Subjects at their total cap or used in the recent window (same rule as _same_subject)."""
+    items = [item for item in history if isinstance(item, dict)]
+    counts = _subject_counts(items)
+    limit = subject_limit(len(items) + planned)
+    blocked = {label for label, number in counts.items() if number >= limit}
+    blocked.update(label for item in items[-SUBJECT_RECENT_WINDOW:] if (label := _subject_label(_subject_of(item))))
+    return blocked
+
+
+def _family_room_text(room: dict[str, int]) -> tuple[str, str]:
+    """(open families with their remaining slots, labels of full families)."""
+    labels = _load_families()["labels"]
+    open_text = "; ".join(
+        f"{family} ({labels[family]}): còn {left}"
+        for family, left in sorted(room.items(), key=lambda entry: (-entry[1], entry[0])) if left > 0
+    )
+    full_text = "; ".join(labels[family] for family, left in sorted(room.items()) if left <= 0)
+    return open_text or "(không còn họ nào; dùng họ mới thật sự khác)", full_text or "(chưa có)"
 
 
 def _overused_props(history: list[dict[str, Any]], limit: int) -> list[str]:
@@ -757,27 +785,22 @@ def _overused_props(history: list[dict[str, Any]], limit: int) -> list[str]:
     return [" ".join(prop) for prop, number in counts.most_common() if number >= limit]
 
 
-def _recent_summary(history: list[dict[str, Any]]) -> str:
-    """Subjects and families that the recent windows block right now."""
+def _recent_subjects(history: list[dict[str, Any]]) -> str:
+    """Subjects that the recent window blocks right now; recent family caps are in family_room."""
     items = [item for item in history if isinstance(item, dict)]
     subjects = sorted({label for item in items[-SUBJECT_RECENT_WINDOW:] if (label := _subject_label(_subject_of(item)))})
-    families = _load_families()
-    counts = Counter(family for item in items[-FAMILY_RECENT_WINDOW:] if (family := _concept_family(item)))
-    full = [families["labels"].get(family, family) for family, number in counts.most_common() if number >= recent_family_limit(family)]
-    return f"Chủ thể: {', '.join(subjects) or '(chưa có)'}\nHọ: {'; '.join(full) or '(chưa có)'}"
+    return ", ".join(subjects) or "(chưa có)"
 
 
 def _subject_counts(history: list[dict[str, Any]]) -> Counter[str]:
     return Counter(label for item in history if isinstance(item, dict) and (label := _subject_label(_subject_of(item))))
 
 
-def _subject_summary(history: list[dict[str, Any]], limit: int) -> tuple[str, str]:
-    """(blocked subjects, most used subjects) as compact text over the full history."""
+def _subject_summary(history: list[dict[str, Any]], limit: int) -> str:
+    """Subjects at their cap over the full history, as compact text."""
     counts = _subject_counts(history)
     blocked = [label for label, number in counts.most_common() if number >= limit]
-    blocked_text = ", ".join(blocked[:600]) or "(chưa có)"
-    common = ", ".join(f"{label}×{number}" for label, number in counts.most_common(150) if number >= 1)
-    return blocked_text, common or "(chưa có)"
+    return ", ".join(blocked[:600]) or "(chưa có)"
 
 
 def pick_seeds(
@@ -798,6 +821,18 @@ def pick_seeds(
     if not category_counts:
         counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
     used = {str(item.get("final_seed", "")) for item in history if isinstance(item, dict)}
+    # A seed whose subject or family is already full only produces a rejected concept.
+    room = family_room(history, count)
+    blocked = blocked_subject_labels(history, count)
+
+    def subject_family(item: dict[str, Any]) -> tuple[str, str | None]:
+        words = tuple(_subject_words(str(item.get("main_subject", ""))))[-3:]
+        return _subject_label(words), _family_of(words) if words else None
+
+    def has_room(item: dict[str, Any]) -> bool:
+        label, family = subject_family(item)
+        return label not in blocked and (family is None or room.get(family, 1) > 0)
+
     slots = [category for category, number in category_plan(count, counts).items() for _ in range(number)]
     rng.shuffle(slots)
     assigned_axes = axes.assign_axes(slots, history, rng)
@@ -809,6 +844,7 @@ def pick_seeds(
         pool = [(index, item) for index, item in themed if item["path"] not in used and item["path"] not in taken]
         if not pool:  # Every seed in this theme was used: allow repeats rather than stall.
             pool = [(index, item) for index, item in themed if item["path"] not in taken] or themed
+        pool = [entry for entry in pool if has_room(entry[1])] or pool
         # Prefer a sample whose framing agrees with the assigned shot type, so a close still
         # life is not seeded with "paella by the sea".
         wants_vista = axes.is_vista_shot(assigned.get("shot", ""))
@@ -817,6 +853,14 @@ def pick_seeds(
             index, item = rng.choice(matching or pool)
             taken.add(item["path"])
             seed = {"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]}
+            label, family = subject_family(item)
+            if item.get("main_subject"):
+                seed["main_subject"] = item["main_subject"]
+            if label:
+                blocked.add(label)  # No two slots of one round share a subject.
+            if family:
+                room[family] = room.get(family, 1) - 1
+                seed["family"] = family
         else:  # No Final index on this machine: the slot still carries category and axes.
             seed = {"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""}
         seed["axes"] = assigned
@@ -831,6 +875,8 @@ def _seed_line(seed: dict[str, Any]) -> str:
     line = f"- {seed['id']} [{seed['category']}]"
     if seed.get("caption"):
         line += f" gợi ý: {seed['caption']}"
+    if seed.get("main_subject"):
+        line += f" (main_subject: {seed['main_subject']}" + (f", họ {seed['family']})" if seed.get("family") else ")")
     if seed.get("axes"):
         line += f" | trục: {axes.describe(seed['axes'])}"
     return line
@@ -856,7 +902,7 @@ def make_planning_prompt(
     history_chars = 0
     for item in _history_sample([x for x in history if isinstance(x, dict)]):
         line = f"- {_fingerprint(item)}"
-        if history_chars + len(line) + 1 > 10000:
+        if history_chars + len(line) + 1 > 3000:
             break
         history_lines.append(line)
         history_chars += len(line) + 1
@@ -867,9 +913,8 @@ def make_planning_prompt(
         seeds = pick_seeds(count, history, dict(counts))
     seed_text = "\n".join(_seed_line(seed) for seed in seeds)
     limit = subject_limit(len(history))
-    blocked_subjects, common_subjects = _subject_summary(history, limit)
-    blocked_families = _family_summary(history)
-    family_ids = "; ".join(f"{family_id} ({label})" for family_id, label in _load_families()["labels"].items())
+    blocked_subjects = _subject_summary(history, limit)
+    open_families, full_families = _family_room_text(family_room(history, count))
     overused_props = ", ".join(_overused_props(history, prop_limit(len(history)))) or "(chưa có)"
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
@@ -900,27 +945,24 @@ CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL VÀ TRỤC ĐA DẠNG — MỖI CONCEPT 
 - Mỗi concept ghi seed_id là mã dòng (ví dụ F12). Lấy chủ thể chính hoặc ý chủ đạo của gợi ý làm hạt nhân, nhưng tự dựng cảnh, góc máy và bố cục mới; không chép câu gợi ý làm tiêu đề (concept trùng ảnh mẫu sẽ bị loại).
 - "Kiểu ảnh" là BẮT BUỘC và quyết định khung hình. Kiểu ảnh không nói tới tầm nhìn xa thì không mở cửa sổ, cửa, hiên hay ban công ra biển, đồi, phố hoặc phong cảnh; hậu cảnh là tường, khăn, kệ, lá hoặc đồ vật. Vùng/địa danh khi đó chỉ thể hiện qua món ăn, đồ vật, chất liệu và hoa văn.
 - Các trục còn lại chỉ là GỢI Ý để tránh lặp. Dùng trục nào hợp tự nhiên với chủ thể; BỎ trục nào khiến cảnh gượng ép, phải đặt đồ vật sai chỗ, ghép thứ không ai ghép ngoài đời, hoặc thêm vật lạ để "chứng minh" trục. Cảnh phải là thứ có thật, người xem nhận ra ngay.
-- Nếu chủ thể của gợi ý nằm trong danh sách CHỦ THỂ ĐÃ ĐỦ, chọn một vật khác có trong gợi ý hoặc một chủ thể cùng tinh thần chưa dùng.
+- Gợi ý đã được chọn để main_subject và họ của nó còn chỗ: ưu tiên giữ đúng main_subject ghi trên dòng. Nếu đổi, chọn chủ thể thuộc HỌ CHỦ THỂ CÒN CHỖ hoặc chủ thể chưa thuộc họ nào; đừng đổi sang vật phụ trong cảnh (ví dụ phòng khách có ghế thì main_subject vẫn là living room, không phải armchair).
+
+HỌ CHỦ THỂ CÒN CHỖ — CHỌN main_subject THUỘC CÁC HỌ NÀY (id (nhãn): số concept họ đó còn nhận; trong {count} concept lần này, mỗi họ không vượt số "còn")
+{open_families}
+
+HỌ ĐÃ ĐẦY — BỊ LOẠI TỰ ĐỘNG (đổi sang con/vật khác cùng họ, ví dụ thỏ sang chuột lang hay nồi súp sang nồi hầm, vẫn bị loại; không tạo họ mới để né)
+{full_families}
 
 CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể tối đa {limit} lần ở quy mô {len(history)} mục; đổi tính từ, giống, màu hay bối cảnh vẫn tính là cùng chủ thể)
 {blocked_subjects}
 
-CHỦ THỂ CHÍNH ĐÃ DÙNG NHIỀU NHẤT (toàn bộ lịch sử)
-{common_subjects}
-
-CHỦ THỂ VÀ HỌ VỪA DÙNG GẦN ĐÂY — BỊ LOẠI TỰ ĐỘNG (chủ thể tối đa 1 lần trong {SUBJECT_RECENT_WINDOW} mục gần nhất; họ tối đa theo độ rộng trong {FAMILY_RECENT_WINDOW} mục gần nhất, kể cả các concept đã lập trước trong batch này)
-{_recent_summary(history)}
-
-DANH SÁCH HỌ CHỦ THỂ (id và nhãn)
-{family_ids}
-
-HỌ CHỦ THỂ ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi họ có giới hạn riêng theo độ rộng; đổi sang con/vật khác cùng họ, ví dụ thỏ sang chuột lang hay nồi súp sang nồi hầm, vẫn bị loại)
-{blocked_families}
+CHỦ THỂ VỪA DÙNG TRONG {SUBJECT_RECENT_WINDOW} MỤC GẦN NHẤT — BỊ LOẠI TỰ ĐỘNG (kể cả các concept đã lập trước trong batch này)
+{_recent_subjects(history)}
 
 VẬT PHỤ ĐÃ DÙNG QUÁ NHIỀU — mỗi concept dùng tối đa 1 vật trong danh sách này, concept có từ 2 vật trở lên bị loại; hãy chọn vật phụ khác hẳn, hợp với cảnh
 {overused_props}
 
-DẤU VÂN TAY CONCEPT ĐÃ DÙNG (được rút gọn từ {len(history)} mục; phải tránh lặp ý, không sao chép):
+DẤU VÂN TAY MỘT SỐ CONCEPT GẦN ĐÂY (mẫu nhỏ trong {len(history)} mục; phải tránh lặp ý, không sao chép):
 {fingerprints}
 
 MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đổi tên/chủ thể phụ rồi dựng lại cùng công thức hình):
@@ -929,7 +971,7 @@ MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đ
 ĐẦU RA
 Chỉ trả về JSON hợp lệ, không markdown, theo dạng {{"concepts":[...]}}. Mỗi phần tử có đủ chuỗi:
 title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, subject_family, props, seed_id.
-- subject_family là id họ của main_subject trong DANH SÁCH HỌ CHỦ THỂ. Chỉ khi không họ nào hợp mới ghi họ mới dạng "id_tieng_anh: nhãn tiếng Việt" (id snake_case). Họ mới cũng bị giới hạn và được ghi lại cho các lần sau; không tạo họ mới để né họ đã đủ.
+- subject_family là id họ của main_subject trong HỌ CHỦ THỂ CÒN CHỖ. Chỉ khi không họ nào hợp mới ghi họ mới dạng "id_tieng_anh: nhãn tiếng Việt" (id snake_case). Họ mới cũng bị giới hạn và được ghi lại cho các lần sau; không tạo họ mới để né họ đã đủ.
 - props là 3–6 vật phụ thấy rõ trong ảnh, danh từ tiếng Anh chung số ít, cách nhau dấu phẩy (ví dụ: teapot, linen napkin, wooden tray).
 - main_subject là danh từ tiếng Anh chung, số ít, 1–3 từ, gọi tên chủ thể chính (ví dụ rabbit, bicycle, railway station, bread); không tính từ, không màu, không bối cảnh. Mỗi concept một chủ thể chính khác nhau.
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.

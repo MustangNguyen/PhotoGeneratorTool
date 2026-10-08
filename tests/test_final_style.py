@@ -105,6 +105,29 @@ class FinalPlanningTests(unittest.TestCase):
         self.assertTrue(any('ảnh mẫu Final' in error and 'Chap9/1-4x4.jpg' in error for error in errors))
 
 
+    def test_seeds_skip_samples_whose_subject_family_is_full(self):
+        from studio.diversity import family_room, pick_seeds
+        with tempfile.TemporaryDirectory() as temp:
+            index = Path(temp) / 'final-index.json'
+            index.write_text(json.dumps({'items': [
+                {'path': 'A/1.jpg', 'theme': 'animal', 'caption': 'thỏ trong vườn', 'main_subject': 'rabbit'},
+                {'path': 'A/2.jpg', 'theme': 'animal', 'caption': 'chuột lang trên cỏ', 'main_subject': 'guinea pig'},
+                {'path': 'A/3.jpg', 'theme': 'animal', 'caption': 'vẹt trên cành', 'main_subject': 'parrot'},
+            ]}), encoding='utf-8')
+            # Two small pets fill the family's recent-window cap.
+            history = [concept(main_subject='hamster', subject_family='small_pet', title='Chuột hamster'),
+                       concept(main_subject='bunny', subject_family='small_pet', title='Thỏ con')]
+            with patch('studio.final.FINAL_INDEX_PATH', index), patch('studio.diversity.category_plan', return_value={'Động vật dễ thương': 1}):
+                self.assertEqual(0, family_room(history, 1)['small_pet'])
+                seeds = pick_seeds(1, history)
+                prompt = make_planning_prompt(1, history, None, seeds)
+        self.assertEqual('A/3.jpg', seeds[0]['path'])
+        self.assertEqual('parrot', seeds[0]['main_subject'])
+        self.assertIn('(main_subject: parrot, họ parrot)', prompt)
+        self.assertIn('HỌ CHỦ THỂ CÒN CHỖ', prompt)
+        self.assertNotIn('small_pet (', prompt.split('HỌ ĐÃ ĐẦY')[0].split('HỌ CHỦ THỂ CÒN CHỖ')[1])
+
+
 class LegacyPromptTests(unittest.TestCase):
     def test_context_planned_with_old_rules_gets_only_final_style(self):
         old_rules = (

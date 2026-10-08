@@ -196,7 +196,7 @@
         <h2 id="settingsTitle">Dịch vụ tạo ảnh</h2>
         <p class="settings-intro">Chọn CLI để dùng hạn mức tài khoản đã đăng nhập, hoặc OpenAI API để tính phí qua API key.</p>
         <div class="settings-status" id="settingsStatus"></div>
-        <label for="providerSelect">Nhà cung cấp</label>
+        <label for="providerSelect">Nhà cung cấp chính (lập context)</label>
         <select id="providerSelect" name="provider">
           <option value="codex">Codex cục bộ</option>
           <option value="antigravity">Antigravity cục bộ</option>
@@ -217,9 +217,11 @@
           <select id="digenModelSelect" name="digen_image_model"></select>
           <small>Credit mỗi ảnh đo ngày 07/10/2026; Digen có thể đổi giá. Ảnh tạo ở 3:4 rồi cắt giữa về 2:3.</small>
         </div>
-        <label for="concurrencyInput">Số ảnh tạo đồng thời</label>
-        <input id="concurrencyInput" name="concurrency" type="number" inputmode="numeric" min="1" max="8" value="4" required aria-describedby="concurrencyHint">
-        <small id="concurrencyHint">Mặc định 4, tối đa 8. Tăng số này có thể tạo nhanh hơn nếu dịch vụ hỗ trợ.</small>
+        <fieldset class="source-list" aria-describedby="sourcesHint">
+          <legend>Nguồn tạo ảnh và số luồng song song</legend>
+          <div id="sourceRows"></div>
+          <small id="sourcesHint">Mỗi nguồn 0–8 luồng; 0 là tắt. Các nguồn chạy cùng lúc, chia nhau ảnh trong lô. Nguồn lỗi sẽ ngừng nhận ảnh mới, nguồn khác vẫn chạy.</small>
+        </fieldset>
         <div id="apiKeyField">
           <label for="apiKeyInput">OpenAI API key</label>
           <input id="apiKeyInput" name="api_key" type="password" autocomplete="new-password" placeholder="Để trống nếu không thay đổi">

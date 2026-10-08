@@ -106,7 +106,7 @@ const elements = {
   textModelHint: $("#textModelHint"),
   imageModelInput: $("#imageModelInput"),
   imageModelHint: $("#imageModelHint"),
-  concurrencyInput: $("#concurrencyInput"),
+  sourceRows: $("#sourceRows"),
   apiKeyInput: $("#apiKeyInput"),
   apiKeyHint: $("#apiKeyHint"),
   apiKeyField: $("#apiKeyField"),
@@ -691,7 +691,7 @@ async function openSettings() {
     elements.digenModelSelect.replaceChildren(...Object.entries(settings.digen_models || {}).map(([id, label]) => new Option(`${label} (${id})`, id)));
     elements.digenModelSelect.value = settings.digen_image_model || "t2i.hd.lite";
     elements.settingsModal.dataset.digenAvailable = String(Boolean(settings.digen_available));
-    elements.concurrencyInput.value = String(settings.concurrency ?? 4);
+    renderSourceRows(settings);
     elements.apiKeyInput.value = "";
     elements.apiKeyHint.textContent = settings.has_api_key ? "Đã có khóa API. Để trống nếu không thay đổi." : "Khóa hiện tại chưa được thiết lập.";
     elements.settingsModal.dataset.codexAvailable = String(Boolean(settings.codex_available));
@@ -702,6 +702,39 @@ async function openSettings() {
   } catch (error) {
     showToast(error.message, "error");
   }
+}
+
+function renderSourceRows(settings) {
+  const names = settings.provider_names || { codex: "Codex", antigravity: "Antigravity", digen: "Digen", openai: "OpenAI API" };
+  const saved = settings.image_sources && Object.keys(settings.image_sources).length
+    ? settings.image_sources
+    : { [settings.provider || "codex"]: settings.concurrency ?? 4 };
+  const missing = {
+    codex: settings.codex_available ? "" : "Chưa tìm thấy Codex CLI.",
+    antigravity: settings.antigravity_available ? "" : "Chưa tìm thấy Antigravity CLI (agy).",
+    digen: settings.digen_available ? "" : "Chưa tìm thấy digen-mcp hoặc npx.",
+    openai: settings.has_api_key ? "Tính phí theo API key." : "Cần API key và model ảnh OpenAI.",
+  };
+  elements.sourceRows.replaceChildren(...Object.entries(names).map(([id, label]) => {
+    const row = document.createElement("div");
+    row.className = "source-row";
+    const name = document.createElement("label");
+    name.htmlFor = `source-${id}`;
+    name.textContent = label;
+    const input = document.createElement("input");
+    Object.assign(input, { id: `source-${id}`, type: "number", min: "0", max: "8", inputMode: "numeric", required: true });
+    input.dataset.source = id;
+    input.value = String(saved[id] ?? 0);
+    input.addEventListener("input", () => input.setCustomValidity(""));
+    row.append(name, input);
+    if (missing[id]) {
+      const note = document.createElement("small");
+      note.textContent = missing[id];
+      note.classList.toggle("error", id !== "openai" || !settings.has_api_key);
+      row.append(note);
+    }
+    return row;
+  }));
 }
 
 function updateSettingsFields(preserveCurrent = true) {
@@ -718,12 +751,14 @@ function updateSettingsFields(preserveCurrent = true) {
   elements.settingsModal.dataset.activeProvider = provider;
 
   const openai = provider === "openai";
+  const openaiImages = openai || Number($("#source-openai")?.value) > 0;
   const digen = provider === "digen";
-  elements.apiKeyField.hidden = !openai;
-  elements.digenModelField.hidden = !digen;
+  const digenImages = digen || Number($("#source-digen")?.value) > 0;
+  elements.apiKeyField.hidden = !openaiImages;
+  elements.digenModelField.hidden = !digenImages;
   // Digen has its own model picker; the OpenAI image model would only confuse here.
-  elements.imageModelField.hidden = digen;
-  elements.imageModelInput.disabled = !openai;
+  elements.imageModelField.hidden = !openaiImages && digenImages;
+  elements.imageModelInput.disabled = !openaiImages;
   elements.providerHint.textContent = provider === "openai"
     ? "OpenAI API dùng API key và được tính phí riêng."
     : digen
@@ -736,7 +771,7 @@ function updateSettingsFields(preserveCurrent = true) {
     : openai
       ? "Model dùng để lên và duyệt context qua OpenAI API."
       : "Model riêng cho Codex; để trống để Codex dùng mặc định.";
-  elements.imageModelHint.textContent = openai
+  elements.imageModelHint.textContent = openaiImages
     ? "Model tạo ảnh được gọi qua OpenAI API."
     : "CLI dùng công cụ tạo ảnh tích hợp nên không cần model API.";
   if (provider === "codex" && elements.settingsModal.dataset.codexAvailable === "false") {
@@ -764,13 +799,23 @@ function updateSettingsFields(preserveCurrent = true) {
 async function saveSettings(event) {
   event.preventDefault();
   const button = $("#saveSettingsButton");
-  const concurrency = Number(elements.concurrencyInput.value);
-  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 8) {
-    elements.concurrencyInput.setCustomValidity("Nhập số nguyên từ 1 đến 8.");
-    elements.concurrencyInput.reportValidity();
+  const imageSources = {};
+  for (const input of $$("[data-source]", elements.sourceRows)) {
+    const slots = Number(input.value);
+    if (input.value.trim() === "" || !Number.isInteger(slots) || slots < 0 || slots > 8) {
+      input.setCustomValidity("Nhập số nguyên từ 0 đến 8.");
+      input.reportValidity();
+      return;
+    }
+    input.setCustomValidity("");
+    imageSources[input.dataset.source] = slots;
+  }
+  if (!Object.values(imageSources).some(Boolean)) {
+    const first = $("[data-source]", elements.sourceRows);
+    first.setCustomValidity("Bật ít nhất một nguồn tạo ảnh.");
+    first.reportValidity();
     return;
   }
-  elements.concurrencyInput.setCustomValidity("");
   updateSettingsFields();
   const body = {
     provider: elements.providerSelect.value,
@@ -778,9 +823,9 @@ async function saveSettings(event) {
     antigravity_text_model: elements.settingsModal.dataset.antigravityTextModel || "",
     image_model: elements.imageModelInput.value.trim(),
     digen_image_model: elements.digenModelSelect.value || "t2i.hd.lite",
-    concurrency,
+    image_sources: imageSources,
   };
-  if (elements.providerSelect.value === "openai" && elements.apiKeyInput.value.trim()) body.api_key = elements.apiKeyInput.value.trim();
+  if (!elements.apiKeyField.hidden && elements.apiKeyInput.value.trim()) body.api_key = elements.apiKeyInput.value.trim();
   setButtonBusy(button, true, "Đang lưu…");
   try {
     await api("/api/settings", { method: "PUT", body });
@@ -828,7 +873,7 @@ function wireEvents() {
   });
   $("#settingsButton").addEventListener("click", openSettings);
   elements.providerSelect.addEventListener("change", updateSettingsFields);
-  elements.concurrencyInput.addEventListener("input", () => elements.concurrencyInput.setCustomValidity(""));
+  elements.sourceRows.addEventListener("input", () => updateSettingsFields());
   elements.settingsForm.addEventListener("submit", saveSettings);
   $("#approveButton").addEventListener("click", () => reviewItem("approved"));
   $("#rejectButton").addEventListener("click", () => reviewItem("rejected"));

@@ -276,6 +276,133 @@ class ParallelEngineTests(unittest.TestCase):
         self.assertEqual(1, max_checks)
         self.assertEqual([0, 1], calls, "second comparison must see the first committed image")
 
+    def test_images_start_while_next_context_round_is_still_planning(self):
+        self.store.save_settings({"concurrency": 3})
+        control = GenerationControl()
+        second_round_started = threading.Event()
+        release_second_round = threading.Event()
+        rounds = []
+
+        def plan(prompt):
+            count = int(re.search(r"chính xác (\d+)", prompt).group(1))
+            offset = sum(rounds)
+            rounds.append(count)
+            if len(rounds) == 2:
+                second_round_started.set()
+                self.assertTrue(release_second_round.wait(5), "test did not release the second planning round")
+            return {"concepts": [make_concept(offset + number) for number in range(count)]}
+
+        def factory():
+            provider = control.factory()
+            provider.plan = plan
+            return provider
+
+        engine = Engine(self.store, factory)
+        self.background.append((engine, control))
+        batch = self.store.create(23)
+        engine.start(batch["id"])
+
+        self.assertTrue(second_round_started.wait(5), "planner never began the second round")
+        control.wait_started(3)
+        self.assertEqual("generating", self.store.batch(batch["id"])["status"])
+        self.assertEqual(20, self.store.batch(batch["id"])["planned"], "second round is still being planned")
+
+        release_second_round.set()
+        control.release_all()
+        self.join(engine)
+        self.assertEqual([20, 3], rounds)
+        self.assertEqual(23, len(control.started))
+        self.assertEqual("completed", self.store.batch(batch["id"])["status"])
+
+    def test_planning_failure_keeps_generating_planned_images_then_blocks(self):
+        self.store.save_settings({"concurrency": 2})
+        control = GenerationControl(blocked=False)
+        rounds = []
+
+        def plan(prompt):
+            rounds.append(1)
+            if len(rounds) == 1:
+                return {"concepts": [make_concept(number) for number in range(20)]}
+            raise RuntimeError("planner offline")
+
+        def factory():
+            provider = control.factory()
+            provider.plan = plan
+            return provider
+
+        engine = Engine(self.store, factory)
+        self.background.append((engine, control))
+        batch = self.store.create(25)
+        engine.start(batch["id"])
+        self.join(engine)
+
+        result = self.store.batch(batch["id"])
+        self.assertEqual(20, result["completed"])
+        self.assertEqual("blocked", result["status"])
+        self.assertIn("planner offline", result["error"])
+
+    def make_multi_engine(self, count, sources, unready=()):
+        self.store.save_settings({"provider": "codex", "image_sources": sources})
+        control = GenerationControl()
+        built = []
+
+        def source_factory(name):
+            provider = control.factory()
+            provider.source = name
+            if name in unready:
+                provider.status = lambda: {"name": name, "ready": False, "text_ready": False, "message": f"{name} offline"}
+            built.append(name)
+            return provider
+
+        engine = Engine(self.store, control.factory, source_factory=source_factory)
+        self.background.append((engine, control))
+        batch = self.store.create(count)
+        self.store.add_concepts(batch["id"], [make_concept(number) for number in range(count)])
+        return engine, control, batch, built
+
+    def test_each_source_fills_its_own_parallel_slots(self):
+        engine, control, batch, _ = self.make_multi_engine(7, {"codex": 2, "digen": 1})
+        engine.start(batch["id"])
+        control.wait_started(3)
+
+        running = Counter(item["source"] for item in self.store.items(batch["id"]) if item["status"] == "generating")
+        self.assertEqual({"codex": 2, "digen": 1}, dict(running))
+        self.assertEqual(3, engine.concurrency())
+
+        control.release_all()
+        self.join(engine)
+        self.assertEqual(3, control.max_active)
+        items = self.store.items(batch["id"])
+        self.assertEqual(["completed"] * 7, [item["status"] for item in items])
+        self.assertTrue({item["source"] for item in items} <= {"codex", "digen"})
+        self.assertEqual("completed", self.store.batch(batch["id"])["status"])
+
+    def test_failed_source_stops_while_other_sources_finish_the_batch(self):
+        engine, control, batch, _ = self.make_multi_engine(5, {"codex": 1, "digen": 1})
+        control.fail_numbers.add(1)
+        engine.start(batch["id"])
+        control.wait_started(2)
+        failing = next(item["source"] for item in self.store.items(batch["id"]) if item["position"] == 1)
+        control.release_all()
+        self.join(engine)
+
+        items = self.store.items(batch["id"])
+        self.assertEqual("failed", items[1]["status"])
+        self.assertEqual(["completed"] * 4, [item["status"] for i, item in enumerate(items) if i != 1])
+        self.assertEqual([1], [item["position"] for item in items if item["source"] == failing], "failed source takes no new images")
+        self.assertFalse(engine.generation_failed.is_set())
+        self.assertEqual("blocked", self.store.batch(batch["id"])["status"])
+
+    def test_unready_source_is_skipped(self):
+        engine, control, batch, built = self.make_multi_engine(3, {"codex": 1, "antigravity": 2}, unready={"antigravity"})
+        control.release_all()
+        engine.start(batch["id"])
+        self.join(engine)
+
+        self.assertEqual({"codex"}, {item["source"] for item in self.store.items(batch["id"])})
+        self.assertEqual("completed", self.store.batch(batch["id"])["status"])
+        self.assertTrue(any("antigravity offline" in event["message"] for event in self.store.events(batch["id"])))
+
     def test_completion_order_does_not_change_item_or_export_order(self):
         engine, control, batch = self.make_engine(3, 3)
         engine.start(batch["id"])
@@ -339,6 +466,17 @@ class ParallelSettingsHTTPTests(unittest.TestCase):
             self.assertEqual(200, status)
             self.assertEqual(value, settings["concurrency"])
             self.assertEqual(value, self.server.engine.concurrency())
+
+    def test_settings_validate_and_persist_image_sources(self):
+        for invalid in ({"codex": 9}, {"codex": True}, {"midjourney": 1}, {"codex": 0, "digen": 0}, [1]):
+            with self.subTest(invalid=invalid):
+                status, payload = self.request("PUT", "/api/settings", {"image_sources": invalid})
+                self.assertEqual(400, status, payload)
+        status, payload = self.request("PUT", "/api/settings", {"image_sources": {"codex": 3, "digen": 2, "antigravity": 0}})
+        self.assertEqual(200, status, payload)
+        status, settings = self.request("GET", "/api/settings")
+        self.assertEqual({"codex": 3, "digen": 2, "antigravity": 0}, settings["image_sources"])
+        self.assertEqual(5, self.server.engine.concurrency())
 
 
 if __name__ == "__main__":

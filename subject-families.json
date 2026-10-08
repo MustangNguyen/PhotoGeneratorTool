@@ -44,6 +44,10 @@
         "collie",
         "dachshund",
         "spaniel"
+      ],
+      "learned": [
+        "akita",
+        "bichon frise"
       ]
     },
     {
@@ -64,6 +68,9 @@
         "foal",
         "alpaca",
         "llama"
+      ],
+      "learned": [
+        "argali"
       ]
     },
     {
@@ -80,7 +87,12 @@
         "swan"
       ],
       "learned": [
-        "roast chicken"
+        "roast chicken",
+        "chicken wing",
+        "fried chicken",
+        "emu",
+        "pheasant",
+        "peafowl"
       ]
     },
     {
@@ -99,7 +111,18 @@
         "hummingbird",
         "tit"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "koel",
+        "mockingbird",
+        "dove",
+        "lyrebird",
+        "eurasian jaybird",
+        "myna",
+        "towhee",
+        "hoopoe",
+        "wallcreeper"
+      ]
     },
     {
       "id": "parrot",
@@ -112,6 +135,11 @@
         "cockatoo",
         "macaw",
         "lovebird"
+      ],
+      "learned": [
+        "eclectus",
+        "african grey parrot",
+        "lorikeet"
       ]
     },
     {
@@ -124,7 +152,9 @@
         "falcon"
       ],
       "learned": [
-        "snowy owl"
+        "snowy owl",
+        "eaglet",
+        "barn owl"
       ]
     },
     {
@@ -137,6 +167,13 @@
         "stork",
         "pelican",
         "egret"
+      ],
+      "learned": [
+        "oystercatcher",
+        "gull",
+        "razorbill",
+        "curlew",
+        "seagull"
       ]
     },
     {
@@ -148,6 +185,11 @@
         "puffin",
         "arctic fox",
         "reindeer"
+      ],
+      "learned": [
+        "ermine",
+        "monal",
+        "musk ox"
       ]
     },
     {
@@ -159,6 +201,10 @@
         "sea lion",
         "beaver",
         "walrus"
+      ],
+      "learned": [
+        "narwhal",
+        "dugong"
       ]
     },
     {
@@ -178,7 +224,11 @@
         "koala"
       ],
       "learned": [
-        "marten"
+        "marten",
+        "golden lion tamarin",
+        "dhole",
+        "lemur",
+        "groundhog"
       ]
     },
     {
@@ -197,7 +247,11 @@
         "camel"
       ],
       "learned": [
-        "cougar"
+        "cougar",
+        "serval",
+        "terrapin",
+        "bison",
+        "gazelle"
       ]
     },
     {
@@ -219,7 +273,10 @@
       ],
       "learned": [
         "seashell",
-        "blue whale"
+        "blue whale",
+        "guitarfish",
+        "shell stand",
+        "leafy seadragon"
       ]
     },
     {
@@ -234,6 +291,11 @@
         "moth",
         "beetle",
         "snail"
+      ],
+      "learned": [
+        "bumblebee",
+        "volkswagen beetle",
+        "ant"
       ]
     },
     {
@@ -272,7 +334,12 @@
         "matcha cake",
         "matcha sponge cake",
         "steamed fish cake",
-        "meringue cake"
+        "meringue cake",
+        "poppy seed cake",
+        "stollen",
+        "bibingka",
+        "madeira cake",
+        "babka"
       ]
     },
     {
@@ -316,7 +383,11 @@
         "pastry"
       ],
       "learned": [
-        "baking"
+        "baking",
+        "kheer",
+        "turon",
+        "jalebi",
+        "mochi"
       ]
     },
     {
@@ -331,7 +402,11 @@
         "cone"
       ],
       "learned": [
-        "ice cream sundae"
+        "ice cream sundae",
+        "bingsu",
+        "halo halo",
+        "kulfi",
+        "ice pop"
       ]
     },
     {
@@ -371,6 +446,9 @@
         "lasagna",
         "dumpling",
         "gyoza"
+      ],
+      "learned": [
+        "bao"
       ]
     },
     {
@@ -390,7 +468,11 @@
       ],
       "learned": [
         "rice ball",
-        "rice dish"
+        "rice dish",
+        "arancini",
+        "tacu tacu",
+        "pad kra pao",
+        "tamago kake gohan"
       ]
     },
     {
@@ -407,7 +489,13 @@
         "roast"
       ],
       "learned": [
-        "vegetable skewer"
+        "vegetable skewer",
+        "meatloaf",
+        "souvlaki",
+        "schnitzel",
+        "lechon",
+        "paillard",
+        "lechon kawali"
       ]
     },
     {
@@ -424,7 +512,11 @@
       ],
       "learned": [
         "poached egg",
-        "shakshuka"
+        "shakshuka",
+        "pain perdu",
+        "blintz",
+        "oatmeal",
+        "omelet"
       ]
     },
     {
@@ -457,7 +549,17 @@
       "weight": 2,
       "learned": [
         "olive",
-        "lychee"
+        "lychee",
+        "plantain",
+        "strawberry plant",
+        "kumquat",
+        "durian",
+        "guava",
+        "tamarind",
+        "pawpaw",
+        "rambutan",
+        "huckleberry",
+        "jackfruit"
       ]
     },
     {
@@ -482,7 +584,19 @@
         "stuffed pepper",
         "artichoke",
         "guacamole",
-        "cauliflower"
+        "cauliflower",
+        "potato gratin",
+        "panzanella",
+        "coleslaw",
+        "bean plant",
+        "kimchi",
+        "pinakbet",
+        "fennel",
+        "corn plant",
+        "caponata",
+        "tomatillo plant",
+        "radicchio",
+        "bubble and squeak"
       ]
     },
     {
@@ -500,7 +614,12 @@
         "salmon tray"
       ],
       "learned": [
-        "shrimp platter"
+        "shrimp platter",
+        "tempura",
+        "kinilaw",
+        "mussel marinara",
+        "fritto misto",
+        "moqueca"
       ]
     },
     {
@@ -514,7 +633,11 @@
       ],
       "learned": [
         "fondue pot",
-        "cheese sandwich"
+        "cheese sandwich",
+        "feta",
+        "prosciutto",
+        "burrata",
+        "deli counter"
       ]
     },
     {
@@ -530,7 +653,11 @@
         "jelly"
       ],
       "learned": [
-        "honey candy"
+        "honey candy",
+        "coffee jelly",
+        "chewing gum",
+        "nougat",
+        "torrone"
       ]
     },
     {
@@ -556,7 +683,15 @@
       "weight": 2,
       "learned": [
         "coffee maker",
-        "coffee cup"
+        "coffee cup",
+        "chocolate caliente",
+        "api",
+        "tea strainer",
+        "kahwa",
+        "dalgona",
+        "vietnamese coffee",
+        "kopi",
+        "pour over"
       ]
     },
     {
@@ -583,7 +718,16 @@
         "apple juice",
         "coconut water",
         "hot water bottle",
-        "grape juice"
+        "grape juice",
+        "bissap",
+        "shrimp cocktail",
+        "lemonade stand",
+        "cream jug",
+        "kumis",
+        "coffee julep",
+        "colada morada",
+        "cold drink",
+        "coffee slush"
       ]
     },
     {
@@ -660,7 +804,12 @@
         "book"
       ],
       "learned": [
-        "stamp album"
+        "stamp album",
+        "envelope box",
+        "writing desk",
+        "paperweight",
+        "inkwell",
+        "journal"
       ]
     },
     {
@@ -672,6 +821,11 @@
         "sundial",
         "hourglass",
         "sundial tower"
+      ],
+      "learned": [
+        "pocket watch",
+        "clock stand",
+        "wall calendar"
       ]
     },
     {
@@ -689,7 +843,12 @@
       ],
       "learned": [
         "handheld console",
-        "rotary telephone"
+        "rotary telephone",
+        "telephone handset",
+        "walkman",
+        "rotary phone",
+        "television set",
+        "sofa console"
       ]
     },
     {
@@ -713,7 +872,13 @@
       ],
       "learned": [
         "cloth doll",
-        "pinball machine"
+        "pinball machine",
+        "toy lizard",
+        "toy stand",
+        "wooden animal",
+        "toy bowling set",
+        "kite stand",
+        "toy cart"
       ]
     },
     {
@@ -729,7 +894,11 @@
         "diya",
         "oil lamp",
         "table lamp",
-        "lighting"
+        "lighting",
+        "candle stand",
+        "glass lampshade",
+        "lamp stand",
+        "candlestick"
       ]
     },
     {
@@ -750,7 +919,17 @@
         "washbasin",
         "fruit bowl",
         "ceramic figurine",
-        "ceramic bowl"
+        "ceramic bowl",
+        "statuette",
+        "mustard pot",
+        "decorative plate",
+        "garden urn",
+        "coffee bowl",
+        "cut glass bowl",
+        "condiment set",
+        "souvenir plate",
+        "cake plate",
+        "soup plate"
       ]
     },
     {
@@ -777,6 +956,14 @@
         "wardrobe",
         "apron",
         "shirt"
+      ],
+      "learned": [
+        "laundry rack",
+        "camera bag",
+        "lace collar",
+        "rucksack",
+        "weekender bag",
+        "doctor bag"
       ]
     },
     {
@@ -797,7 +984,9 @@
       ],
       "learned": [
         "foot rinse tap",
-        "flower planter"
+        "flower planter",
+        "bird feeder",
+        "seedling tray"
       ]
     },
     {
@@ -818,7 +1007,16 @@
         "rattan chair",
         "deck chair"
       ],
-      "weight": 2
+      "weight": 2,
+      "learned": [
+        "hammock chair",
+        "sedan chair",
+        "wingback",
+        "club chair",
+        "wicker chair",
+        "swivel chair",
+        "ottoman"
+      ]
     },
     {
       "id": "storage",
@@ -842,7 +1040,16 @@
         "kitchen",
         "tea table",
         "kitchen island",
-        "reading table"
+        "reading table",
+        "drawer unit",
+        "modular shelving",
+        "basket stand",
+        "credenza",
+        "armoire",
+        "umbrella stand",
+        "wine rack",
+        "laundry sorter",
+        "corner shelf"
       ]
     },
     {
@@ -855,6 +1062,13 @@
         "cradle",
         "pet bed",
         "daybed"
+      ],
+      "learned": [
+        "trundle bed",
+        "four poster bed",
+        "platform bed",
+        "murphy bed",
+        "hammock bed"
       ]
     },
     {
@@ -869,7 +1083,11 @@
       ],
       "learned": [
         "wood stove",
-        "cast iron stove"
+        "cast iron stove",
+        "fireplace surround",
+        "fireplace screen",
+        "fireplace insert",
+        "woodstove"
       ]
     },
     {
@@ -885,7 +1103,12 @@
       "learned": [
         "kitchen sink",
         "outdoor shower",
-        "laundry sink"
+        "laundry sink",
+        "toilet",
+        "towel rack",
+        "freestanding tub",
+        "washstand",
+        "sponge stand"
       ]
     },
     {
@@ -905,7 +1128,16 @@
         "gladiolus",
         "bluebell",
         "flower bulb",
-        "daffodil bulb"
+        "daffodil bulb",
+        "allium",
+        "canna",
+        "tuberose",
+        "daylily",
+        "clivia",
+        "grape hyacinth",
+        "fritillary",
+        "freesia",
+        "muscari"
       ]
     },
     {
@@ -931,7 +1163,18 @@
         "flower arrangement",
         "queen s wreath",
         "dried flower",
-        "peony shrub"
+        "peony shrub",
+        "coastal gorse",
+        "pittosporum",
+        "weigela",
+        "plumbago",
+        "salvia",
+        "viburnum",
+        "potentilla",
+        "boxwood",
+        "flamingo flower",
+        "forsythia",
+        "leucadendron"
       ]
     },
     {
@@ -949,7 +1192,19 @@
       "weight": 2,
       "learned": [
         "cosmo flower",
-        "field flower"
+        "field flower",
+        "mallow",
+        "tansy",
+        "blazing star",
+        "celosia",
+        "thistle",
+        "corncockle",
+        "cotton plant",
+        "blanket flower",
+        "cornflower",
+        "aster",
+        "strawflower",
+        "echinacea"
       ]
     },
     {
@@ -960,6 +1215,13 @@
         "water lily",
         "lily pad",
         "reed"
+      ],
+      "learned": [
+        "duckweed",
+        "horsetail",
+        "water plant",
+        "cattail",
+        "water lettuce"
       ]
     },
     {
@@ -975,6 +1237,10 @@
         "olive tree",
         "pomegranate tree",
         "peach tree"
+      ],
+      "learned": [
+        "quince",
+        "coffee plant"
       ]
     },
     {
@@ -998,7 +1264,17 @@
         "maple tree",
         "willow tree",
         "cypress tree",
-        "pear tree"
+        "pear tree",
+        "jacaranda tree",
+        "hawthorn",
+        "fruit tree",
+        "longan tree",
+        "pawpaw tree",
+        "spruce",
+        "elm tree",
+        "sweetgum tree",
+        "poplar",
+        "jackfruit tree"
       ]
     },
     {
@@ -1011,6 +1287,13 @@
         "thyme",
         "mint",
         "sage"
+      ],
+      "learned": [
+        "bay laurel",
+        "pesto",
+        "hyssop",
+        "lemongrass",
+        "cinnamon"
       ]
     },
     {
@@ -1028,7 +1311,10 @@
         "saguaro"
       ],
       "learned": [
-        "air plant"
+        "air plant",
+        "echeveria",
+        "japanese aralia",
+        "snake plant"
       ]
     },
     {
@@ -1044,7 +1330,10 @@
         "grapevine"
       ],
       "learned": [
-        "pea trellis"
+        "pea trellis",
+        "passionflower",
+        "crossvine",
+        "clematis"
       ]
     },
     {
@@ -1063,7 +1352,10 @@
       ],
       "learned": [
         "house door",
-        "archway"
+        "archway",
+        "doorway sidelight",
+        "gateway",
+        "doorway portiere"
       ]
     },
     {
@@ -1076,6 +1368,12 @@
         "stairway",
         "stair",
         "stone step"
+      ],
+      "learned": [
+        "staircase handrail",
+        "stairwell",
+        "house stair",
+        "exterior staircase"
       ]
     },
     {
@@ -1098,7 +1396,17 @@
         "canal house",
         "cinema",
         "opera house",
-        "hotel"
+        "hotel",
+        "publishing house",
+        "longere",
+        "courtyard residence",
+        "coastal house",
+        "smokehouse",
+        "school",
+        "kindergarten",
+        "barn",
+        "municipal academy",
+        "cliff house"
       ]
     },
     {
@@ -1133,7 +1441,23 @@
         "cobbler shop",
         "cafe table",
         "steamed bun stall",
-        "shoe repair shop"
+        "shoe repair shop",
+        "upholstery shop",
+        "home textile shop",
+        "plant counter",
+        "bicycle shop",
+        "bookbinding counter",
+        "tea shop",
+        "butcher shop",
+        "watchmaker shop",
+        "village shop",
+        "bread stall",
+        "pottery shop",
+        "mineral stand",
+        "shower stall",
+        "gemstone stand",
+        "cheese shop",
+        "coffee stand"
       ]
     },
     {
@@ -1153,7 +1477,16 @@
       "weight": 2,
       "learned": [
         "clock tower",
-        "skyscraper"
+        "skyscraper",
+        "palazzina",
+        "observation tower",
+        "barbican",
+        "guildhouse",
+        "radio tower",
+        "cruckhouse",
+        "chhatri",
+        "chancery",
+        "mosque"
       ]
     },
     {
@@ -1167,6 +1500,10 @@
         "terminus",
         "bus stop",
         "shelter"
+      ],
+      "learned": [
+        "signal box",
+        "coach station"
       ]
     },
     {
@@ -1177,7 +1514,10 @@
         "footbridge"
       ],
       "learned": [
-        "arch bridge"
+        "arch bridge",
+        "causeway",
+        "drawbridge",
+        "aqueduct"
       ]
     },
     {
@@ -1201,7 +1541,15 @@
         "arched alcove",
         "beach tent",
         "canal",
-        "seaside terrace"
+        "seaside terrace",
+        "harborfront",
+        "waterfront",
+        "esplanade",
+        "watergate",
+        "bandstand",
+        "breakwater",
+        "promenade",
+        "river embankment"
       ]
     },
     {
@@ -1216,7 +1564,9 @@
       "learned": [
         "tide pool",
         "tidal pool",
-        "swimming pool"
+        "swimming pool",
+        "cascade",
+        "stepwell"
       ]
     },
     {
@@ -1242,7 +1592,18 @@
       "learned": [
         "wildflower meadow",
         "sunflower field",
-        "island"
+        "island",
+        "coastal cave",
+        "moss landscape",
+        "sea stack",
+        "headland",
+        "coastal peak",
+        "sea inlet",
+        "islet",
+        "sea grotto",
+        "coastal heath",
+        "city block",
+        "island volcano"
       ]
     },
     {
@@ -1259,7 +1620,18 @@
       "weight": 2,
       "learned": [
         "glasshouse",
-        "rock garden"
+        "rock garden",
+        "kitchen garden",
+        "topiary",
+        "island garden",
+        "tool shed",
+        "herb garden",
+        "coastal cottage garden",
+        "fernery",
+        "butterfly garden",
+        "summerhouse",
+        "winter garden",
+        "garden fence"
       ]
     },
     {
@@ -1269,6 +1641,9 @@
         "windmill",
         "mill",
         "water wheel"
+      ],
+      "learned": [
+        "watermill"
       ]
     },
     {
@@ -1291,7 +1666,12 @@
         "sidecar"
       ],
       "learned": [
-        "motorbike"
+        "motorbike",
+        "chopper",
+        "motorized snowbike",
+        "sportbike",
+        "scooterbike",
+        "bobber"
       ]
     },
     {
@@ -1315,7 +1695,15 @@
       "learned": [
         "off road vehicle",
         "sport car",
-        "mustang"
+        "mustang",
+        "overland truck",
+        "dining car",
+        "hot rod",
+        "bookmobile",
+        "speedster",
+        "minivan",
+        "brougham",
+        "bubble car"
       ]
     },
     {
@@ -1329,6 +1717,12 @@
         "railcar",
         "cable car",
         "funicular"
+      ],
+      "learned": [
+        "railbus",
+        "railroad",
+        "caboose",
+        "railway turntable"
       ]
     },
     {
@@ -1348,6 +1742,9 @@
         "canal boat",
         "barge",
         "vendor boat"
+      ],
+      "learned": [
+        "lifeboat"
       ]
     },
     {
@@ -1361,6 +1758,13 @@
         "tour boat",
         "ship",
         "steamer"
+      ],
+      "learned": [
+        "galleon",
+        "catamaran",
+        "steamship",
+        "trimaran",
+        "fishing trawler"
       ]
     },
     {
@@ -1375,7 +1779,13 @@
         "glider"
       ],
       "learned": [
-        "biplane"
+        "biplane",
+        "triplane",
+        "gyroplane",
+        "rocket",
+        "airliner",
+        "aeroplane",
+        "autogyro"
       ]
     },
     {
@@ -1392,7 +1802,13 @@
       ],
       "learned": [
         "luggage trolley",
-        "flower cart"
+        "flower cart",
+        "book cart",
+        "camping cart",
+        "stagecoach",
+        "herb cart",
+        "station wagon",
+        "bread cart"
       ]
     },
     {
@@ -1405,7 +1821,10 @@
         "coin collection",
         "coin case",
         "enamel badge",
-        "souvenir coin"
+        "souvenir coin",
+        "wooden nickel",
+        "coin stand",
+        "token"
       ]
     },
     {
@@ -1415,7 +1834,11 @@
       "members": [],
       "learned": [
         "paper artwork",
-        "paper art"
+        "paper art",
+        "paper garland",
+        "scissor",
+        "paper flower",
+        "paper quilling"
       ]
     },
     {
@@ -1425,7 +1848,11 @@
       "members": [],
       "learned": [
         "tree frog",
-        "axolotl"
+        "axolotl",
+        "green anole",
+        "toad",
+        "basilisk",
+        "lizard"
       ]
     },
     {
@@ -1436,7 +1863,12 @@
       "learned": [
         "blender",
         "waffle maker",
-        "utensil rack"
+        "utensil rack",
+        "dishwasher",
+        "radiator",
+        "range hood",
+        "coffee grinder",
+        "humidifier"
       ]
     },
     {
@@ -1448,7 +1880,12 @@
         "wool rug",
         "laundry room",
         "woven rug",
-        "wall hanging"
+        "wall hanging",
+        "curtain",
+        "decorative corbel",
+        "lace doily",
+        "coverlet",
+        "rug stand"
       ]
     },
     {
@@ -1458,7 +1895,10 @@
       "members": [],
       "learned": [
         "glass block panel",
-        "stained glass"
+        "stained glass",
+        "skylight",
+        "glass partition",
+        "glassware stand"
       ]
     },
     {
@@ -1469,7 +1909,12 @@
       "learned": [
         "biscuit tin",
         "tin box",
-        "tinware"
+        "tinware",
+        "tin spice box",
+        "tin tray",
+        "tinware stand",
+        "tin measuring cup",
+        "new tinware"
       ]
     },
     {
@@ -1478,7 +1923,8 @@
       "auto": true,
       "members": [],
       "learned": [
-        "living room"
+        "living room",
+        "parlor"
       ]
     },
     {
@@ -1487,7 +1933,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "tamale"
+        "tamale",
+        "pamonha",
+        "humita"
       ]
     },
     {
@@ -1496,7 +1944,8 @@
       "auto": true,
       "members": [],
       "learned": [
-        "letter box"
+        "letter box",
+        "mailbox"
       ]
     },
     {
@@ -1506,7 +1955,12 @@
       "members": [],
       "learned": [
         "ginger cookie assortment",
-        "ginger cooky"
+        "ginger cooky",
+        "gingerbread",
+        "shortbread",
+        "coconut macaroon",
+        "brownie",
+        "ginger snap"
       ]
     },
     {
@@ -1516,7 +1970,12 @@
       "members": [],
       "learned": [
         "reading room",
-        "interior room"
+        "interior room",
+        "powder room",
+        "sauna",
+        "interior column",
+        "attic room",
+        "larder"
       ]
     },
     {
@@ -1535,7 +1994,13 @@
       "members": [],
       "learned": [
         "breakfast table",
-        "table"
+        "table",
+        "side table",
+        "laundry counter",
+        "writing bureau",
+        "nesting table",
+        "hall table",
+        "soup tureen"
       ]
     },
     {
@@ -1554,7 +2019,12 @@
       "members": [],
       "learned": [
         "window",
-        "house window"
+        "house window",
+        "stained glass window",
+        "window corner",
+        "transom window",
+        "staircase landing window",
+        "clerestory window"
       ]
     },
     {
@@ -1564,7 +2034,10 @@
       "members": [],
       "learned": [
         "pencil",
-        "writing supply"
+        "writing supply",
+        "crayon",
+        "watercolor palette",
+        "sketchbook"
       ]
     },
     {
@@ -1573,7 +2046,8 @@
       "auto": true,
       "members": [],
       "learned": [
-        "camping gear"
+        "camping gear",
+        "sunshade"
       ]
     },
     {
@@ -1582,7 +2056,11 @@
       "auto": true,
       "members": [],
       "learned": [
-        "gift basket"
+        "gift basket",
+        "basket",
+        "fabric basket",
+        "knitting basket",
+        "firewood basket"
       ]
     },
     {
@@ -1591,7 +2069,10 @@
       "auto": true,
       "members": [],
       "learned": [
-        "library"
+        "library",
+        "bookplate",
+        "library room",
+        "storybook"
       ]
     },
     {
@@ -1610,7 +2091,9 @@
       "members": [],
       "learned": [
         "feast",
-        "mezze"
+        "mezze",
+        "bandeja paisa",
+        "picnic"
       ]
     },
     {
@@ -1629,7 +2112,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "pottery corner"
+        "pottery corner",
+        "pottery stand",
+        "stoneware crock"
       ]
     },
     {
@@ -1638,7 +2123,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "cherry blossom"
+        "cherry blossom",
+        "magnolia blossom",
+        "flower bucket"
       ]
     },
     {
@@ -1647,7 +2134,13 @@
       "auto": true,
       "members": [],
       "learned": [
-        "sandwich"
+        "sandwich",
+        "panini",
+        "tamago sando",
+        "falafel wrap",
+        "croque monsieur",
+        "tuna melt",
+        "smorrebrod"
       ]
     },
     {
@@ -1656,7 +2149,11 @@
       "auto": true,
       "members": [],
       "learned": [
-        "taco"
+        "taco",
+        "pupusa",
+        "burrito",
+        "tostada",
+        "enchilada"
       ]
     },
     {
@@ -1665,7 +2162,8 @@
       "auto": true,
       "members": [],
       "learned": [
-        "gift box"
+        "gift box",
+        "decorative box"
       ]
     },
     {
@@ -1675,7 +2173,12 @@
       "members": [],
       "learned": [
         "picture frame",
-        "keepsake box"
+        "keepsake box",
+        "cufflink",
+        "travel brochure",
+        "pressed flower",
+        "boot jack",
+        "music festival wristband"
       ]
     },
     {
@@ -1685,7 +2188,11 @@
       "members": [],
       "learned": [
         "sport equipment",
-        "sport badge"
+        "sport badge",
+        "cricket bat",
+        "medal",
+        "race bib",
+        "trophy"
       ]
     },
     {
@@ -1694,7 +2201,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "dough"
+        "dough",
+        "gnocchi",
+        "pierogi"
       ]
     },
     {
@@ -1703,7 +2212,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "vanity"
+        "vanity",
+        "kitchen worktop",
+        "powder compact"
       ]
     },
     {
@@ -1712,7 +2223,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "amplifier"
+        "amplifier",
+        "microphone",
+        "headphone"
       ]
     },
     {
@@ -1722,7 +2235,8 @@
       "members": [],
       "learned": [
         "ranunculus",
-        "bouquet"
+        "bouquet",
+        "ranunculus bouquet"
       ]
     },
     {
@@ -1749,7 +2263,10 @@
       "auto": true,
       "members": [],
       "learned": [
-        "road"
+        "road",
+        "coastal footpath",
+        "cul de sac",
+        "city square"
       ]
     },
     {
@@ -1767,7 +2284,13 @@
       "auto": true,
       "members": [],
       "learned": [
-        "snack"
+        "snack",
+        "chutney",
+        "sope",
+        "popcorn stand",
+        "relish",
+        "biltong",
+        "kwek kwek"
       ]
     },
     {
@@ -1776,7 +2299,10 @@
       "auto": true,
       "members": [],
       "learned": [
-        "tartlet"
+        "tartlet",
+        "palmier",
+        "cooky",
+        "canele"
       ]
     },
     {
@@ -1785,7 +2311,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "burger"
+        "burger",
+        "cheeseburger",
+        "sloppy joe"
       ]
     },
     {
@@ -1794,7 +2322,8 @@
       "auto": true,
       "members": [],
       "learned": [
-        "rooftop"
+        "rooftop",
+        "skyline"
       ]
     },
     {
@@ -1812,7 +2341,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "teaparty"
+        "teaparty",
+        "tea service",
+        "espresso machine"
       ]
     },
     {
@@ -1830,7 +2361,9 @@
       "auto": true,
       "members": [],
       "learned": [
-        "castle"
+        "castle",
+        "chateau",
+        "fortress"
       ]
     },
     {
@@ -1839,7 +2372,371 @@
       "auto": true,
       "members": [],
       "learned": [
-        "gelateria"
+        "gelateria",
+        "paper shop model"
+      ]
+    },
+    {
+      "id": "piazza",
+      "label": "quảng trường",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "piazza",
+        "agora",
+        "marketplace"
+      ]
+    },
+    {
+      "id": "fresco",
+      "label": "tranh bích họa",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "fresco"
+      ]
+    },
+    {
+      "id": "sandcastle",
+      "label": "lâu đài cát",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "sandcastle"
+      ]
+    },
+    {
+      "id": "acropolis",
+      "label": "thành cổ trên cao",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "acropolis"
+      ]
+    },
+    {
+      "id": "motel",
+      "label": "nhà nghỉ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "motel"
+      ]
+    },
+    {
+      "id": "stone_monument",
+      "label": "công trình đá cổ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "stone circle",
+        "cairn",
+        "forum",
+        "menhir",
+        "hillfort"
+      ]
+    },
+    {
+      "id": "sport_collectible",
+      "label": "đồ sưu tầm thể thao",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "catcher s mitt",
+        "billiard cue",
+        "softball"
+      ]
+    },
+    {
+      "id": "driftwood",
+      "label": "gỗ trôi dạt",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "driftwood"
+      ]
+    },
+    {
+      "id": "croquet_equipment",
+      "label": "dụng cụ chơi croquet",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "croquet mallet"
+      ]
+    },
+    {
+      "id": "ski_equipment",
+      "label": "ván trượt tuyết",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "ski",
+        "sled",
+        "ski equipment"
+      ]
+    },
+    {
+      "id": "mountain_refuge",
+      "label": "nhà trú núi",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "mountain refuge"
+      ]
+    },
+    {
+      "id": "paddleboard",
+      "label": "ván chèo đứng",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "paddleboard"
+      ]
+    },
+    {
+      "id": "senate",
+      "label": "tòa nhà thượng viện",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "senate"
+      ]
+    },
+    {
+      "id": "palisade",
+      "label": "hàng rào cọc gỗ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "palisade"
+      ]
+    },
+    {
+      "id": "dolmen",
+      "label": "mộ đá dolmen",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "dolmen"
+      ]
+    },
+    {
+      "id": "soap",
+      "label": "xà phòng tạo hình",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "soap"
+      ]
+    },
+    {
+      "id": "vehicle_control",
+      "label": "bộ điều khiển phương tiện",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "gearshift",
+        "tractor"
+      ]
+    },
+    {
+      "id": "capitol_building",
+      "label": "tòa nhà quốc hội",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "capitol",
+        "parliament",
+        "capitol building",
+        "legislature"
+      ]
+    },
+    {
+      "id": "cutting_board",
+      "label": "thớt và bề mặt sơ chế",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "cutting board",
+        "skillet"
+      ]
+    },
+    {
+      "id": "chopstick_rest",
+      "label": "gác đũa",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "chopstick rest"
+      ]
+    },
+    {
+      "id": "tile_mural",
+      "label": "tranh khảm gạch",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "tile mural"
+      ]
+    },
+    {
+      "id": "food_ingredients",
+      "label": "nguyên liệu thực phẩm",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "ingredient",
+        "crate",
+        "tomatoe"
+      ]
+    },
+    {
+      "id": "motorhome_vehicle",
+      "label": "xe nhà lưu động",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "motorhome"
+      ]
+    },
+    {
+      "id": "overland_vehicle",
+      "label": "xe việt dã đường bộ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "land rover",
+        "overland vehicle"
+      ]
+    },
+    {
+      "id": "ironmongery",
+      "label": "cửa hàng kim khí",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "ironmongery"
+      ]
+    },
+    {
+      "id": "diner",
+      "label": "quán ăn ven đường",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "diner"
+      ]
+    },
+    {
+      "id": "wine",
+      "label": "rượu vang",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "wine"
+      ]
+    },
+    {
+      "id": "public_building",
+      "label": "công trình công cộng",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "public gymnasium",
+        "colosseum",
+        "public meetinghouse"
+      ]
+    },
+    {
+      "id": "lunch",
+      "label": "bữa trưa",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "lunch"
+      ]
+    },
+    {
+      "id": "airport",
+      "label": "sân bay và nhà ga hàng không",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "airport"
+      ]
+    },
+    {
+      "id": "grooming_collectible",
+      "label": "dụng cụ cạo râu sưu tầm",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "safety razor"
+      ]
+    },
+    {
+      "id": "parasol",
+      "label": "ô che nắng",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "parasol"
+      ]
+    },
+    {
+      "id": "rail_vehicle",
+      "label": "phương tiện đường sắt đô thị",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "subway",
+        "metro"
+      ]
+    },
+    {
+      "id": "restaurant",
+      "label": "quán ăn",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "yakitori restaurant"
+      ]
+    },
+    {
+      "id": "lifebuoy",
+      "label": "phao cứu sinh",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "lifebuoy"
+      ]
+    },
+    {
+      "id": "glassware",
+      "label": "đồ thủy tinh",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "glass"
+      ]
+    },
+    {
+      "id": "pyramid",
+      "label": "kim tự tháp cổ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "pyramid"
+      ]
+    },
+    {
+      "id": "mortar_and_pestle",
+      "label": "cối và chày",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "mortar and pestle"
       ]
     }
   ],
@@ -2997,7 +3894,1229 @@
       "long spoon",
       "wooden console",
       "flowering branch",
-      "wooden cake stand"
+      "wooden cake stand",
+      "mallow bloom",
+      "mallow bud",
+      "leafy stem",
+      "cafe table",
+      "iron chair",
+      "limestone paving",
+      "ceramic baking dish",
+      "bowl of green",
+      "wooden support frame",
+      "grass path",
+      "string light",
+      "windmill",
+      "tidal pool",
+      "sea grass",
+      "sandbar",
+      "key rail",
+      "folded umbrella",
+      "door handle",
+      "curtido bowl",
+      "cotton tablecloth",
+      "flowering pot",
+      "wooden shovel",
+      "striped shade cloth",
+      "shell",
+      "spinning top",
+      "toy boat",
+      "brass token",
+      "roof luggage",
+      "spare tire",
+      "route sign",
+      "low bench",
+      "woven sun hat",
+      "orchard tree",
+      "stone gateway",
+      "paper hill",
+      "wooden base",
+      "sage bowl",
+      "felt pad",
+      "part case",
+      "polishing cloth",
+      "chain",
+      "cast iron skillet",
+      "ice floe",
+      "air bubble",
+      "snow crust",
+      "clothbound book",
+      "autumn leaf",
+      "silk scarf",
+      "laundry basket",
+      "wall tile",
+      "tansy stem",
+      "cottage roof",
+      "blue sky",
+      "ice cube",
+      "glass feeder",
+      "trumpet vine",
+      "hanging hook",
+      "olive",
+      "vintage car",
+      "leather suitcase",
+      "motel facade",
+      "fabric swatch",
+      "front window",
+      "ceramic vessel",
+      "brass box",
+      "wall niche",
+      "narrow window",
+      "shop door",
+      "woven cushion",
+      "stone column",
+      "sheer curtain",
+      "framed picture",
+      "open doorway",
+      "limestone arch",
+      "clear seawater",
+      "sea pebble",
+      "tomato sauce bowl",
+      "dinner fork",
+      "stone parapet",
+      "canal water",
+      "ochre facade",
+      "ferry ticket",
+      "brass magnifier",
+      "climbing vine",
+      "standing stone",
+      "short grass",
+      "thin snow",
+      "distant horizon",
+      "bedside cabinet",
+      "brass pull",
+      "roadside rail",
+      "coastal grass",
+      "marker post",
+      "baseball",
+      "team photograph",
+      "paper pennant",
+      "lemon slice",
+      "wood fence",
+      "microphone stand",
+      "audio cable",
+      "glass cup",
+      "picnic table",
+      "sea shell",
+      "firm sand",
+      "tide line",
+      "low headland",
+      "kitchen cloth",
+      "paring knife",
+      "boarding stair",
+      "windsock",
+      "marigold",
+      "hanging basket",
+      "wooden hook",
+      "ripe strawberry",
+      "lavender box",
+      "stone bollard",
+      "croquet ball",
+      "storage rack",
+      "score peg",
+      "tea table",
+      "platform lamp",
+      "timetable board",
+      "sauce jar",
+      "parrot",
+      "sketchbook",
+      "teddy bear",
+      "crayon box",
+      "pencil sharpener",
+      "ski rack",
+      "glove",
+      "boot",
+      "grass tuft",
+      "fern frond",
+      "settee",
+      "savory pastry",
+      "woven textile",
+      "hiking staff",
+      "eave bracket",
+      "fallen blossom",
+      "palm leaf",
+      "helmet",
+      "iron grate",
+      "potted citrus",
+      "chair",
+      "paper facade",
+      "balcony rail",
+      "display card",
+      "corn ear",
+      "paddle",
+      "dry bag",
+      "rolled towel",
+      "sun hat",
+      "pedestal sink",
+      "round mirror",
+      "soap dispenser",
+      "seed dish",
+      "cement tile",
+      "dry seed",
+      "paper cactus",
+      "cutting mat",
+      "craft knife",
+      "paper strip",
+      "berry jam",
+      "moored boat",
+      "timber railing",
+      "village house",
+      "fjord",
+      "mountain slope",
+      "measuring spoon",
+      "paper label",
+      "distant hill",
+      "lime slice",
+      "polka dot cloth",
+      "striped tablecloth",
+      "pillow cover",
+      "fabric roll",
+      "lace cloth",
+      "berry preserve",
+      "lidded tray",
+      "folded letter",
+      "sealing wax",
+      "dresser",
+      "stationery card",
+      "sailboat print",
+      "garden grass",
+      "rice bowl",
+      "small serving bowl",
+      "lakeside path",
+      "low tree",
+      "rooftop",
+      "porcelain platter",
+      "apple jam jar",
+      "serving fork",
+      "tiled ledge",
+      "crisp bread",
+      "banana leaf",
+      "roof beam",
+      "hand stamp",
+      "open gate",
+      "citrus tree",
+      "low planter",
+      "fallen berry",
+      "kraft paper",
+      "potato wedge",
+      "lettuce leaf",
+      "wooden manger",
+      "timber wall",
+      "stone floor",
+      "brass lamp",
+      "station sign",
+      "pruning shear",
+      "harvest trug",
+      "baluster",
+      "mango branch",
+      "mango fruit",
+      "twig",
+      "quay post",
+      "talavera pot",
+      "wooden sill",
+      "curtain tie",
+      "cricket ball",
+      "protective helmet",
+      "equipment stand",
+      "wooden bench",
+      "glazed bowl",
+      "embroidered cloth",
+      "small dish",
+      "display glass",
+      "capstone",
+      "upright stone",
+      "wayfinding board",
+      "rubber boot",
+      "ribbed jar",
+      "sheet music",
+      "floor rug",
+      "music stand",
+      "drying cloth",
+      "drawer pull",
+      "corn cake",
+      "guitar",
+      "velvet lining",
+      "wood frame",
+      "cucumber salad",
+      "display base",
+      "miniature streetlamp",
+      "paper path",
+      "serving bowl",
+      "dashboard",
+      "steering wheel",
+      "windshield",
+      "railway platform",
+      "small wooden spoon",
+      "desk blotter",
+      "roof dome",
+      "vegetable bed",
+      "fruit tree",
+      "wooden curtain rod",
+      "ceramic lamp",
+      "tieback",
+      "closed notebook",
+      "vintage radio",
+      "cake box",
+      "raised bed",
+      "kitchen door",
+      "yacht window",
+      "tulip",
+      "wrapping paper",
+      "tropical grass",
+      "glossy leaf",
+      "beetle",
+      "compartment box",
+      "metal spoon",
+      "floral tile",
+      "wrought iron rail",
+      "spring plant",
+      "street",
+      "shopfront",
+      "wooden sign",
+      "canva awning",
+      "strawberry crate",
+      "limestone rock",
+      "onion",
+      "kitchen knife",
+      "plush bear",
+      "paper kite",
+      "plant tie",
+      "stone planter",
+      "knitted seat cover",
+      "paper lunch box",
+      "celosia bloom",
+      "pale gravel",
+      "storm lantern",
+      "hearth ledge",
+      "olive jar",
+      "fountain basin",
+      "carved stele",
+      "standing mirror",
+      "slipper",
+      "eucalyptus branch",
+      "bark knot",
+      "cherry blossom branch",
+      "biscuit dish",
+      "folding table",
+      "rolled blanket",
+      "chandelier",
+      "shop counter",
+      "doorstep plant",
+      "hand rake",
+      "rice bundle",
+      "coral head",
+      "rounded rock",
+      "sea fan",
+      "photo envelope",
+      "folded photo print",
+      "low console",
+      "small bowl",
+      "squat vase",
+      "cotton runner",
+      "repair counter",
+      "part basket",
+      "floor pump",
+      "patterned tablecloth",
+      "seed feeder",
+      "sunflower",
+      "stair runner",
+      "brass sconce",
+      "windowpane",
+      "painted railing",
+      "tiled awning",
+      "pasta bundle",
+      "wool cloth",
+      "kitchen tile",
+      "road guardrail",
+      "travel mug",
+      "preserve dish",
+      "bread board",
+      "painted shutter",
+      "gutter",
+      "stitch seat cover",
+      "canva suitcase",
+      "ferry rail",
+      "side door",
+      "porch wall",
+      "rice field",
+      "yogurt sauce",
+      "walking trail",
+      "wild thyme",
+      "distant lake",
+      "pistachio",
+      "storage tin",
+      "grape basket",
+      "grape trellis",
+      "paved patio",
+      "scissor",
+      "gift tag",
+      "stone bridge",
+      "river railing",
+      "ceramic street plaque",
+      "sidewalk",
+      "bamboo clothespin box",
+      "low cabinet",
+      "hanging rail",
+      "runway marker",
+      "grass verge",
+      "order notebook",
+      "coin dish",
+      "track",
+      "cable",
+      "watchtower",
+      "conical roof",
+      "tiled rooftop",
+      "paved square",
+      "orchard grass",
+      "stepped gable",
+      "stone entrance",
+      "flagpole",
+      "serving tray",
+      "paintbrush",
+      "test sheet",
+      "wooden palette",
+      "watercolor pan",
+      "manual book press",
+      "hardcover notebook",
+      "cover paper",
+      "aquatic leaf",
+      "water lily bud",
+      "reed stem",
+      "checked towel",
+      "washbasin",
+      "stone rim",
+      "train window",
+      "wildflower cluster",
+      "stone marker",
+      "trail marker",
+      "mountain refuge",
+      "snow shovel",
+      "serving platter",
+      "rhododendron flower",
+      "mountain grass",
+      "coffee cherry",
+      "greenhouse pane",
+      "door wreath",
+      "sunflower seed",
+      "stucco parapet",
+      "seaside house",
+      "coastal shrub",
+      "hinged gate leaf",
+      "stone post",
+      "calamansi",
+      "red onion",
+      "bougainvillea branch",
+      "woven placemat",
+      "cotton string",
+      "open carton",
+      "vintage sunglass",
+      "azulejo panel",
+      "rain gutter",
+      "decorative tray",
+      "open cupboard",
+      "shell shaped dish",
+      "ink bottle",
+      "paperweight",
+      "wooden serving board",
+      "stone heater",
+      "wooden ladle",
+      "wall thermometer",
+      "snack carton",
+      "cracker tin",
+      "drip saucer",
+      "ceramic teapot",
+      "vinyl record",
+      "longan branch",
+      "tea caddy",
+      "lacquer table",
+      "grape bunch",
+      "wooden keepsake box",
+      "grape cluster",
+      "market crate",
+      "pruning tie",
+      "log holder",
+      "mantel shelf",
+      "knitted cushion",
+      "pickle",
+      "mustard jar",
+      "seagrass clump",
+      "coral rock",
+      "sand patch",
+      "basil bunch",
+      "lotus flower",
+      "stone edge",
+      "brass lamp base",
+      "hardback book",
+      "shepherd hut",
+      "pendulum clock",
+      "ikat curtain",
+      "welcome mat",
+      "amigurumi toy",
+      "crochet hook",
+      "stone arch",
+      "diner chair",
+      "tile shelf",
+      "plant saucer",
+      "wreath",
+      "pistachio dish",
+      "walkman",
+      "cassette case",
+      "headphone",
+      "pop up book",
+      "pennant string",
+      "tabletop",
+      "fried chicken platter",
+      "side dish",
+      "framed painting",
+      "life ring",
+      "rope",
+      "mailbox",
+      "stollen loaf",
+      "powdered sugar",
+      "tractor",
+      "barn",
+      "straw bale",
+      "paved lane",
+      "paper model",
+      "display plinth",
+      "paper tree",
+      "towel shelf",
+      "soap jar",
+      "miniature house",
+      "wooden ornament",
+      "counter edge",
+      "wooden plant label",
+      "lemonade pitcher",
+      "salsa jar",
+      "stucco facade",
+      "painted door",
+      "billiard cue",
+      "triangle rack",
+      "billiard ball",
+      "chalk cube",
+      "paper artwork",
+      "paper vase",
+      "geometric accent",
+      "syrup bottle",
+      "blender",
+      "pale stone",
+      "woodland mushroom",
+      "fireplace screen",
+      "hearth rug",
+      "pond log",
+      "shell pattern",
+      "milk tea pitcher",
+      "bread plate",
+      "coin tray",
+      "snow globe",
+      "wooden feeder",
+      "sparrow",
+      "dessert glass",
+      "rail ticket",
+      "earthenware pot",
+      "iron gate",
+      "clipped hedge",
+      "stone urn",
+      "pickle bowl",
+      "checked napkin",
+      "glass cabinet greenhouse",
+      "painted gate",
+      "windbreak fence",
+      "rosemary sprig",
+      "garden trowel",
+      "ceramic saucer",
+      "biscuit jar",
+      "painted elephant",
+      "carved bird",
+      "wooden horse",
+      "display table",
+      "teal cloth",
+      "wrapped parcel",
+      "painted counter",
+      "wooden display tray",
+      "brass tea spoon",
+      "metal trough",
+      "linen quilt",
+      "coral pillow",
+      "bedside stool",
+      "passenger airplane",
+      "terminal",
+      "vineyard",
+      "eucalyptus trunk",
+      "bark",
+      "citrus dish",
+      "checked awning",
+      "rest stop",
+      "rest shelter",
+      "direction post",
+      "paved turnout",
+      "cultivated valley",
+      "country path",
+      "low hill",
+      "curtain rod",
+      "console table",
+      "runner rug",
+      "country inn",
+      "cobblestone street",
+      "metal wheel rim",
+      "grape crate",
+      "vineyard trellis",
+      "harvest hut",
+      "stone lane",
+      "sugar dish",
+      "broad branch",
+      "twig nest",
+      "autumn leave",
+      "compact camera",
+      "measuring tape",
+      "fabric lining",
+      "passenger coach",
+      "stone viaduct",
+      "small station",
+      "autumn tree",
+      "chili bowl",
+      "rocky shore",
+      "river mouth",
+      "large stone",
+      "low stool",
+      "desk lamp",
+      "small curtain",
+      "low step",
+      "paved plaza",
+      "clipped tree",
+      "paper candy box",
+      "crocheted tablecloth",
+      "garden notebook",
+      "stone shelf",
+      "lunch tin",
+      "wooden cask",
+      "fabric pennant",
+      "display platform",
+      "low railing",
+      "trimmed tree",
+      "skyline",
+      "striped cotton mat",
+      "handwheel",
+      "metal hinge",
+      "stone embankment",
+      "protective railing",
+      "velvet canopy",
+      "popcorn warmer",
+      "floating leaf",
+      "pink lotus bloom",
+      "shaving towel",
+      "soap tin",
+      "bathroom shelf",
+      "camping tent",
+      "enamel mug",
+      "pen",
+      "bath stool",
+      "towel rack",
+      "soap bar",
+      "produce crate",
+      "sandstone walkway",
+      "entrance step",
+      "flag",
+      "olive sprig",
+      "display watch",
+      "espresso cup",
+      "tea towel",
+      "kitchen shelf",
+      "kickstand",
+      "travel helmet",
+      "toast",
+      "spice shelf",
+      "house door",
+      "letter paper",
+      "pen tray",
+      "walking scarf",
+      "flour bowl",
+      "dough scraper",
+      "wooden entrance",
+      "fabric flag",
+      "wool glove",
+      "knitted scarf",
+      "wall peg",
+      "timber porch",
+      "leafy pot",
+      "pale rock",
+      "sedge clump",
+      "stone footbridge",
+      "water chute",
+      "paper sleeve",
+      "enamel pot",
+      "cooktop",
+      "oak shelf",
+      "tile backsplash",
+      "wooden plate",
+      "biscuit tin",
+      "coconut flake",
+      "bamboo hook",
+      "roof",
+      "clear stream",
+      "hydrangea shrub",
+      "cocoa mug",
+      "sea wave",
+      "wooden cutting board",
+      "sandstone railing",
+      "clear pool",
+      "spring shoot",
+      "carved ledge",
+      "pastry plate",
+      "distant sea",
+      "brass hook",
+      "wooden mooring post",
+      "dock cleat",
+      "lane marker",
+      "lakeside shrub",
+      "clean paving tile",
+      "glass decanter",
+      "crystal candlestick",
+      "shelf liner",
+      "cabinet handle",
+      "paving tile",
+      "thatched cottage",
+      "grape tray",
+      "stone stand",
+      "glass roof",
+      "cake tin",
+      "promenade",
+      "sailboat",
+      "linen fabric",
+      "thread box",
+      "spool",
+      "oven dish",
+      "cilantro",
+      "oak branch",
+      "nest",
+      "interior door",
+      "stall cloth",
+      "market counter",
+      "display window",
+      "cargo crate",
+      "lifebuoy",
+      "bamboo stake",
+      "cotton boll",
+      "garden edging",
+      "hay",
+      "timber post",
+      "canva bag",
+      "parasol pole",
+      "straw nest",
+      "wooden wall",
+      "spiral stair",
+      "printed tin",
+      "firewood stack",
+      "chimney cap",
+      "bagel",
+      "baking tray",
+      "heatproof cloth",
+      "sesame jar",
+      "calf",
+      "oak vanity",
+      "country lane",
+      "sliding door",
+      "route map",
+      "small cup",
+      "silver tray",
+      "wooden pin",
+      "bowling ball",
+      "enamel food tin",
+      "park bench",
+      "greenhouse",
+      "linen mat",
+      "porcelain spoon",
+      "work table",
+      "cotton tie",
+      "nut topping",
+      "bookshelf",
+      "art desk",
+      "keepsake frame",
+      "cotton paper",
+      "craft table",
+      "hanok roof",
+      "chessboard",
+      "chess piece",
+      "paper step",
+      "serving trolley",
+      "grape dish",
+      "glue pot",
+      "card sheet",
+      "color board",
+      "upholstery tack",
+      "wooden leg",
+      "satin ribbon",
+      "library card",
+      "fruit cart",
+      "wooden guardrail",
+      "spoked wheel",
+      "metal screen",
+      "key ring",
+      "ticket holder",
+      "pond edge",
+      "wooden bed marker",
+      "bread tray",
+      "paper bag",
+      "drink counter",
+      "railing planter",
+      "terrazzo lamp",
+      "terminal mirror",
+      "jet bridge",
+      "airport apron",
+      "terminal seat",
+      "sandwich",
+      "pickle slice",
+      "display stand",
+      "gardening book",
+      "greenhouse glass",
+      "trail map",
+      "compass",
+      "rain jacket",
+      "walking shoe",
+      "dry log",
+      "willow branch",
+      "stick lodge",
+      "travel guide",
+      "cotton scarf",
+      "jewelry case",
+      "highball glass",
+      "mint leaf",
+      "cookie plate",
+      "wooden cart",
+      "herb crate",
+      "market lamp",
+      "signal post",
+      "luggage trunk",
+      "chrome handrail",
+      "flat stone",
+      "driftwood branch",
+      "water dish",
+      "tool case",
+      "soy sauce dish",
+      "chopstick rest",
+      "rounded stone",
+      "hillside grass",
+      "reed tray",
+      "whole pawpaw",
+      "pawpaw leaf",
+      "kitchen work surface",
+      "motorboat",
+      "buoy",
+      "pier",
+      "wall cabinet",
+      "tabletop fan",
+      "airliner wing",
+      "coral reef",
+      "sand rim",
+      "palm canopy",
+      "clay tile",
+      "timber doorway",
+      "arched gate",
+      "clipped shrub",
+      "display tray",
+      "coin",
+      "note card",
+      "cabinet",
+      "willow basket",
+      "roasted pear",
+      "pumpkin seed",
+      "root",
+      "brass watering spout",
+      "pizza wheel",
+      "green pepper",
+      "glazed planter",
+      "glass inkwell",
+      "letter",
+      "paper box",
+      "sandcastle",
+      "sand bucket",
+      "flower spike",
+      "scooter",
+      "bicycle post",
+      "directional sign",
+      "wall",
+      "seed tray",
+      "seed",
+      "magnolia branch",
+      "blossom",
+      "picnic mat",
+      "rubber ball",
+      "ceramic basin",
+      "framed mirror",
+      "roasted coffee bean",
+      "pour over filter",
+      "grass bed",
+      "watering hose",
+      "wooden side table",
+      "reading glass case",
+      "brass pull chain",
+      "tasting plate",
+      "planted border",
+      "small pitcher",
+      "counter cloth",
+      "seed ball",
+      "folded throw",
+      "coffee phin",
+      "fruit leaf",
+      "grape arbor",
+      "brick paving",
+      "grape leaf",
+      "raised flower bed",
+      "yellow awning",
+      "tiled plinth",
+      "brick bed edge",
+      "pepper shaker",
+      "salt shaker",
+      "cork stopper",
+      "butter skillet",
+      "sour cream bowl",
+      "dill sprig",
+      "steel pylon",
+      "mooring bollard",
+      "quay edge",
+      "canal boat",
+      "wooden bed",
+      "bedside rug",
+      "folded sheet",
+      "salt marsh grass",
+      "tidal flat",
+      "porcelain saucer",
+      "rambutan fruit",
+      "small fruit knife",
+      "timber trellis",
+      "garden hose",
+      "jam bowl",
+      "butter spreader",
+      "closed umbrella",
+      "coat hook rail",
+      "doormat",
+      "planted bed",
+      "copper tray",
+      "cream plate",
+      "eraser",
+      "watercolor tin",
+      "motel canopy",
+      "luggage rack",
+      "ski boot",
+      "mitten",
+      "low shelf",
+      "lily pad",
+      "water lily",
+      "paper stone",
+      "display frame",
+      "rice sheaf",
+      "curtido",
+      "paper layer",
+      "low shrub",
+      "amethyst cluster",
+      "mineral specimen",
+      "coral",
+      "date",
+      "patterned cloth",
+      "paper sail",
+      "crossbeam",
+      "olive branch",
+      "stair tread",
+      "olive dish",
+      "spiral shell",
+      "coral fragment",
+      "cotton lining",
+      "dead end sign",
+      "street lamp",
+      "tugboat model",
+      "container ship model",
+      "port chart",
+      "scale ruler",
+      "harvest basket",
+      "glass dome",
+      "craft scissor",
+      "paper roll",
+      "mooring post",
+      "small boat",
+      "dock rope",
+      "plate stand",
+      "travel book",
+      "painted tin box",
+      "glass tumbler",
+      "colored vase",
+      "ceramic shelf stop",
+      "talavera plate",
+      "table knife",
+      "fence post",
+      "wooden barn",
+      "grass clump",
+      "feather",
+      "oak table",
+      "hay manger",
+      "water pail",
+      "wooden stall",
+      "seedling tray",
+      "leather glove",
+      "blue cap",
+      "bronze figurine",
+      "crusty bread",
+      "olive oil dish",
+      "basil leaf",
+      "pool",
+      "paved courtyard",
+      "shade eave",
+      "picnic basket",
+      "arepa",
+      "rescue post",
+      "safety rope",
+      "citrus basket",
+      "display case",
+      "wood bench",
+      "flour tin",
+      "wedding arch",
+      "paper flower",
+      "scallion dish",
+      "seasoning bottle",
+      "support stake",
+      "veranda railing",
+      "bay",
+      "gingham cloth",
+      "flower vase",
+      "key tray",
+      "airfield grass",
+      "shower head",
+      "bamboo rack",
+      "cream tile",
+      "cafe awning",
+      "snack tin",
+      "leather boot",
+      "shoe brush",
+      "village lane",
+      "field flower",
+      "sturdy branch",
+      "stitched quilt",
+      "bedside table",
+      "reading lamp",
+      "garden shrub",
+      "foliage",
+      "column",
+      "berry branch",
+      "ripe berry",
+      "green berry",
+      "sunlit leave",
+      "dressing table tray",
+      "seed head",
+      "lake water",
+      "grooming comb",
+      "rubber mat",
+      "wall bracket",
+      "landing rug",
+      "stair post",
+      "pressed flower",
+      "clothbound notebook",
+      "spaghetti plate",
+      "cured ham",
+      "herb bundle",
+      "flower tag",
+      "hurricane lantern",
+      "wooden easel",
+      "canva",
+      "folded shirt",
+      "wool rug",
+      "roof rack",
+      "road map",
+      "sea sponge",
+      "shallow basket",
+      "grassy ridge",
+      "gemstone",
+      "viaduct",
+      "guardrail",
+      "concrete support",
+      "paperback",
+      "cotton cover",
+      "sharing bowl",
+      "movie ticket",
+      "timber rail",
+      "pepper mill",
+      "heat mat",
+      "paper sack",
+      "bread box",
+      "produce bag",
+      "coconut cake",
+      "milk pitcher",
+      "reading desk",
+      "bookmark",
+      "birch branch",
+      "blossom cluster",
+      "grated cheese bowl",
+      "stone pedestal",
+      "courtyard tile",
+      "tree cavity",
+      "insect",
+      "berry cluster",
+      "steam locomotive",
+      "signal hut",
+      "track lever",
+      "jackfruit",
+      "pond",
+      "opened letter",
+      "grass seed",
+      "grass stem",
+      "nest opening",
+      "clover leaf",
+      "apple pastry",
+      "drink bottle",
+      "newspaper kiosk",
+      "street clock",
+      "iron bollard",
+      "farofa bowl",
+      "heatproof trivet",
+      "display rack",
+      "ceramic butter dish",
+      "bread knife",
+      "cotton laundry bag",
+      "red brick bed",
+      "garden marker",
+      "leafy groundcover",
+      "wooden boundary post",
+      "wild grass",
+      "turquoise plate",
+      "wicker sofa",
+      "ceramic plant pot",
+      "painted shelf",
+      "cotton blanket",
+      "tissue box",
+      "stained glass pane",
+      "straw mat",
+      "boat railing",
+      "deck bench",
+      "climbing branch",
+      "glass terrarium",
+      "brass trophy",
+      "balcony",
+      "potting table",
+      "folding entry step",
+      "canva stool",
+      "blank sign",
+      "stone verge",
+      "glass case",
+      "price stand",
+      "gateway",
+      "stone courtyard",
+      "date palm",
+      "book table",
+      "floor cushion",
+      "turmeric dish",
+      "fountain",
+      "cheese paper",
+      "hand saw",
+      "garden shear",
+      "metal hook",
+      "produce scale",
+      "market awning",
+      "soup pot",
+      "riverside awning",
+      "compartment tray",
+      "vintage television",
+      "paperback book",
+      "glass server",
+      "coffee bean jar",
+      "pruning hook",
+      "paper coil",
+      "chart table",
+      "safety buoy",
+      "porthole",
+      "paper plinth",
+      "cut paper window",
+      "plate",
+      "oak counter",
+      "garden boot",
+      "tropical branch",
+      "ripe fruit",
+      "feeder",
+      "moon",
+      "glass plate",
+      "sauce cup",
+      "firewood basket",
+      "tile hearth",
+      "paper ornament",
+      "seagrass cluster",
+      "limestone piece",
+      "water plant",
+      "aquarium glass",
+      "bamboo skewer",
+      "grass airstrip",
+      "landing wheel",
+      "rotor mast",
+      "riverbank tree",
+      "shoe cabinet",
+      "brass key dish",
+      "hillside stone",
+      "wildflower stem",
+      "fabric basket",
+      "serving hatch",
+      "tiled counter",
+      "wooden cradle",
+      "pier rail",
+      "harbor shed",
+      "wooden display case",
+      "felt insert",
+      "harbor water",
+      "matching bowl",
+      "stone canal edge",
+      "tram",
+      "bridge",
+      "brick facade",
+      "roasted vegetable dish",
+      "cold cut platter",
+      "scale",
+      "bamboo tray",
+      "indigo cloth",
+      "wooden chopstick rest",
+      "planter box",
+      "paper ticket",
+      "bound sheaf",
+      "field basket",
+      "pruning twine",
+      "ticket counter",
+      "waiting seat",
+      "route clock",
+      "stethoscope",
+      "herb plate",
+      "enamel watering can",
+      "toast slice",
+      "coral cushion",
+      "closed shutter",
+      "patterned box",
+      "flag string",
+      "orange cat",
+      "upholstered ottoman",
+      "pendant light",
+      "wooden beam",
+      "burrow entrance",
+      "tree root",
+      "nautical chart",
+      "cabin opening",
+      "pond rim",
+      "reflected color",
+      "replacement wheel",
+      "paint tin",
+      "screwdriver",
+      "sandpaper",
+      "limestone crevice",
+      "lichen",
+      "ferry shelter",
+      "wooden platform",
+      "water channel",
+      "fair canopy",
+      "round serving tray",
+      "farm trailer",
+      "leash",
+      "paw towel",
+      "door",
+      "firewood log",
+      "cast iron stove",
+      "venetian mask",
+      "small rug",
+      "apricot blossom branch",
+      "feed basket",
+      "metal tray",
+      "tiled step"
     ]
   }
 }

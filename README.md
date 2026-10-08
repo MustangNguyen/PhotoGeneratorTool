@@ -90,14 +90,15 @@ Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay l�
 1. Mỗi lượt lập context, ứng dụng gán cho từng concept một ảnh mẫu Final chưa dùng (theo GỢI Ý PHÂN BỔ). Model lấy chủ thể/ý chủ đạo của gợi ý rồi tự dựng cảnh mới và trả lại `seed_id`; context lưu `final_seed` để lượt sau không lặp gợi ý.
 2. Model phải trả `main_subject`: danh từ tiếng Anh chung, số ít (ví dụ `rabbit`, `bicycle`). Mỗi chủ thể chỉ được dùng tối đa `1 + số context / 500` lần (756 mục → 2 lần, 1.000 mục → 3 lần); đổi giống, màu, tính từ hay bối cảnh vẫn tính là cùng chủ thể. Danh từ quá chung như `machine`, `table`, `tree` cần cả từ đứng trước trùng mới tính là một chủ thể.
 3. Context cũ không có `main_subject` được suy ra từ cụm danh từ đầu của `key`. Cách suy ra này là heuristic và có thể sai với key không bắt đầu bằng chủ thể.
-4. Prompt lập context liệt kê toàn bộ chủ thể đã đủ giới hạn và các chủ thể dùng nhiều nhất, thay vì chỉ vài chục dấu vân tay gần nhất.
+4. Prompt lập context liệt kê toàn bộ chủ thể đã đủ giới hạn và chủ thể vừa dùng trong 100 mục gần nhất. Dấu vân tay chỉ còn một mẫu nhỏ (khoảng 3.000 ký tự), vì bộ lọc code đã tự kiểm trùng trên toàn bộ lịch sử.
+5. Mỗi ảnh mẫu trong `final-index.json` có `main_subject` tiếng Anh. Gợi ý không giao ảnh mẫu có chủ thể đã đủ, vừa dùng, hoặc thuộc họ đã hết chỗ. Trong một lượt, hai gợi ý không cùng chủ thể và không giao quá số chỗ còn lại của một họ. Dòng gợi ý ghi `main_subject` và họ để model giữ đúng chủ thể. Khi thêm ảnh vào Final, chạy lại `python3 tag_final_subjects.py`: lệnh dùng phiên Codex để gắn nhãn, chỉ xử lý ảnh chưa có nhãn.
 
 ### Họ chủ thể và vật phụ (`subject-families.json`)
 
 Giới hạn theo `main_subject` không bắt được việc đổi sang con/vật cùng loại: chuột lang gặm cỏ thay cho thỏ gặm rau, nồi hầm thay cho nồi súp. File này gom 77 họ chủ thể (thú nhỏ ăn cỏ, nồi và món hầm, bánh mì, quần áo/khăn/túi…), mỗi họ liệt kê danh từ tiếng Anh thành viên.
 
 - Chủ thể thuộc họ có cụm cuối dài nhất khớp với `main_subject` (context cũ: cụm danh từ đầu của `key`). Chủ thể chưa có trong file chỉ chịu giới hạn theo chủ thể.
-- Mỗi họ dùng tối đa `1 + số context × weight / 120` lần (756 mục, weight 1 → 7 lần). Họ rộng như mặt tiền, cửa tiệm, trái cây, hoa dùng weight 2–3. Prompt liệt kê các họ đã đủ.
+- Mỗi họ dùng tối đa `1 + số context × weight / 120` lần (756 mục, weight 1 → 7 lần). Họ rộng như mặt tiền, cửa tiệm, trái cây, hoa dùng weight 2–3. Trong 50 mục gần nhất, mỗi họ dùng tối đa `weight` lần. Prompt liệt kê các họ còn chỗ kèm số concept mỗi họ còn nhận, và tên các họ đã đầy.
 - Planner trả thêm `props`: 3–6 vật phụ tiếng Anh. Các vật trong `props.tracked` được đếm trên toàn bộ lịch sử (context cũ: tìm trong prompt tiếng Anh). Vật đã dùng từ `1 + số context / 25` lần trở lên là "quá quen"; concept có từ 2 vật quá quen trở lên bị loại.
 - **Tự học:** planner trả thêm `subject_family` (id họ có sẵn, hoặc họ mới dạng `id: nhãn`). Chủ thể đã có trong file luôn giữ họ của nó, nên không thể đặt họ mới để né họ đã đủ. Khi context được lưu, chủ thể chưa có họ được ghi vào `learned` của họ đó (họ mới có `"auto": true`), và vật phụ mới được ghi vào `props.learned`. Log batch báo số mục đã học. Nên thỉnh thoảng xem lại các mục `learned`/`auto` và sửa nếu model xếp sai họ.
 - Một từ thuộc hai họ sẽ báo lỗi khi đọc file. Thêm họ, thành viên hay vật phụ bằng cách sửa file; ứng dụng đọc lại khi file đổi.

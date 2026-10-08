@@ -22,7 +22,7 @@ Mặc định dùng **Codex CLI đã đăng nhập trên máy**. CLI phải hỗ
 
 1. Nhập 1–1.000 ảnh và bấm tạo.
 2. Tool viết bản nháp theo nhóm tối đa 20, lọc trùng, rồi gọi một lượt AI duyệt cả nhóm. Mục tốt giữ nguyên; mục lỗi được sửa hoặc loại và bù ở lượt tiếp. Chỉ context qua duyệt và kiểm tra lại mới được lưu để tạo ảnh. Sau khi đủ context, mặc định tạo 4 ảnh đồng thời.
-3. Trong cài đặt, có thể chọn từ 1 đến 8 ảnh đồng thời. Đây là số tác vụ chạy cùng lúc, không phải gửi toàn bộ lô 1.000 ảnh trong một lần.
+3. Trong cài đặt, mục **Nguồn tạo ảnh** cho bật nhiều nguồn cùng lúc (Codex, Antigravity, Digen, OpenAI API), mỗi nguồn 0–8 luồng riêng (0 là tắt). Các nguồn chia nhau ảnh trong lô; nguồn chưa sẵn sàng bị bỏ qua, nguồn gặp lỗi ngừng nhận ảnh mới còn nguồn khác vẫn chạy. Context vẫn lập bằng nhà cung cấp chính. Đây là số tác vụ chạy cùng lúc, không phải gửi toàn bộ lô 1.000 ảnh trong một lần.
 4. Bảng hoạt động trực tiếp cho biết từng ảnh đang chuẩn bị, chờ dịch vụ trả ảnh, lưu file hay kiểm tra gần trùng, kèm thời gian đã chạy. Đây là trạng thái thực, không phải phần trăm ước đoán.
 5. Khi bấm tạm dừng, các ảnh đang tạo sẽ hoàn tất rồi lô mới dừng; tiếp tục vẫn giữ nguyên ảnh đã xong.
 6. Mở ảnh để theo dõi trạng thái, xem context, lưới 4–8, mảnh xáo trộn và duyệt/loại. Hộp chi tiết tự cập nhật mà không làm mất trạng thái preview.
@@ -37,6 +37,8 @@ Mặc định dùng **Codex CLI đã đăng nhập trên máy**. CLI phải hỗ
 ## Quota và kết nối
 
 Codex CLI dùng quota theo tài khoản đang đăng nhập. Chạy song song không làm giảm quota: mỗi ảnh đầu ra vẫn dùng quota như bình thường. Mặc định 4 tác vụ giúp tăng tốc, nhưng mức phù hợp còn tùy giới hạn và độ ổn định của provider; nếu hay lỗi, giảm concurrency trong cài đặt. Không có cam kết tạo đủ 1.000 ảnh trong một hạn mức. Khi quota hoặc provider lỗi, batch dừng và giữ kết quả; tiếp tục sau hoặc thử lại riêng ảnh lỗi. Yêu cầu đang chạy khi mất điện/timeout có thể đã dùng quota; ứng dụng không tự gọi lại để tránh tính phí hai lần.
+
+Lập context và tạo ảnh chạy chồng lên nhau: mỗi lượt context (tối đa 20) được duyệt xong là đưa ngay vào hàng tạo ảnh, trong khi planner lập lượt kế tiếp. Lời gọi lập context chạy thêm ngoài số slot concurrency của ảnh. Nếu lập context lỗi, các ảnh đã có context vẫn tạo xong rồi batch mới chuyển sang bị chặn. Nếu mọi nguồn ảnh lỗi, planner bị hủy luôn.
 
 Trang lấy trạng thái mới từ máy chủ mỗi vài giây; đồng hồ của ảnh được cập nhật tại trình duyệt mỗi giây và không tạo thêm yêu cầu. Nếu mất kết nối, đồng hồ dừng ở lần cập nhật cuối và giao diện báo dữ liệu có thể đã cũ.
 

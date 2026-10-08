@@ -50,6 +50,27 @@ class ContextReviewTests(unittest.TestCase):
         self.assertIn("CURRENT_CONTENT_DIRECTION", accepted[0]["prompt"])
         self.assertIn("Vật thể không có thật", rejected[0])
 
+    def test_revise_keeps_planner_subject_family_and_props(self):
+        original = concept(1) | {"main_subject": "coin collection", "subject_family": "coin_collection", "props": "velvet tray, magnifier"}
+        revised = concept(9) | {"key": "souvenir coins kept in an open wooden box"}
+        accepted, rejected = apply_review({"reviews": [
+            {"index": 0, "decision": "revise", "reason": "Làm cảnh rõ hơn", "revised": revised},
+        ]}, [original], [])
+        self.assertFalse(rejected)
+        self.assertEqual("coin collection", accepted[0]["main_subject"])
+        self.assertEqual("coin_collection", accepted[0]["subject_family"])
+        self.assertEqual("velvet tray, magnifier", accepted[0]["props"])
+
+    def test_revise_cannot_dodge_a_recent_family_by_rewording_the_key(self):
+        peer = concept(3) | {"main_subject": "coin collection", "subject_family": "coin_collection"}
+        original = concept(1) | {"main_subject": "coin case", "subject_family": "coin_collection"}
+        revised = concept(9) | {"key": "souvenir coins kept in an open wooden box"}
+        accepted, rejected = apply_review({"reviews": [
+            {"index": 0, "decision": "revise", "reason": "Sửa", "revised": revised},
+        ]}, [original], [peer])
+        self.assertEqual([], accepted)
+        self.assertTrue(any("họ chủ thể" in reason for reason in rejected), rejected)
+
     def test_revised_concept_cannot_duplicate_a_peer(self):
         duplicate = concept(2)
         accepted, rejected = apply_review({"reviews": [

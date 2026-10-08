@@ -7,7 +7,7 @@ import re
 from typing import Any
 
 from .axes import describe
-from .diversity import FIELDS, _IMAGE_RULES, _key_head, _same_subject, _subject_words, content_direction, validate_concepts
+from .diversity import FIELDS, _IMAGE_RULES, content_direction, validate_concepts
 
 
 _REVIEW_LENGTHS = {
@@ -182,15 +182,16 @@ def apply_review(
             concept = dict(original)
         else:
             revised = dict(entry["revised"])
-            # Keep the planner's main subject when the revision still describes it.
-            original_subject = tuple(_subject_words(str(original.get("main_subject", ""))))
-            if original_subject and _same_subject(original_subject, tuple(_key_head(revised["key"]))):
+            # The review only polishes wording, so the planner's subject, family and props
+            # stay with the concept; guessing them from the revised key let rewrites such as
+            # "souvenir coins kept in..." slip past the subject and family caps.
+            if original.get("main_subject"):
                 revised["main_subject"] = original["main_subject"]
-                if original.get("subject_family"):
-                    claimed = original["subject_family"]
-                    if original.get("family_label"):
-                        claimed += f": {original['family_label']}"
-                    revised["subject_family"] = claimed
+            if original.get("subject_family"):
+                claimed = original["subject_family"]
+                if original.get("family_label"):
+                    claimed += f": {original['family_label']}"
+                revised["subject_family"] = claimed
             if original.get("props"):
                 revised["props"] = original["props"]
             peers = list(history) + keep_peers + list(accepted_by_index.values())

@@ -567,6 +567,10 @@ def subject_limit(history_size: int) -> int:
 FAMILIES_PATH = Path(__file__).resolve().parent.parent / "subject-families.json"
 FAMILY_REPEAT_EVERY = 120
 PROP_REPEAT_EVERY = 25
+# The caps above scale with the whole catalogue, so one batch could still spend a
+# family's entire allowance at once.  These windows spread repeats across batches.
+SUBJECT_RECENT_WINDOW = 100  # the same main subject at most once per 100 recent contexts
+FAMILY_RECENT_WINDOW = 50  # a family at most `weight` times per 50 recent contexts
 _FAMILY_LOCK = threading.Lock()
 _FAMILY_WRITE_LOCK = threading.Lock()
 _FAMILY_CACHE_KEY: tuple[str, int, int] | None = None
@@ -711,6 +715,10 @@ def family_limit(history_size: int, family: str | None = None) -> int:
     return 1 + int(max(0, history_size) * weight // FAMILY_REPEAT_EVERY)
 
 
+def recent_family_limit(family: str | None) -> int:
+    return max(1, int(_load_families()["weights"].get(family, 1.0))) if family else 1
+
+
 def prop_limit(history_size: int) -> int:
     return 1 + max(0, history_size) // PROP_REPEAT_EVERY
 
@@ -747,6 +755,16 @@ def _family_summary(history: list[dict[str, Any]]) -> str:
 def _overused_props(history: list[dict[str, Any]], limit: int) -> list[str]:
     counts = Counter(prop for item in history if isinstance(item, dict) for prop in _props_of(item))
     return [" ".join(prop) for prop, number in counts.most_common() if number >= limit]
+
+
+def _recent_summary(history: list[dict[str, Any]]) -> str:
+    """Subjects and families that the recent windows block right now."""
+    items = [item for item in history if isinstance(item, dict)]
+    subjects = sorted({label for item in items[-SUBJECT_RECENT_WINDOW:] if (label := _subject_label(_subject_of(item)))})
+    families = _load_families()
+    counts = Counter(family for item in items[-FAMILY_RECENT_WINDOW:] if (family := _concept_family(item)))
+    full = [families["labels"].get(family, family) for family, number in counts.most_common() if number >= recent_family_limit(family)]
+    return f"Chủ thể: {', '.join(subjects) or '(chưa có)'}\nHọ: {'; '.join(full) or '(chưa có)'}"
 
 
 def _subject_counts(history: list[dict[str, Any]]) -> Counter[str]:
@@ -889,6 +907,9 @@ CHỦ THỂ CHÍNH ĐÃ ĐỦ — BỊ LOẠI TỰ ĐỘNG (mỗi chủ thể t�
 
 CHỦ THỂ CHÍNH ĐÃ DÙNG NHIỀU NHẤT (toàn bộ lịch sử)
 {common_subjects}
+
+CHỦ THỂ VÀ HỌ VỪA DÙNG GẦN ĐÂY — BỊ LOẠI TỰ ĐỘNG (chủ thể tối đa 1 lần trong {SUBJECT_RECENT_WINDOW} mục gần nhất; họ tối đa theo độ rộng trong {FAMILY_RECENT_WINDOW} mục gần nhất, kể cả các concept đã lập trước trong batch này)
+{_recent_summary(history)}
 
 DANH SÁCH HỌ CHỦ THỂ (id và nhãn)
 {family_ids}
@@ -1090,6 +1111,12 @@ def validate_concepts(
                 f"(giới hạn {max_uses}); chọn chủ thể khác"
             )
             continue
+        if subject and any(_same_subject(subject, other) for other in comparison_subjects[-SUBJECT_RECENT_WINDOW:]):
+            errors.append(
+                f"concept {index} ({normalized['title']}): chủ thể chính “{_subject_label(subject)}” vừa dùng trong "
+                f"{SUBJECT_RECENT_WINDOW} mục gần nhất; chọn chủ thể khác"
+            )
+            continue
         family, new_label = _resolve_family(subject, normalized.pop("subject_family", ""))
         if new_label:
             new_label = new_family_labels.setdefault(family, new_label)
@@ -1100,6 +1127,14 @@ def validate_concepts(
             errors.append(
                 f"concept {index} ({normalized['title']}): họ chủ thể “{label}” đã dùng "
                 f"{family_uses} lần (giới hạn {max_family}); chọn họ chủ thể khác"
+            )
+            continue
+        recent_family_uses = sum(other == family for other in comparison_families[-FAMILY_RECENT_WINDOW:]) if family else 0
+        if family and recent_family_uses >= recent_family_limit(family):
+            label = _load_families()["labels"].get(family) or new_label or family
+            errors.append(
+                f"concept {index} ({normalized['title']}): họ chủ thể “{label}” đã dùng {recent_family_uses} lần "
+                f"trong {FAMILY_RECENT_WINDOW} mục gần nhất; chọn họ chủ thể khác"
             )
             continue
         props = _props_of(normalized)

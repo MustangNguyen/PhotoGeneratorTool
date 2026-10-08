@@ -219,6 +219,36 @@ class DiversityTests(unittest.TestCase):
         self.assertEqual("small_pet", accepted[0]["subject_family"], errors)
         self.assertNotIn("family_label", accepted[0])
 
+    def test_recent_window_spreads_a_family_across_batches(self):
+        def filler(n):
+            return concept(title=f"Mục lấp {n}", subject=f"Vật q{n}", scene=f"Nơi r{n}", story=f"Chuyện s{n}",
+                           key=f"filler t{n} u{n}", main_subject=f"widget{n}")
+        rabbit = concept(title="Thỏ trong chuồng", subject="Thỏ ăn rau", scene="Chuồng gỗ", story="Bữa trưa",
+                         key="rabbit eating greens in a hutch", main_subject="rabbit")
+        hamster = concept(title="Chuột hamster trong lồng", subject="Hamster chạy bánh xe", scene="Lồng sáng",
+                          story="Giờ chơi", key="hamster running a wheel in a cage", main_subject="hamster")
+        fillers = [filler(n) for n in range(130)]
+        accepted, errors = validate_concepts({"concepts": [hamster]}, fillers + [rabbit], 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("họ chủ thể" in error and "gần nhất" in error for error in errors), errors)
+        accepted, errors = validate_concepts({"concepts": [hamster]}, [rabbit] + fillers, 1)
+        self.assertEqual(1, len(accepted), errors)
+
+    def test_recent_window_blocks_same_subject_even_under_the_global_cap(self):
+        def filler(n):
+            return concept(title=f"Mục lấp {n}", subject=f"Vật q{n}", scene=f"Nơi r{n}", story=f"Chuyện s{n}",
+                           key=f"filler t{n} u{n}", main_subject=f"widget{n}")
+        squirrel = concept(title="Sóc gặm hạt", subject="Sóc trên cành", scene="Công viên", story="Bữa chiều",
+                           key="squirrel eating a nut on a branch", main_subject="squirrel")
+        again = concept(title="Sóc nhặt hạt dẻ", subject="Sóc dưới gốc", scene="Vườn nhà", story="Mùa thu",
+                        key="squirrel gathering chestnuts in a garden", main_subject="squirrel")
+        fillers = [filler(n) for n in range(520)]
+        accepted, errors = validate_concepts({"concepts": [again]}, fillers + [squirrel], 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("“squirrel” vừa dùng" in error for error in errors), errors)
+        accepted, errors = validate_concepts({"concepts": [again]}, [squirrel] + fillers, 1)
+        self.assertEqual(1, len(accepted), errors)
+
     def test_subject_cap_grows_slowly_with_catalogue_size(self):
         self.assertEqual(1, subject_limit(0))
         self.assertEqual(2, subject_limit(756))

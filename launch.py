@@ -3,6 +3,7 @@
 import argparse
 import fcntl
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -19,9 +20,18 @@ def running():
     try:
         with urllib.request.urlopen(URL + '/api/settings', timeout=1) as response:
             data = json.load(response)
-        return isinstance(data, dict) and 'codex_available' in data and data.get('provider') in {'codex', 'antigravity', 'openai'}
+        return isinstance(data, dict) and 'codex_available' in data and data.get('provider') in {'codex', 'antigravity', 'openai', 'digen'}
     except (OSError, ValueError):
         return False
+
+
+def server_env():
+    """Desktop shortcuts skip shell rc files, so add nvm's Node bins for npx/digen-mcp."""
+    env = dict(os.environ)
+    paths = env.get('PATH', '').split(os.pathsep)
+    bins = sorted(Path.home().glob('.nvm/versions/node/*/bin'), reverse=True)
+    env['PATH'] = os.pathsep.join(paths + [str(b) for b in bins if str(b) not in paths])
+    return env
 
 
 def main():
@@ -34,7 +44,7 @@ def main():
         fcntl.flock(lock, fcntl.LOCK_EX)
         if not running():
             with (data / 'launcher.log').open('a') as log:
-                process = subprocess.Popen([sys.executable, str(ROOT / 'app.py')], cwd=ROOT,
+                process = subprocess.Popen([sys.executable, str(ROOT / 'app.py')], cwd=ROOT, env=server_env(),
                                            stdin=subprocess.DEVNULL, stdout=log, stderr=log,
                                            start_new_session=True)
             for _ in range(80):

@@ -459,6 +459,24 @@ function schedulePoll() {
   }, POLL_MS);
 }
 
+async function shutdownApp() {
+  const running = Boolean(state.status?.activeBatchId);
+  const message = running
+    ? "Lô ảnh đang chạy. Tắt bây giờ sẽ hủy các ảnh đang tạo dở; ảnh đã xong vẫn giữ. Vẫn tắt?"
+    : "Tắt Puzzle Atelier? Mở lại bằng shortcut trên màn hình.";
+  if (!window.confirm(message)) return;
+  try {
+    await api("/api/shutdown", { method: "POST" });
+  } catch (error) {
+    showToast(error.message, "error");
+    return;
+  }
+  window.clearTimeout(state.pollTimer);
+  window.clearInterval(state.liveTimer);
+  document.body.innerHTML = '<main class="shutdown-screen"><h1>Puzzle Atelier đã tắt</h1><p>Có thể đóng tab này. Mở lại bằng shortcut trên màn hình.</p></main>';
+  window.close();
+}
+
 async function createBatch(event) {
   event.preventDefault();
   const count = Number(elements.countInput.value);
@@ -872,6 +890,7 @@ function wireEvents() {
     elements.eventList.hidden = expanded;
   });
   $("#settingsButton").addEventListener("click", openSettings);
+  $("#shutdownButton").addEventListener("click", shutdownApp);
   elements.providerSelect.addEventListener("change", updateSettingsFields);
   elements.sourceRows.addEventListener("input", () => updateSettingsFields());
   elements.settingsForm.addEventListener("submit", saveSettings);

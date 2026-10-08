@@ -1,5 +1,6 @@
 import json
 import threading
+import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from pathlib import Path
@@ -12,7 +13,7 @@ from .diversity import learn_from, make_planning_prompt, order_concepts, pick_se
 from .review import apply_review, make_review_prompt
 from .style import style_drift, style_stats
 
-ITEM_FAILURES_BEFORE_STOP = 3  # consecutive single-image errors that take a source out of the batch
+ITEM_FAILURES_BEFORE_STOP = 3  # consecutive single-image errors that mean the source itself is failing
 
 
 class Engine:
@@ -37,6 +38,13 @@ class Engine:
         self.sources = {}
         self.failed_sources = set()
         self.item_failures = Counter()  # consecutive single-image errors per source
+        # Recovery instead of giving up: a failed image is generated once more, and a failing
+        # source rests for a while and then takes images again, up to a few rests per batch.
+        self.item_retries = 1
+        self.source_cooldown_seconds = 180
+        self.max_cooldowns = 3
+        self.cooldown_until = {}
+        self.cooldowns = Counter()
         # Planner thread state; planning overlaps image generation.
         self.planning_done = threading.Event()
         self.planning_done.set()
@@ -267,8 +275,13 @@ class Engine:
             self.sources = dict(sources)
             self.failed_sources = set()
             self.item_failures = Counter()
+            self.cooldown_until = {}
+            self.cooldowns = Counter()
+        retried = Counter()
+        items_of = {}
+        retry_note = f'ảnh lỗi tự thử lại {self.item_retries} lần' if self.item_retries else 'không tự thử lại ảnh lỗi'
         plan = ', '.join(f'{PROVIDER_NAMES.get(name, name)} {slots}' for name, slots in sources.items())
-        self.store.event(batch_id, f'Tạo tối đa {sum(sources.values())} ảnh đồng thời ({plan}); không tự thử lại ảnh lỗi.' if len(sources) > 1 else f'Tạo tối đa {sum(sources.values())} ảnh đồng thời; không tự thử lại ảnh lỗi.')
+        self.store.event(batch_id, f'Tạo tối đa {sum(sources.values())} ảnh đồng thời ({plan}); {retry_note}.' if len(sources) > 1 else f'Tạo tối đa {sum(sources.values())} ảnh đồng thời; {retry_note}.')
         with ThreadPoolExecutor(max_workers=sum(sources.values()), thread_name_prefix='puzzle-image') as pool:
             while True:
                 # Read the done flag before the store so contexts saved just before it are never missed.
@@ -282,8 +295,11 @@ class Engine:
                                                 and bool(DigenProvider.finished_task(self.store.root / 'images' / item['id'])))
                 # Never queue the whole batch: only admit enough work to fill each source's free slots.
                 with self.lock:
+                    clock = time.monotonic()
+                    resting = [until for name, until in self.cooldown_until.items() if until > clock and name not in self.failed_sources]
                     for name, slots in sources.items():
-                        while running[name] < slots and name not in self.failed_sources and not self.pause_requested.is_set() and not self.generation_failed.is_set():
+                        while (running[name] < slots and name not in self.failed_sources and self.cooldown_until.get(name, 0) <= clock
+                               and not self.pause_requested.is_set() and not self.generation_failed.is_set()):
                             item = next((item for item in queue if not reserved[item['id']] or name == 'digen'), None)
                             if item is None:
                                 break
@@ -292,23 +308,38 @@ class Engine:
                             queue.remove(item)
                             admitted.add(item['id'])
                             running[name] += 1
-                            pending[pool.submit(self.generate_one, batch_id, count, item, name)] = name
+                            future = pool.submit(self.generate_one, batch_id, count, item, name)
+                            pending[future] = name
+                            items_of[future] = item
                     stopping = self.pause_requested.is_set() or self.generation_failed.is_set()
+                # A resting source wakes the loop when its rest ends, so waiting images are not dropped.
+                rest = max(0.1, min(resting) - clock) if resting and (queue or not planning_done) and not stopping else None
                 if not pending:
-                    if planning_done or stopping:
+                    if (planning_done or stopping) and rest is None:
                         break
-                    self.work_ready.wait()
+                    self.work_ready.wait(rest)
                     continue
                 # While contexts are still being planned, wake periodically to admit newly saved ones.
-                finished, _ = wait(pending, timeout=None if planning_done else 0.5, return_when=FIRST_COMPLETED)
+                timeout = None if planning_done else 0.5
+                if rest is not None:
+                    timeout = rest if timeout is None else min(timeout, rest)
+                finished, _ = wait(pending, timeout=timeout, return_when=FIRST_COMPLETED)
                 for future in finished:
                     name = pending.pop(future)
+                    item = items_of.pop(future)
                     running[name] -= 1
                     try:
                         future.result()
                     except Exception as error:
                         if first_error is None:
                             first_error = error
+                        # Put the image back in the queue for one more try; any source may take it.
+                        if retried[item['id']] < self.item_retries and not self.pause_requested.is_set() and not self.generation_failed.is_set():
+                            retried[item['id']] += 1
+                            self.store.set_item(item['id'], status='planned', stage='queued', progress_message='Lần trước lỗi; đang chờ tự thử lại.', stage_changed_at=now())
+                            self.store.event(batch_id, f"Tự thử lại ảnh {item['position'] + 1}/{count}: {item['title']}.")
+                            admitted.discard(item['id'])
+                            reserved.pop(item['id'], None)
                 # On pause/failure, drain existing work and save its results before returning.
         # A failed source stops taking images while others keep going; only stop the batch when all failed.
         if first_error is not None and self.generation_failed.is_set():
@@ -378,14 +409,26 @@ class Engine:
                     # Several images failing in a row means the source itself is broken (e.g. out of credit).
                     repeated = self.item_failures[source] >= ITEM_FAILURES_BEFORE_STOP
                 item_only = not repeated
+            notice = ''
             if not item_only:
                 with self.lock:
-                    self.failed_sources.add(source)
+                    clock = time.monotonic()
+                    # Images already running on a source fail together; that is one rest, not several.
+                    if source not in self.failed_sources and self.cooldown_until.get(source, 0) <= clock:
+                        self.cooldowns[source] += 1
+                        self.item_failures[source] = 0
+                        if self.cooldowns[source] > self.max_cooldowns:
+                            self.failed_sources.add(source)
+                            notice = 'ngừng nhận ảnh mới đến hết lượt chạy này'
+                        else:
+                            self.cooldown_until[source] = clock + self.source_cooldown_seconds
+                            notice = f'nghỉ {max(1, round(self.source_cooldown_seconds / 60))} phút rồi tự nhận ảnh tiếp (lần nghỉ {self.cooldowns[source]}/{self.max_cooldowns})'
                     if not self.sources or self.failed_sources >= set(self.sources):
                         self.generation_failed.set()
-            if started and label and not item_only:
+            if started and notice:
                 reason = f'lỗi {ITEM_FAILURES_BEFORE_STOP} ảnh liên tiếp' if repeated else 'lỗi'
-                self.store.event(batch_id, f'{label} {reason}; nguồn này ngừng nhận ảnh mới, các nguồn khác vẫn chạy.')
+                others = ', các nguồn khác vẫn chạy' if len(self.sources) > 1 else ''
+                self.store.event(batch_id, f'{label or PROVIDER_NAMES.get(source, source) or "Nguồn tạo ảnh"} {reason}; {notice}{others}.')
             if started:
                 self.store.set_item(item['id'], status='failed', error=str(error)[:1000], stage='failed', progress_message='Lỗi: ' + str(error)[:300], stage_changed_at=now(), finished_at=now())
             raise

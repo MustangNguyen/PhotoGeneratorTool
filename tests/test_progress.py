@@ -187,6 +187,8 @@ class ItemProgressTests(unittest.TestCase):
         control = ProgressControl()
         control.fail_next = True
         engine, batch = self.create_engine(control)
+        engine.max_cooldowns = 0  # recovery off: this covers the manual retry path
+        engine.item_retries = 0
         engine.start(batch["id"])
         self.assertTrue(control.generate_entered.wait(5), "provider generation did not start")
         control.release_generate.set()

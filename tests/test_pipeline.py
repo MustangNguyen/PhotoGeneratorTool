@@ -174,6 +174,8 @@ class PipelineTests(unittest.TestCase):
     def test_failure_blocks_without_retry_and_explicit_retry_resumes(self):
         provider = FakeProvider(fail_calls={1})
         engine = Engine(self.store, lambda: provider)
+        engine.max_cooldowns = 0  # recovery off: this covers the manual retry path
+        engine.item_retries = 0
         batch = self.store.create(3)
         engine.start(batch["id"])
         self.wait(engine)
@@ -194,6 +196,8 @@ class PipelineTests(unittest.TestCase):
     def test_retry_failed_requeues_every_failed_item(self):
         provider = FakeProvider(fail_calls={1})
         engine = Engine(self.store, lambda: provider)
+        engine.max_cooldowns = 0  # recovery off: this covers the manual retry path
+        engine.item_retries = 0
         batch = self.store.create(3)
         engine.start(batch["id"])
         self.wait(engine)

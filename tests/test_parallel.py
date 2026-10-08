@@ -4,6 +4,7 @@ import json
 import re
 import tempfile
 import threading
+import time
 import unittest
 import zipfile
 from collections import Counter
@@ -92,6 +93,8 @@ class GenerationControl:
             release = self.release_events.setdefault(number, threading.Event())
             self.condition.notify_all()
         try:
+            if getattr(self, "generate_delay", 0) and getattr(provider, "source", "") == "codex":
+                time.sleep(self.generate_delay)
             if self.blocked:
                 while not release.wait(5):
                     raise AssertionError(f"test did not release image {number}")
@@ -162,6 +165,7 @@ class ParallelEngineTests(unittest.TestCase):
         self.store.save_settings({"concurrency": concurrency})
         control = GenerationControl()
         engine = Engine(self.store, control.factory)
+        engine.source_cooldown_seconds = 0.2
         self.background.append((engine, control))
         batch = self.store.create(count)
         self.store.add_concepts(batch["id"], [make_concept(number) for number in range(count)])
@@ -211,6 +215,8 @@ class ParallelEngineTests(unittest.TestCase):
 
     def test_failure_stops_admission_but_keeps_successful_in_flight_results(self):
         engine, control, batch = self.make_engine(5, 3)
+        engine.max_cooldowns = 0  # no rests or retries: the old give-up path
+        engine.item_retries = 0
         control.fail_numbers.add(0)
         engine.start(batch["id"])
         control.wait_started(3)
@@ -356,6 +362,7 @@ class ParallelEngineTests(unittest.TestCase):
             return provider
 
         engine = Engine(self.store, control.factory, source_factory=source_factory)
+        engine.source_cooldown_seconds = 0.2
         self.background.append((engine, control))
         batch = self.store.create(count)
         self.store.add_concepts(batch["id"], [make_concept(number) for number in range(count)])
@@ -380,6 +387,8 @@ class ParallelEngineTests(unittest.TestCase):
 
     def test_failed_source_stops_while_other_sources_finish_the_batch(self):
         engine, control, batch, _ = self.make_multi_engine(5, {"codex": 1, "digen": 1})
+        engine.max_cooldowns = 0
+        engine.item_retries = 0
         control.fail_numbers.add(1)
         engine.start(batch["id"])
         control.wait_started(2)
@@ -396,6 +405,7 @@ class ParallelEngineTests(unittest.TestCase):
 
     def test_bad_result_for_one_image_keeps_its_source_running(self):
         engine, control, batch, _ = self.make_multi_engine(5, {"codex": 1, "digen": 1})
+        engine.item_retries = 0
         original = control.generate
 
         def generate(provider, prompt, directory):
@@ -418,6 +428,8 @@ class ParallelEngineTests(unittest.TestCase):
 
     def test_source_stops_after_repeated_single_image_errors(self):
         engine, control, batch, _ = self.make_multi_engine(8, {"codex": 1, "digen": 1})
+        engine.max_cooldowns = 0
+        engine.item_retries = 0
         original = control.generate
 
         def generate(provider, prompt, directory):
@@ -436,6 +448,53 @@ class ParallelEngineTests(unittest.TestCase):
         self.assertTrue(all(item["status"] == "failed" for item in digen_items))
         self.assertIn("digen", engine.failed_sources)
         self.assertTrue(any("lỗi 3 ảnh liên tiếp" in event["message"] for event in self.store.events(batch["id"])))
+
+    def test_failed_image_is_retried_once_after_the_source_rests(self):
+        engine, control, batch = self.make_engine(3, 1)
+        original = control.generate
+        failed_once = []
+
+        def generate(provider, prompt, directory):
+            if "alpha1 " in prompt and not failed_once:
+                failed_once.append(1)
+                raise RuntimeError("synthetic outage")
+            return original(provider, prompt, directory)
+
+        control.generate = generate
+        control.release_all()
+        engine.start(batch["id"])
+        self.join(engine)
+
+        items = self.store.items(batch["id"])
+        self.assertEqual(["completed"] * 3, [item["status"] for item in items])
+        self.assertEqual(2, items[1]["attempts"])
+        messages = [event["message"] for event in self.store.events(batch["id"])]
+        self.assertTrue(any("Tự thử lại ảnh 2/3" in message for message in messages), messages)
+        self.assertTrue(any("nghỉ" in message and "lần nghỉ 1/3" in message for message in messages), messages)
+        self.assertEqual("completed", self.store.batch(batch["id"])["status"])
+
+    def test_resting_source_takes_images_again(self):
+        engine, control, batch, _ = self.make_multi_engine(10, {"codex": 1, "digen": 1})
+        original = control.generate
+        outages = []
+
+        def generate(provider, prompt, directory):
+            if provider.source == "digen" and not outages:
+                outages.append(1)
+                raise RuntimeError("504 Gateway Time-out")
+            return original(provider, prompt, directory)
+
+        control.generate = generate
+        control.blocked = False
+        # Slow codex down so digen is still needed after its rest.
+        control.generate_delay = 0.1
+        engine.start(batch["id"])
+        self.join(engine)
+
+        items = self.store.items(batch["id"])
+        self.assertEqual(["completed"] * 10, [item["status"] for item in items])
+        self.assertNotIn("digen", engine.failed_sources)
+        self.assertTrue(any(item["source"] == "digen" for item in items), "digen came back after resting")
 
     def test_unready_source_is_skipped(self):
         engine, control, batch, built = self.make_multi_engine(3, {"codex": 1, "antigravity": 2}, unready={"antigravity"})

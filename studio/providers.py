@@ -33,6 +33,14 @@ SCHEMA = {
 }
 
 
+_GATEWAY_ERRORS = ('502 Bad Gateway', '503 Service', '504 Gateway', 'Gateway Time-out', 'Gateway Timeout')
+
+
+def _gateway_error(error):
+    """A Digen proxy hiccup (5xx gateway page): the service is up, this one call failed."""
+    return any(marker in str(error) for marker in _GATEWAY_ERRORS)
+
+
 class ItemError(RuntimeError):
     """A failure of one image only (bad result); the source stays usable for other images."""
 
@@ -331,6 +339,7 @@ class DigenProvider(CodexProvider):
     SEND_RETRY_DELAYS = (15, 30, 60)
     DOWNLOAD_RETRY_DELAYS = (5, 15)
     RELINK_POLLS = 12
+    POLL_GATEWAY_RETRIES = 10  # consecutive 5xx gateway pages tolerated while polling one task
 
     def __init__(self, settings, work_root):
         super().__init__(settings, work_root)
@@ -424,9 +433,18 @@ class DigenProvider(CodexProvider):
                 raise RuntimeError('Digen không nhận yêu cầu: ' + str(sent.get('error', 'không có task_id'))[:300])
             deadline = time.monotonic() + 1200
             relinks = 0
+            poll_errors = 0
             while True:
                 time.sleep(self.POLL_SECONDS)
-                result = self.mcp.call('digen_poll', {'task_id': task})
+                try:
+                    result = self.mcp.call('digen_poll', {'task_id': task})
+                except RuntimeError as error:
+                    # Polling is free, so a gateway hiccup only means asking again.
+                    if not _gateway_error(error) or poll_errors >= self.POLL_GATEWAY_RETRIES or time.monotonic() > deadline:
+                        raise
+                    poll_errors += 1
+                    continue
+                poll_errors = 0
                 log.write_text(json.dumps({'task_id': task, 'conversation_id': sent.get('conversation_id'), 'recovered': bool(recovered), **result}, ensure_ascii=False, indent=1), encoding='utf-8')
                 status = result.get('status')
                 # When presigning fails on a flaky network the asset comes back as a raw s3:// link;
@@ -440,7 +458,10 @@ class DigenProvider(CodexProvider):
                 if status == 'await_confirmation':
                     self.mcp.call('digen_confirm', {'task_id': task, 'action': 'cancel'})
                     raise ItemError('Digen hỏi xác nhận thay vì tạo ảnh; đã hủy lượt này. Xem digen.json, không tự thử lại.')
-                if status in ('error', 'cancelled') or result.get('error'):
+                if status == 'error':
+                    # Digen accepted the task and only this image failed; the service itself is fine.
+                    raise ItemError(f'Digen báo lỗi khi tạo ảnh này: {str(result.get("error") or result.get("consumer_error") or "")[:300]} Không tự thử lại.')
+                if status == 'cancelled' or result.get('error'):
                     raise RuntimeError(f'Digen báo {status or "lỗi"}: {str(result.get("error") or result.get("consumer_error") or "")[:300]} Không tự thử lại.')
                 if time.monotonic() > deadline:
                     raise RuntimeError('Digen quá thời gian chờ; lượt gọi có thể đã dùng credit. Không tự thử lại.')
@@ -480,6 +501,9 @@ class DigenProvider(CodexProvider):
             except RuntimeError as error:
                 # Only network failures are retried; a connect timeout means nothing was sent.
                 # A drop after Digen accepted the request could, rarely, charge twice.
+                if _gateway_error(error):
+                    # Digen may have created the task before the proxy timed out: never resend.
+                    raise ItemError('Digen quá tải (lỗi gateway) khi gửi ảnh này; không rõ task đã được tạo chưa nên không tự gửi lại.') from error
                 if 'fetch failed' not in str(error):
                     raise
                 if delay is None or self.cancelled:

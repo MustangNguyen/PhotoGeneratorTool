@@ -12,6 +12,8 @@ from .diversity import learn_from, make_planning_prompt, order_concepts, pick_se
 from .review import apply_review, make_review_prompt
 from .style import style_drift, style_stats
 
+ITEM_FAILURES_BEFORE_STOP = 3  # consecutive single-image errors that take a source out of the batch
+
 
 class Engine:
     def __init__(self, store, provider_factory, final_root=None, source_factory=None):
@@ -34,6 +36,7 @@ class Engine:
         self.pause_requested = threading.Event()
         self.sources = {}
         self.failed_sources = set()
+        self.item_failures = Counter()  # consecutive single-image errors per source
         # Planner thread state; planning overlaps image generation.
         self.planning_done = threading.Event()
         self.planning_done.set()
@@ -263,6 +266,7 @@ class Engine:
         with self.lock:
             self.sources = dict(sources)
             self.failed_sources = set()
+            self.item_failures = Counter()
         plan = ', '.join(f'{PROVIDER_NAMES.get(name, name)} {slots}' for name, slots in sources.items())
         self.store.event(batch_id, f'Tạo tối đa {sum(sources.values())} ảnh đồng thời ({plan}); không tự thử lại ảnh lỗi.' if len(sources) > 1 else f'Tạo tối đa {sum(sources.values())} ảnh đồng thời; không tự thử lại ảnh lỗi.')
         with ThreadPoolExecutor(max_workers=sum(sources.values()), thread_name_prefix='puzzle-image') as pool:
@@ -361,17 +365,27 @@ class Engine:
                 warning = f"Ảnh có bố cục/màu gần ảnh «{similar['title']}». Cần người duyệt đối chiếu." if similar else ''
                 (directory / 'context.json').write_text(json.dumps({k: item.get(k) for k in ['title','category','subject','scene','story','composition','palette','materials','key','main_subject','subject_family','props','final_seed','axes','prompt','context_review'] if k in item} | {'source': source or '', 'style_stats': stats}, ensure_ascii=False, indent=2), encoding='utf-8')
                 self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, style_warning=style_warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
+            with self.lock:
+                self.item_failures[source] = 0
             self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}" + (f' (từ {label})' if label else '') + "." + (' Có cảnh báo gần trùng.' if warning else '') + (' Màu lệch so với ảnh mẫu Final.' if style_warning else ''))
         except Exception as error:
             # A bad result for one image (ItemError) does not take its source out of the batch.
             item_only = isinstance(error, ItemError)
+            repeated = False
+            if item_only and started:
+                with self.lock:
+                    self.item_failures[source] += 1
+                    # Several images failing in a row means the source itself is broken (e.g. out of credit).
+                    repeated = self.item_failures[source] >= ITEM_FAILURES_BEFORE_STOP
+                item_only = not repeated
             if not item_only:
                 with self.lock:
                     self.failed_sources.add(source)
                     if not self.sources or self.failed_sources >= set(self.sources):
                         self.generation_failed.set()
             if started and label and not item_only:
-                self.store.event(batch_id, f'{label} lỗi; nguồn này ngừng nhận ảnh mới, các nguồn khác vẫn chạy.')
+                reason = f'lỗi {ITEM_FAILURES_BEFORE_STOP} ảnh liên tiếp' if repeated else 'lỗi'
+                self.store.event(batch_id, f'{label} {reason}; nguồn này ngừng nhận ảnh mới, các nguồn khác vẫn chạy.')
             if started:
                 self.store.set_item(item['id'], status='failed', error=str(error)[:1000], stage='failed', progress_message='Lỗi: ' + str(error)[:300], stage_changed_at=now(), finished_at=now())
             raise

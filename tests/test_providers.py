@@ -114,9 +114,10 @@ def _jpeg(width, height):
 class FakeMcp:
     """Scripted digen-mcp: returns queued poll results and records tool calls."""
 
-    def __init__(self, polls, send_failures=0):
+    def __init__(self, polls, send_failures=0, send_error="Digen báo lỗi: fetch failed"):
         self.polls = list(polls)
         self.send_failures = send_failures
+        self.send_error = send_error
         self.calls = []
         self.closed = False
 
@@ -128,10 +129,13 @@ class FakeMcp:
         if tool == "digen_send":
             if self.send_failures:
                 self.send_failures -= 1
-                raise RuntimeError("Digen báo lỗi: fetch failed")
+                raise RuntimeError(self.send_error)
             return {"task_id": "task-1", "conversation_id": "conv-1", "status": "running"}
         if tool == "digen_poll":
-            return self.polls.pop(0)
+            poll = self.polls.pop(0)
+            if isinstance(poll, Exception):
+                raise poll
+            return poll
         return {"ok": True}
 
     def close(self):
@@ -139,8 +143,8 @@ class FakeMcp:
 
 
 class DigenProviderTests(unittest.TestCase):
-    def run_generate(self, polls, image_bytes=None, settings=None, send_failures=0, root=None):
-        fake = FakeMcp(polls, send_failures)
+    def run_generate(self, polls, image_bytes=None, settings=None, send_failures=0, root=None, send_error=None):
+        fake = FakeMcp(polls, send_failures, *([send_error] if send_error else []))
         if root is None:
             temporary = tempfile.TemporaryDirectory()
             self.addCleanup(temporary.cleanup)
@@ -207,6 +211,24 @@ class DigenProviderTests(unittest.TestCase):
         asset = {"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}
         _, error = self.run_generate([{"status": "done", "assets": [asset, asset]}], _jpeg(720, 960))
         self.assertIn("2 ảnh", str(error))
+
+    def test_gateway_timeout_on_send_fails_only_this_image_without_resending(self):
+        gateway = "Digen báo lỗi: <html><head><title>504 Gateway Time-out</title></head></html>"
+        fake, error = self.run_generate([], send_failures=1, send_error=gateway)
+        self.assertIsInstance(error, ItemError, "a gateway hiccup must not take Digen out of the batch")
+        self.assertEqual(1, sum(tool == "digen_send" for tool, _ in fake.calls), "never resend: the task may exist")
+
+    def test_gateway_timeout_while_polling_is_polled_again(self):
+        done = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        gateway = RuntimeError("Digen báo lỗi: 502 Bad Gateway")
+        fake, target = self.run_generate([gateway, gateway, done], _jpeg(720, 960))
+        self.assertIsInstance(target, Path, target)
+        self.assertEqual(1, sum(tool == "digen_send" for tool, _ in fake.calls))
+
+    def test_task_error_fails_only_this_image(self):
+        _, error = self.run_generate([{"status": "error", "assets": [], "error": "image"}])
+        self.assertIsInstance(error, ItemError)
+        self.assertIn("image", str(error))
 
     def test_retries_send_after_network_failure(self):
         done = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}

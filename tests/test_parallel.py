@@ -416,6 +416,27 @@ class ParallelEngineTests(unittest.TestCase):
         self.assertFalse(any("ngừng nhận ảnh mới" in event["message"] for event in self.store.events(batch["id"])))
         self.assertEqual("blocked", self.store.batch(batch["id"])["status"])
 
+    def test_source_stops_after_repeated_single_image_errors(self):
+        engine, control, batch, _ = self.make_multi_engine(8, {"codex": 1, "digen": 1})
+        original = control.generate
+
+        def generate(provider, prompt, directory):
+            if getattr(provider, "source", "") == "digen":
+                raise ItemError("Digen báo lỗi khi tạo ảnh này: image")
+            return original(provider, prompt, directory)
+
+        control.generate = generate
+        control.release_all()
+        engine.start(batch["id"])
+        self.join(engine)
+
+        items = self.store.items(batch["id"])
+        digen_items = [item for item in items if item["source"] == "digen"]
+        self.assertEqual(3, len(digen_items), "digen stops after 3 errors in a row")
+        self.assertTrue(all(item["status"] == "failed" for item in digen_items))
+        self.assertIn("digen", engine.failed_sources)
+        self.assertTrue(any("lỗi 3 ảnh liên tiếp" in event["message"] for event in self.store.events(batch["id"])))
+
     def test_unready_source_is_skipped(self):
         engine, control, batch, built = self.make_multi_engine(3, {"codex": 1, "antigravity": 2}, unready={"antigravity"})
         control.release_all()

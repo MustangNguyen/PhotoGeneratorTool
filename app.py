@@ -180,6 +180,11 @@ def build_server(data_root, port=8787, provider_factory=None, final_root=None):
                         return self.send({'saved': True})
                 if self.command != 'POST':
                     raise KeyError('Không tìm thấy thao tác.')
+                if path == '/api/shutdown':
+                    self.send({'stopping': True})
+                    # shutdown() blocks until serve_forever exits, so it cannot run on this request thread.
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
+                    return
                 if path == '/api/batches':
                     with engine.lock:
                         if engine.active:

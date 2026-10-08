@@ -6,7 +6,7 @@ from pathlib import Path
 
 from . import final
 from .artifacts import load_fingerprint_cache, near_image, normalize_image, save_fingerprint_cache
-from .providers import DEFAULTS, PROVIDER_NAMES, DigenProvider, image_sources
+from .providers import DEFAULTS, PROVIDER_NAMES, DigenProvider, ItemError, image_sources
 from .store import now
 from .diversity import learn_from, make_planning_prompt, order_concepts, pick_seeds, validate_concepts, image_prompt
 from .review import apply_review, make_review_prompt
@@ -363,11 +363,14 @@ class Engine:
                 self.store.set_item(item['id'], status='completed', image_path=str(target.resolve()), similarity=warning, style_warning=style_warning, stage='completed', progress_message='Đã lưu ảnh 600×900, chờ duyệt.', stage_changed_at=now(), finished_at=now())
             self.store.event(batch_id, f"Đã lưu 600×900: {item['title']}" + (f' (từ {label})' if label else '') + "." + (' Có cảnh báo gần trùng.' if warning else '') + (' Màu lệch so với ảnh mẫu Final.' if style_warning else ''))
         except Exception as error:
-            with self.lock:
-                self.failed_sources.add(source)
-                if not self.sources or self.failed_sources >= set(self.sources):
-                    self.generation_failed.set()
-            if started and label:
+            # A bad result for one image (ItemError) does not take its source out of the batch.
+            item_only = isinstance(error, ItemError)
+            if not item_only:
+                with self.lock:
+                    self.failed_sources.add(source)
+                    if not self.sources or self.failed_sources >= set(self.sources):
+                        self.generation_failed.set()
+            if started and label and not item_only:
                 self.store.event(batch_id, f'{label} lỗi; nguồn này ngừng nhận ảnh mới, các nguồn khác vẫn chạy.')
             if started:
                 self.store.set_item(item['id'], status='failed', error=str(error)[:1000], stage='failed', progress_message='Lỗi: ' + str(error)[:300], stage_changed_at=now(), finished_at=now())

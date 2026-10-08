@@ -15,6 +15,7 @@ from PIL import Image
 from app import build_server
 from studio.artifacts import export_batch
 from studio.engine import Engine
+from studio.providers import ItemError
 from studio.store import Store
 
 
@@ -391,6 +392,28 @@ class ParallelEngineTests(unittest.TestCase):
         self.assertEqual(["completed"] * 4, [item["status"] for i, item in enumerate(items) if i != 1])
         self.assertEqual([1], [item["position"] for item in items if item["source"] == failing], "failed source takes no new images")
         self.assertFalse(engine.generation_failed.is_set())
+        self.assertEqual("blocked", self.store.batch(batch["id"])["status"])
+
+    def test_bad_result_for_one_image_keeps_its_source_running(self):
+        engine, control, batch, _ = self.make_multi_engine(5, {"codex": 1, "digen": 1})
+        original = control.generate
+
+        def generate(provider, prompt, directory):
+            if "alpha1 " in prompt:
+                raise ItemError("Digen trả ảnh ngang 1280×720")
+            return original(provider, prompt, directory)
+
+        control.generate = generate
+        control.release_all()
+        engine.start(batch["id"])
+        self.join(engine)
+
+        items = self.store.items(batch["id"])
+        failing = items[1]["source"]
+        self.assertEqual("failed", items[1]["status"])
+        self.assertEqual(["completed"] * 4, [item["status"] for i, item in enumerate(items) if i != 1])
+        self.assertNotIn(failing, engine.failed_sources)
+        self.assertFalse(any("ngừng nhận ảnh mới" in event["message"] for event in self.store.events(batch["id"])))
         self.assertEqual("blocked", self.store.batch(batch["id"])["status"])
 
     def test_unready_source_is_skipped(self):

@@ -33,6 +33,14 @@ SCHEMA = {
 }
 
 
+class ItemError(RuntimeError):
+    """A failure of one image only (bad result); the source stays usable for other images."""
+
+
+class LandscapeError(ItemError):
+    pass
+
+
 class CodexProvider:
     def __init__(self, settings, work_root):
         self.settings = settings
@@ -377,7 +385,19 @@ class DigenProvider(CodexProvider):
                 return previous['task_id']
         return None
 
+    # Digen's agent occasionally returns 1280×720 despite the portrait request (3 of 38 on
+    # 2026-10-08); one new generation costs credits but keeps the batch complete.
+    LANDSCAPE_RETRIES = 1
+
     def generate(self, prompt, directory):
+        for attempt in range(self.LANDSCAPE_RETRIES + 1):
+            try:
+                return self._generate_once(prompt, directory)
+            except LandscapeError:
+                if attempt == self.LANDSCAPE_RETRIES or self.cancelled:
+                    raise
+
+    def _generate_once(self, prompt, directory):
         # Retrying an item whose image was generated but not downloaded fetches that image
         # again instead of paying for a new one.
         recovered = self.finished_task(directory)
@@ -385,7 +405,7 @@ class DigenProvider(CodexProvider):
         model = self.model()
         model_rule = 'the default text-to-image model (do not set a model parameter)' if model == 'krea2' else f'model `{model}`'
         instruction = (
-            f'Generate exactly ONE image now with {model_rule} and aspect_ratio `3:4` (portrait) set in the image tool parameters. '
+            f'Generate exactly ONE image now with {model_rule} and aspect_ratio `3:4` and orientation `portrait` set in the image tool parameters; the image must be taller than wide. '
             'Make a single generation, with no variations or retries, and do not ask follow-up questions. '
             'Pass the text between <prompt> tags to the image tool VERBATIM: do not shorten, summarize, translate or rewrite it. '
             'The image will be center-cropped to 2:3, so keep important subjects away from the outer left and right edges. '
@@ -419,7 +439,7 @@ class DigenProvider(CodexProvider):
                     break
                 if status == 'await_confirmation':
                     self.mcp.call('digen_confirm', {'task_id': task, 'action': 'cancel'})
-                    raise RuntimeError('Digen hỏi xác nhận thay vì tạo ảnh; đã hủy lượt này. Xem digen.json, không tự thử lại.')
+                    raise ItemError('Digen hỏi xác nhận thay vì tạo ảnh; đã hủy lượt này. Xem digen.json, không tự thử lại.')
                 if status in ('error', 'cancelled') or result.get('error'):
                     raise RuntimeError(f'Digen báo {status or "lỗi"}: {str(result.get("error") or result.get("consumer_error") or "")[:300]} Không tự thử lại.')
                 if time.monotonic() > deadline:
@@ -432,7 +452,7 @@ class DigenProvider(CodexProvider):
         if not images and any(a.get('type') == 'image' for a in result.get('assets', [])):
             raise RuntimeError('Digen đã tạo ảnh nhưng mạng lỗi nên chưa lấy được link tải. Bấm thử lại ảnh này để tải lại đúng ảnh đó, không tốn thêm credit.')
         if len(images) != 1:
-            raise RuntimeError(f'Digen trả {len(images)} ảnh; cần đúng một ảnh. Xem {log}, không tự tạo lại.')
+            raise ItemError(f'Digen trả {len(images)} ảnh; cần đúng một ảnh. Xem {log}, không tự tạo lại.')
         suffix = Path(urllib.parse.urlparse(images[0]['url']).path).suffix.lower()
         target = directory / ('source' + (suffix if suffix in {'.png', '.jpg', '.jpeg', '.webp'} else '.jpg'))
         for delay in (*self.DOWNLOAD_RETRY_DELAYS, None):
@@ -450,7 +470,7 @@ class DigenProvider(CodexProvider):
                 time.sleep(delay)
         # A landscape result would lose most of the scene when cropped to portrait.
         if height <= width:
-            raise RuntimeError(f'Digen trả ảnh ngang {width}×{height} thay vì 3:4 dọc; không cắt về 2:3. Không tự tạo lại.')
+            raise LandscapeError(f'Digen trả ảnh ngang {width}×{height} thay vì 3:4 dọc, cả sau {self.LANDSCAPE_RETRIES} lần tạo lại; không cắt về 2:3. Bấm thử lại ảnh này.')
         return target
 
     def _send(self, instruction):

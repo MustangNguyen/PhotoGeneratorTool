@@ -9,7 +9,7 @@ import io
 
 from PIL import Image
 
-from studio.providers import CodexProvider, DigenProvider, OpenAIProvider
+from studio.providers import CodexProvider, DigenProvider, ItemError, OpenAIProvider
 from studio.review import REVIEW_SCHEMA
 
 
@@ -150,7 +150,10 @@ class DigenProviderTests(unittest.TestCase):
         provider.SEND_RETRY_DELAYS = (0, 0)
         provider.DOWNLOAD_RETRY_DELAYS = (0, 0)
         response = mock.MagicMock()
-        response.__enter__.return_value.read.return_value = image_bytes or b""
+        if isinstance(image_bytes, list):  # One download per generation, in order.
+            response.__enter__.return_value.read.side_effect = image_bytes
+        else:
+            response.__enter__.return_value.read.return_value = image_bytes or b""
         with mock.patch("studio.providers._McpSession", fake), \
              mock.patch.object(DigenProvider, "mcp_command", return_value=["digen-mcp"]), \
              mock.patch("studio.providers.urllib.request.urlopen", return_value=response):
@@ -179,11 +182,20 @@ class DigenProviderTests(unittest.TestCase):
         self.assertIsInstance(target, Path, target)
         self.assertIn("do not set a model parameter", fake.calls[0][1]["message"])
 
-    def test_rejects_landscape_result_instead_of_cropping(self):
+    def test_rejects_landscape_result_after_one_new_generation(self):
         done = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
-        _, error = self.run_generate([done], _jpeg(1280, 720))
-        self.assertIsInstance(error, RuntimeError)
+        fake, error = self.run_generate([done, dict(done)], _jpeg(1280, 720))
+        self.assertIsInstance(error, ItemError, "a bad result must not take the source out of the batch")
         self.assertIn("ảnh ngang", str(error))
+        self.assertEqual(2, sum(tool == "digen_send" for tool, _ in fake.calls))
+
+    def test_landscape_result_is_generated_again_in_portrait(self):
+        done = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        fake, target = self.run_generate([done, dict(done)], [_jpeg(1280, 720), _jpeg(720, 960)])
+        self.assertIsInstance(target, Path, target)
+        with Image.open(target) as image:
+            self.assertEqual((720, 960), image.size)
+        self.assertEqual(2, sum(tool == "digen_send" for tool, _ in fake.calls))
 
     def test_cancels_confirmation_prompt_without_retry(self):
         fake, error = self.run_generate([{"status": "await_confirmation", "assets": []}])

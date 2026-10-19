@@ -201,7 +201,7 @@ def apply_review(
                 rejected.append(f"review sửa concept {index + 1} ({original['title']}) nhưng không qua kiểm tra: {detail}")
                 continue
             concept = valid[0]
-            for field in ("final_seed", "axes"):
+            for field in ("final_seed", "axes", "era"):
                 if original.get(field):
                     concept[field] = original[field]
         audit = {"decision": decision, "reason": reason}

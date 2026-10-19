@@ -1,5 +1,7 @@
 """The Final sample library: themes, captions and image paths used as a style reference.
 
+Only palette/style and duplicate checks use it; planned content no longer comes from it.
+
 final-index.json is committed (captions, grid, colour stats per image); the images
 themselves stay on the owner's machine under Final/ and are only read when present.
 """
@@ -13,7 +15,8 @@ ROOT = Path(__file__).resolve().parent.parent
 FINAL_INDEX_PATH = ROOT / 'final-index.json'
 FINAL_ROOT = ROOT / 'Final'
 
-# Index theme -> planner category, with the share each theme has in Final (2,204 images).
+# final-index.json theme codes, with the share each theme has in Final (2,204 images).
+# Planning no longer uses these: content themes live in studio/themes.py.
 THEMES = {
     'food': ('Ẩm thực và bàn ăn', 22),
     'interior': ('Nội thất ấm cúng', 14),
@@ -52,17 +55,6 @@ def load_index(path=None):
             _CACHE = tuple(item for item in items or () if isinstance(item, dict) and item.get('caption') and item.get('path'))
             _CACHE_KEY = key
         return _CACHE
-
-
-def examples(category, count=4, offset=0, items=None):
-    """A rotating, deterministic sample of Final captions for one planner category."""
-    theme = CATEGORY_TO_THEME.get(category)
-    items = load_index() if items is None else items
-    pool = [item['caption'] for item in items if item.get('theme') == theme and not item.get('people')]
-    if not pool:
-        return []
-    step = max(1, len(pool) // count)
-    return [pool[(offset + index * step) % len(pool)] for index in range(min(count, len(pool)))]
 
 
 def image_candidates(root=None, items=None):

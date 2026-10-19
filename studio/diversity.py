@@ -18,12 +18,12 @@ import threading
 import unicodedata
 from typing import Any, Iterable
 
-from . import axes, final
+from . import axes, final, themes
 
 
-# Planner categories and target shares come from the Final sample library (studio/final.py).
-CATEGORIES = [category for category, _ in final.THEMES.values()]
-CATEGORY_TARGETS = {category: share for category, share in final.THEMES.values()}
+# Planner categories and target shares (studio/themes.py). Final only sets palette and style.
+CATEGORIES = [category for category, _ in themes.THEMES.values()]
+CATEGORY_TARGETS = {category: share for category, share in themes.THEMES.values()}
 
 FIELDS = (
     "title",
@@ -438,7 +438,7 @@ def _history_sample(history: list[dict[str, Any]], max_items: int = 72) -> list[
 
 
 def category_plan(count: int, counts: dict[str, int]) -> dict[str, int]:
-    """Split one request across categories so the catalogue moves toward Final's theme shares."""
+    """Split one request across categories so the catalogue moves toward the theme target shares."""
     total = sum(counts.get(category, 0) for category in CATEGORIES) + count
     weight = sum(CATEGORY_TARGETS.values())
     deficit = {
@@ -755,13 +755,27 @@ def _props_of(concept: dict[str, Any]) -> frozenset[tuple[str, ...]]:
     return frozenset(found)
 
 
+# Content era 2 (2026-10-19) replaced every theme, so family and prop quotas restart:
+# a full family or prop from the old Final-style catalogue must not block the new themes.
+# Exact subjects, motifs and fingerprints still count over the whole history.
+CONTENT_ERA = 2
+
+
+def _current_era(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Concepts of the current content era: tagged with it, or filed under one of its themes."""
+    return [
+        item for item in history
+        if isinstance(item, dict) and (item.get("era") == CONTENT_ERA or _normalized_category(str(item.get("category", ""))) in CATEGORIES)
+    ]
+
+
 def family_room(history: list[dict[str, Any]], planned: int = 0) -> dict[str, int]:
     """Concepts each family can still take, under both its total cap and its recent-window cap.
 
     `planned` counts the concepts about to be added, as validate_concepts does for the cap.
     """
     families = _load_families()
-    used = [_concept_family(item) for item in history if isinstance(item, dict)]
+    used = [_concept_family(item) for item in _current_era(history)]
     total = Counter(family for family in used if family)
     recent = Counter(family for family in used[-FAMILY_RECENT_WINDOW:] if family)
     size = len(used) + planned
@@ -816,9 +830,9 @@ def _subject_summary(history: list[dict[str, Any]], limit: int) -> str:
 
 
 # --- Subject catalogue ------------------------------------------------------------
-# Final names only ~630 distinct subjects, so seeds ran dry after a few batches and the
-# planner fell back to its favourites.  subject-catalogue.json (build_subject_catalogue.py)
-# lists ~500 concrete subjects per theme; seeds take the least-used open one.
+# Content no longer comes from Final captions: after ~4,800 images seeded from the same
+# 2,204 samples, the catalogue looked alike.  subject-catalogue.json (build_subject_catalogue.py)
+# lists concrete subjects per theme of studio/themes.py; each slot takes the least-used open one.
 CATALOGUE_PATH = Path(__file__).resolve().parent.parent / "subject-catalogue.json"
 _CATALOGUE_LOCK = threading.Lock()
 _CATALOGUE_CACHE_KEY: tuple[str, int, int] | None = None
@@ -854,30 +868,18 @@ def pick_seeds(
     category_counts: dict[str, int] | None = None,
     rng: random.Random | None = None,
 ) -> list[dict[str, Any]]:
-    """Build one slot per concept: category, an unused Final caption, and diversity axes.
+    """Build one slot per concept: category, an open catalogue subject, and diversity axes.
 
-    Seeds come from the whole Final library so the content spread follows the 2,204
-    sample images instead of the text model's favourite subjects; axes then push each
-    slot toward the least-used viewpoint, season, region and so on.
+    Slots never carry Final captions; a theme without open catalogue subjects still gets
+    a slot with category and axes, and the planner picks the subject itself.
     """
     rng = rng or random.Random()
-    items = final.load_index()
     counts = Counter(category_counts or {})
     if not category_counts:
         counts.update(_normalized_category(str(item.get("category", "Khác"))) for item in history if isinstance(item, dict))
-    used = {str(item.get("final_seed", "")) for item in history if isinstance(item, dict)}
-    # A seed whose subject or family is already full only produces a rejected concept.
+    # A subject or family that is already full only produces a rejected concept.
     room = family_room(history, count)
     blocked = blocked_subject_labels(history, count)
-
-    def subject_family(item: dict[str, Any]) -> tuple[str, str | None]:
-        words = tuple(_subject_words(str(item.get("main_subject", ""))))[-3:]
-        return _subject_label(words), _family_of(words) if words else None
-
-    def has_room(item: dict[str, Any]) -> bool:
-        label, family = subject_family(item)
-        return label not in blocked and (family is None or room.get(family, 1) > 0)
-
     catalogue = _load_catalogue()
     usage = _subject_counts(history)
 
@@ -905,58 +907,21 @@ def pick_seeds(
     slots = [category for category, number in category_plan(count, counts).items() for _ in range(number)]
     rng.shuffle(slots)
     assigned_axes = axes.assign_axes(slots, history, rng)
-    taken: set[str] = set()
     seeds: list[dict[str, Any]] = []
-    for category, assigned in zip(slots, assigned_axes):
-        theme = final.CATEGORY_TO_THEME.get(category)
-        themed = [(index, item) for index, item in enumerate(items) if item.get("theme") == theme and not item.get("people")]
-        pool = [(index, item) for index, item in themed if item["path"] not in used and item["path"] not in taken]
-        if not pool:  # Every seed in this theme was used: allow repeats rather than stall.
-            pool = [(index, item) for index, item in themed if item["path"] not in taken] or themed
-        chosen = catalogue_subject(theme)
+    for index, (category, assigned) in enumerate(zip(slots, assigned_axes), start=1):
+        seed: dict[str, Any] = {"id": f"S{index}", "category": category}
+        chosen = catalogue_subject(themes.CATEGORY_TO_THEME.get(category))
         if chosen:
-            # The Final sample only shows framing and style; one of the same family fits best.
-            pool = [entry for entry in pool if chosen.get("family") and subject_family(entry[1])[1] == chosen["family"]] or pool
-        else:
-            pool = [entry for entry in pool if has_room(entry[1])] or pool
-        # Prefer a sample whose framing agrees with the assigned shot type, so a close still
-        # life is not seeded with "paella by the sea".
-        wants_vista = axes.is_vista_shot(assigned.get("shot", ""))
-        matching = [entry for entry in pool if bool(_VISTA_CAPTION.search(entry[1]["caption"].lower())) == wants_vista]
-        if pool:
-            index, item = rng.choice(matching or pool)
-            taken.add(item["path"])
-            seed = {"id": f"F{index}", "category": category, "caption": item["caption"], "path": item["path"]}
-            label, family = subject_family(item)
-            if chosen:
-                label, family = chosen["label"], chosen.get("family")
-                seed["catalogue"] = True
-                seed["main_subject"] = chosen["main_subject"]
-                if chosen.get("vi"):
-                    seed["vi"] = chosen["vi"]
-            elif item.get("main_subject"):
-                seed["main_subject"] = item["main_subject"]
-            if label:
-                blocked.add(label)  # No two slots of one round share a subject.
-            if family:
-                room[family] = room.get(family, 1) - 1
-                seed["family"] = family
-        else:  # No Final index on this machine: the slot still carries category and axes.
-            seed = {"id": f"S{len(seeds) + 1}", "category": category, "caption": "", "path": ""}
-            if chosen:
-                seed.update(catalogue=True, main_subject=chosen["main_subject"])
-                for field in ("vi", "family"):
-                    if chosen.get(field):
-                        seed[field] = chosen[field]
-                blocked.add(chosen["label"])
-                if chosen.get("family"):
-                    room[chosen["family"]] = room.get(chosen["family"], 1) - 1
+            seed.update(catalogue=True, main_subject=chosen["main_subject"])
+            for field in ("vi", "family"):
+                if chosen.get(field):
+                    seed[field] = chosen[field]
+            blocked.add(chosen["label"])  # No two slots of one round share a subject.
+            if chosen.get("family"):
+                room[chosen["family"]] = room.get(chosen["family"], 1) - 1
         seed["axes"] = assigned
         seeds.append(seed)
     return seeds
-
-
-_VISTA_CAPTION = re.compile(r"nhìn ra|nhìn xuống|bên biển|ven biển|bên hồ|ven hồ|cửa sổ biển|hoàng hôn|vịnh|trên đồi|bãi biển")
 
 
 def _seed_line(seed: dict[str, Any]) -> str:
@@ -965,15 +930,8 @@ def _seed_line(seed: dict[str, Any]) -> str:
         line += f" CHỦ THỂ: {seed['main_subject']}" + (f" ({seed['vi']})" if seed.get("vi") else "")
         if seed.get("family"):
             line += f", họ {seed['family']}"
-        if seed.get("caption"):
-            line += f" | ảnh mẫu tham khảo khung cảnh: {seed['caption']}"
-        if seed.get("axes"):
-            line += f" | trục: {axes.describe(seed['axes'])}"
-        return line
-    if seed.get("caption"):
-        line += f" gợi ý: {seed['caption']}"
-    if seed.get("main_subject"):
-        line += f" (main_subject: {seed['main_subject']}" + (f", họ {seed['family']})" if seed.get("family") else ")")
+    else:
+        line += " CHỦ THỂ: tự chọn trong nhóm"
     if seed.get("axes"):
         line += f" | trục: {axes.describe(seed['axes'])}"
     return line
@@ -1012,7 +970,8 @@ def make_planning_prompt(
     limit = subject_limit(len(history))
     blocked_subjects = _subject_summary(history, limit)
     open_families, full_families = _family_room_text(family_room(history, count))
-    overused_props = ", ".join(_overused_props(history, prop_limit(len(history)))) or "(chưa có)"
+    era = _current_era(history)
+    overused_props = ", ".join(_overused_props(era, prop_limit(len(era)))) or "(chưa có)"
     return f"""Bạn là biên tập viên concept cho game ghép hình. Hãy tạo chính xác {count} concept mới, sâu sắc và khác nhau về ngữ cảnh.
 
 CẢNH TỰ NHIÊN TRƯỚC, BỐ CỤC SAU
@@ -1025,25 +984,27 @@ MỤC TIÊU ĐA DẠNG
 - Mỗi concept phải có chủ thể chính khác hẳn các concept khác và lịch sử; cùng con vật/món/phương tiện/đồ vật với bối cảnh khác vẫn là trùng chủ đề.
 - Mỗi concept phải khác về chủ thể chính, môi trường, câu chuyện qua đồ vật và cấu trúc bố cục; tạo một cảnh mạch lạc, không ghép ngẫu nhiên nhiều thứ.
 - Đổi loại trái cây, màu sắc, giống hoa hoặc vật trang trí trong cùng kiểu cảnh KHÔNG tạo thành concept mới. Cùng họ chủ thể chính + cùng môi trường là gần trùng và phải tránh.
-- Chia concept theo GỢI Ý PHÂN BỔ bên dưới để kho ảnh tiến dần về tỷ lệ chủ đề của Final, trong mỗi nhóm vẫn đa dạng nội dung, bố cục, chất liệu và mảng màu. Không bù nhóm thiếu bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
+- Chia concept theo GỢI Ý PHÂN BỔ bên dưới để kho ảnh tiến dần về tỷ lệ mục tiêu của các nhóm chủ đề mới, trong mỗi nhóm vẫn đa dạng nội dung, bố cục, chất liệu và mảng màu. Không bù nhóm thiếu bằng các cảnh gần giống. Nếu có nhóm thực sự mới, đặt tên rõ ràng.
+- NỘI DUNG PHẢI MỚI: kho cũ đã quá nhiều ảnh giống nhau. Không dựng lại các công thức cảnh cũ như tĩnh vật bày trên bàn/kệ, góc phòng ấm cúng, đồ vật trước cửa sổ nhìn ra phong cảnh, dãy mặt tiền/cửa tiệm, món ăn hay đồ uống bày khay, thú cưng dễ thương. Chỉ giữ phong cách và bảng màu (xem QUY CÁCH ẢNH); chủ đề, chủ thể và cách dựng cảnh đi theo nhóm và Kiểu ảnh được gán.
 - Hãy tự nghĩ thêm phương án dự phòng khi suy luận để thay thế concept trùng, nhưng chỉ xuất đúng {count} concept tốt nhất.
 
 NHÓM GỢI Ý
 {'; '.join(CATEGORIES)}
 
-SỐ LƯỢNG HIỆN CÓ THEO NHÓM VÀ TỶ LỆ MỤC TIÊU THEO FINAL
+SỐ LƯỢNG HIỆN CÓ THEO NHÓM VÀ TỶ LỆ MỤC TIÊU
 {count_text}
 
 GỢI Ý PHÂN BỔ {count} CONCEPT LẦN NÀY
 {plan_text}
 
-CHỦ ĐỀ GÁN TỪ ẢNH MẪU FINAL VÀ TRỤC ĐA DẠNG — MỖI CONCEPT DÙNG ĐÚNG MỘT DÒNG, KHÔNG DÙNG LẠI DÒNG
+CHỖ CONCEPT ĐƯỢC GÁN (NHÓM, CHỦ THỂ, TRỤC ĐA DẠNG) — MỖI CONCEPT DÙNG ĐÚNG MỘT DÒNG, KHÔNG DÙNG LẠI DÒNG
 {seed_text}
-- Mỗi concept ghi seed_id là mã dòng (ví dụ F12). Lấy chủ thể chính hoặc ý chủ đạo của gợi ý làm hạt nhân, nhưng tự dựng cảnh, góc máy và bố cục mới; không chép câu gợi ý làm tiêu đề (concept trùng ảnh mẫu sẽ bị loại).
-- "Kiểu ảnh" là BẮT BUỘC và quyết định khung hình. Kiểu ảnh không nói tới tầm nhìn xa thì không mở cửa sổ, cửa, hiên hay ban công ra biển, đồi, phố hoặc phong cảnh; hậu cảnh là tường, khăn, kệ, lá hoặc đồ vật. Vùng/địa danh khi đó chỉ thể hiện qua món ăn, đồ vật, chất liệu và hoa văn.
+- Mỗi concept ghi seed_id là mã dòng (ví dụ S3) và category đúng nhóm của dòng đó.
+- "Kiểu ảnh" là BẮT BUỘC và quyết định khung hình. Kiểu ảnh không có tầm nhìn xa thì không mở cửa sổ, cửa, hiên hay ban công ra biển, đồi, phố hoặc phong cảnh; hậu cảnh là vật, cây, vách hoặc công trình gần. Vùng/địa danh khi đó chỉ thể hiện qua đồ vật, công trình, cây cỏ, chất liệu và hoa văn.
+- Khi tỷ lệ của chủ thể được gán không khớp Kiểu ảnh, GIỮ CẢ HAI bằng cách điều chỉnh, KHÔNG BAO GIỜ bỏ Kiểu ảnh hay đổi chủ thể: chủ thể nhỏ trong cảnh tầm nhìn xa, toàn cảnh từ trên cao hoặc nhìn từ thấp lên thì thành vật chính lớn, nổi bật ở tiền cảnh, phong cảnh/công trình cao ở phía sau; chủ thể lớn (cầu, lâu đài, thác) trong kiểu góc làm việc, góc thấp hoặc vật chiếm nửa khung thì lấy một phần đặc trưng của nó ở gần hoặc đặt nó ở trung cảnh sau các vật tiền cảnh hợp cảnh; chủ thể ngoài trời trong kiểu không gian lớn có mái thì đặt trong nhà kính, nhà kho, sảnh hay lều lớn có thật chứa nó.
 - Các trục còn lại chỉ là GỢI Ý để tránh lặp. Dùng trục nào hợp tự nhiên với chủ thể; BỎ trục nào khiến cảnh gượng ép, phải đặt đồ vật sai chỗ, ghép thứ không ai ghép ngoài đời, hoặc thêm vật lạ để "chứng minh" trục. Cảnh phải là thứ có thật, người xem nhận ra ngay.
-- Dòng có "CHỦ THỂ:" thì main_subject PHẢI là đúng chủ thể đó (chủ thể được chọn từ danh mục, chưa dùng gần đây); dựng một cảnh đời thực dễ chịu quanh nó. "Ảnh mẫu tham khảo khung cảnh" chỉ gợi khung hình và phong cách, KHÔNG lấy chủ thể của ảnh mẫu.
-- Dòng không có "CHỦ THỂ:": gợi ý đã được chọn để main_subject và họ của nó còn chỗ: ưu tiên giữ đúng main_subject ghi trên dòng. Nếu đổi, chọn chủ thể thuộc HỌ CHỦ THỂ CÒN CHỖ hoặc chủ thể chưa thuộc họ nào; đừng đổi sang vật phụ trong cảnh (ví dụ phòng khách có ghế thì main_subject vẫn là living room, không phải armchair).
+- Dòng có chủ thể cụ thể thì main_subject PHẢI là đúng chủ thể đó (chọn từ danh mục, chưa dùng gần đây); dựng một cảnh đời thực dễ chịu quanh nó, đúng nhóm và Kiểu ảnh.
+- Dòng "CHỦ THỂ: tự chọn trong nhóm": tự chọn chủ thể mới thuộc nhóm đó, thuộc HỌ CHỦ THỂ CÒN CHỖ hoặc chưa thuộc họ nào; main_subject là chủ thể chính, không phải vật phụ trong cảnh (ví dụ bàn khắc gỗ có đục thì main_subject là woodcarving bench, không phải chisel).
 
 HỌ CHỦ THỂ CÒN CHỖ — CHỌN main_subject THUỘC CÁC HỌ NÀY (id (nhãn): số concept họ đó còn nhận; trong {count} concept lần này, mỗi họ không vượt số "còn")
 {open_families}
@@ -1070,7 +1031,7 @@ MÔ-TÍP HÌNH ẢNH ĐÃ DÙNG TRONG TOÀN BỘ {len(history)} MỤC (không đ
 Chỉ trả về JSON hợp lệ, không markdown, theo dạng {{"concepts":[...]}}. Mỗi phần tử có đủ chuỗi:
 title, category, subject, scene, story, composition, palette, materials, key, prompt, main_subject, subject_family, props, seed_id.
 - subject_family là id họ của main_subject trong HỌ CHỦ THỂ CÒN CHỖ. Chỉ khi không họ nào hợp mới ghi họ mới dạng "id_tieng_anh: nhãn tiếng Việt" (id snake_case). Họ mới cũng bị giới hạn và được ghi lại cho các lần sau; không tạo họ mới để né họ đã đủ.
-- props là 3–6 vật phụ thấy rõ trong ảnh, danh từ tiếng Anh chung số ít, cách nhau dấu phẩy (ví dụ: teapot, linen napkin, wooden tray).
+- props là 3–6 vật phụ thấy rõ trong ảnh, danh từ tiếng Anh chung số ít, cách nhau dấu phẩy (ví dụ: wooden mallet, sketchbook, brass lantern).
 - main_subject là danh từ tiếng Anh chung, số ít, 1–3 từ, gọi tên chủ thể chính (ví dụ rabbit, bicycle, railway station, bread); không tính từ, không màu, không bối cảnh. Mỗi concept một chủ thể chính khác nhau.
 - title/category/subject/scene/story/composition/palette/materials viết tiếng Việt, thật ngắn gọn.
 - title tối đa 100 ký tự; category 70; subject/scene/story/composition/materials mỗi trường tối đa 200 ký tự; palette 150; key 150; prompt 1800 ký tự.
@@ -1182,11 +1143,12 @@ def validate_concepts(
     comparison_subjects = [_subject_of(item) for item in comparison_pool]
     # The cap scales with the whole catalogue, including this response's accepted concepts.
     max_uses = subject_limit(len(comparison_pool) + min(len(source), limit))
-    catalogue_size = len(comparison_pool) + min(len(source), limit)
-    max_prop = prop_limit(len(comparison_pool) + min(len(source), limit))
-    comparison_families = [_concept_family(item) for item in comparison_pool]
+    era = _current_era(comparison_pool)
+    catalogue_size = len(era) + min(len(source), limit)
+    max_prop = prop_limit(catalogue_size)
+    comparison_families = [_concept_family(item) for item in era]
     new_family_labels: dict[str, str] = {}
-    prop_counts = Counter(prop for item in comparison_pool for prop in _props_of(item))
+    prop_counts = Counter(prop for item in era for prop in _props_of(item))
     seed_by_id = {seed["id"]: seed for seed in seeds or ()}
     used_seeds: set[str] = set()
 
@@ -1220,8 +1182,9 @@ def validate_concepts(
         seed_id = normalized.pop("seed_id", "")
         # The seed only steers the planner; the subject cap below is the real gate.
         seed = seed_by_id.get(seed_id) if seed_id not in used_seeds else None
-        if seed and seed.get("path"):
-            normalized["final_seed"] = seed["path"]
+        # The slot's category decided its axes and shot quota; a planner relabel would skew both.
+        if seed and seed.get("category"):
+            normalized["category"] = _normalized_category(str(seed["category"]))
         if seed and seed.get("axes"):
             normalized["axes"] = dict(seed["axes"])
         sample = _final_duplicate(normalized)
@@ -1286,6 +1249,7 @@ def validate_concepts(
             continue
         if family:
             normalized["subject_family"] = family
+        normalized["era"] = CONTENT_ERA
         if new_label:
             normalized["family_label"] = new_label
         normalized["prompt"] = image_prompt(normalized)

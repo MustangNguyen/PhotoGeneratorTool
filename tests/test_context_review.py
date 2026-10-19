@@ -61,8 +61,17 @@ class ContextReviewTests(unittest.TestCase):
         self.assertEqual("coin_collection", accepted[0]["subject_family"])
         self.assertEqual("velvet tray, magnifier", accepted[0]["props"])
 
+    def test_revise_keeps_content_era(self):
+        original = concept(1) | {"main_subject": "coin collection", "era": 2}
+        revised = concept(9) | {"key": "souvenir coins kept in an open wooden box"}
+        accepted, rejected = apply_review({"reviews": [
+            {"index": 0, "decision": "revise", "reason": "Sửa", "revised": revised},
+        ]}, [original], [])
+        self.assertFalse(rejected)
+        self.assertEqual(2, accepted[0]["era"])
+
     def test_revise_cannot_dodge_a_recent_family_by_rewording_the_key(self):
-        peer = concept(3) | {"main_subject": "coin collection", "subject_family": "coin_collection"}
+        peer = concept(3) | {"main_subject": "coin collection", "subject_family": "coin_collection", "era": 2}
         original = concept(1) | {"main_subject": "coin case", "subject_family": "coin_collection"}
         revised = concept(9) | {"key": "souvenir coins kept in an open wooden box"}
         accepted, rejected = apply_review({"reviews": [

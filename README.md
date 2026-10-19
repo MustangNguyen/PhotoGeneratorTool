@@ -30,7 +30,7 @@ Mặc định dùng **Codex CLI đã đăng nhập trên máy**. CLI phải hỗ
 
 ## Đa dạng nội dung
 
-10 nhóm chủ đề lấy từ kho Final kèm tỷ lệ mục tiêu (xem phần Bám phong cách Final), subject/scene/story/composition/palette/materials cho từng concept. Bộ lọc chặn trùng khóa, dấu vân tay từ vựng và một số thay đổi bề mặt như đổi trái cây trong cùng cảnh. Lịch sử của tất cả batch được so sánh, kể cả ảnh đã loại, để không tự dùng lại ý đó. Sắp xếp ưu tiên tránh nhóm/bảng màu/góc nhìn tương tự cạnh nhau.
+12 nhóm chủ đề kèm tỷ lệ mục tiêu (`studio/themes.py`): bàn sở thích và xưởng thủ công, nhạc cụ, đồ chơi và mô hình, lễ hội và trang trí, núi rừng sông suối, chim và sinh vật hoang dã, nông trại, công viên và khu vui chơi, khám phá và khoa học tự nhiên, thể thao và cắm trại, thư viện và hiệu sách, công trình độc đáo. Các nhóm này thay 10 nhóm cũ chắt từ kho Final (ẩm thực, nội thất, mặt tiền, thú cưng…) vì sau khoảng 4.800 ảnh, kho ảnh tạo ra đã quá giống nhau; từ đó Final chỉ còn là chuẩn bảng màu và phong cách. Planner viết subject/scene/story/composition/palette/materials cho từng concept. Bộ lọc chặn trùng khóa, dấu vân tay từ vựng và một số thay đổi bề mặt như đổi trái cây trong cùng cảnh. Lịch sử của tất cả batch được so sánh, kể cả ảnh đã loại, để không tự dùng lại ý đó. Sắp xếp ưu tiên tránh nhóm/bảng màu/góc nhìn tương tự cạnh nhau.
 
 Đây là **lọc gần trùng theo heuristic**, không phải chứng minh 1.000 ảnh khác nhau tuyệt đối về ngữ nghĩa. Sau gen có cảnh báo ảnh gần giống theo màu/bố cục thô. Người duyệt vẫn kiểm tra nội dung và trải nghiệm ghép. Không tự gen lại khi có cảnh báo để tránh tốn quota. Kho ảnh mẫu `Final/` không được phân phối trong repo; mô tả từng ảnh nằm trong `final-index.json` và được dùng để chặn concept lặp lại ảnh mẫu.
 
@@ -87,11 +87,11 @@ Bộ lọc trước khi tạo ảnh xét thêm các công thức cảnh dễ l�
 
 Trước đây model tự chọn chủ thể trong mỗi nhóm nên hay quay lại ý quen thuộc (xe đạp touring, thỏ tai cụp, bánh mì, ngô nướng…), còn bộ lọc từ vựng không bắt được khi chỉ đổi bối cảnh. Hiện tại:
 
-1. Mỗi lượt lập context, ứng dụng gán cho từng concept một ảnh mẫu Final chưa dùng (theo GỢI Ý PHÂN BỔ). Model lấy chủ thể/ý chủ đạo của gợi ý rồi tự dựng cảnh mới và trả lại `seed_id`; context lưu `final_seed` để lượt sau không lặp gợi ý.
+1. Mỗi lượt lập context, ứng dụng chia từng concept vào một chỗ `S1…` (theo GỢI Ý PHÂN BỔ): nhóm, một chủ thể ít dùng nhất còn chỗ trong `subject-catalogue.json` của nhóm đó và các trục đa dạng. Model giữ đúng chủ thể, tự dựng cảnh và trả lại `seed_id`. Nhóm hết chủ thể trong danh mục vẫn nhận chỗ, khi đó model tự chọn chủ thể. Ảnh mẫu Final không còn được dùng làm gợi ý nội dung; context mới không ghi `final_seed` (context cũ vẫn giữ trường này). Bổ sung danh mục bằng `python3 build_subject_catalogue.py` (dùng phiên Codex, chỉ thêm phần còn thiếu).
 2. Model phải trả `main_subject`: danh từ tiếng Anh chung, số ít (ví dụ `rabbit`, `bicycle`). Mỗi chủ thể chỉ được dùng tối đa `1 + số context / 500` lần (756 mục → 2 lần, 1.000 mục → 3 lần); đổi giống, màu, tính từ hay bối cảnh vẫn tính là cùng chủ thể. Danh từ quá chung như `machine`, `table`, `tree` cần cả từ đứng trước trùng mới tính là một chủ thể.
 3. Context cũ không có `main_subject` được suy ra từ cụm danh từ đầu của `key`. Cách suy ra này là heuristic và có thể sai với key không bắt đầu bằng chủ thể.
 4. Prompt lập context liệt kê toàn bộ chủ thể đã đủ giới hạn và chủ thể vừa dùng trong 100 mục gần nhất. Dấu vân tay chỉ còn một mẫu nhỏ (khoảng 3.000 ký tự), vì bộ lọc code đã tự kiểm trùng trên toàn bộ lịch sử.
-5. Mỗi ảnh mẫu trong `final-index.json` có `main_subject` tiếng Anh. Gợi ý không giao ảnh mẫu có chủ thể đã đủ, vừa dùng, hoặc thuộc họ đã hết chỗ. Trong một lượt, hai gợi ý không cùng chủ thể và không giao quá số chỗ còn lại của một họ. Dòng gợi ý ghi `main_subject` và họ để model giữ đúng chủ thể. Khi thêm ảnh vào Final, chạy lại `python3 tag_final_subjects.py`: lệnh dùng phiên Codex để gắn nhãn, chỉ xử lý ảnh chưa có nhãn.
+5. Danh mục không giao chủ thể đã đủ, vừa dùng, hoặc thuộc họ đã hết chỗ. Trong một lượt, hai chỗ không cùng chủ thể và không giao quá số chỗ còn lại của một họ. Giới hạn vẫn tính trên toàn bộ lịch sử, nên chủ thể của kho cũ tiếp tục bị chặn.
 
 ### Họ chủ thể và vật phụ (`subject-families.json`)
 
@@ -103,30 +103,32 @@ Giới hạn theo `main_subject` không bắt được việc đổi sang con/v�
 - **Tự học:** planner trả thêm `subject_family` (id họ có sẵn, hoặc họ mới dạng `id: nhãn`). Chủ thể đã có trong file luôn giữ họ của nó, nên không thể đặt họ mới để né họ đã đủ. Khi context được lưu, chủ thể chưa có họ được ghi vào `learned` của họ đó (họ mới có `"auto": true`), và vật phụ mới được ghi vào `props.learned`. Log batch báo số mục đã học. Nên thỉnh thoảng xem lại các mục `learned`/`auto` và sửa nếu model xếp sai họ.
 - Một từ thuộc hai họ sẽ báo lỗi khi đọc file. Thêm họ, thành viên hay vật phụ bằng cách sửa file; ứng dụng đọc lại khi file đổi.
 
+**Đợt nội dung 2 (19/10/2026):** khi đổi sang 12 nhóm mới, giới hạn theo họ và vật phụ chỉ đếm context của đợt mới (có `era: 2` hoặc thuộc một trong 12 nhóm), để họ đã đầy từ kho cũ không chặn nhóm mới. Giới hạn theo đúng chủ thể, mô-típ và dấu vân tay vẫn tính trên toàn bộ lịch sử, nên chủ thể cũ vẫn không được dùng lại.
+
 Giới hạn chặt khiến lượt đầu sau khi bật có thể loại nhiều concept hơn và tốn thêm lượt lập context. Nếu batch hay dừng vì "Ba lượt lập context không có đề xuất mới hợp lệ", tăng `weight` của họ đang chặn hoặc tăng `FAMILY_REPEAT_EVERY`/`PROP_REPEAT_EVERY` trong `studio/diversity.py`.
 
 ### Trục đa dạng (`diversity-axes.json`)
 
-Ngoài chủ thể, mỗi concept luôn được gán **Kiểu ảnh** (trục bắt buộc `shot`): tĩnh vật, flat-lay, bộ sưu tập xếp kín, kệ trưng bày, góc phòng, cận cảnh hoa cây, con vật, mặt tiền, phương tiện, bên trong phương tiện, cảnh có tầm nhìn xa, tranh/thủ công. Tỷ lệ của từng kiểu theo nhóm lấy từ Final (`shares`), ví dụ nhóm ăn uống khoảng 58% tĩnh vật và chỉ 8% có tầm nhìn xa; tổng cộng khoảng 13% ảnh có tầm nhìn xa như Final. Kiểu ảnh không có tầm nhìn xa thì prompt cấm mở cửa sổ/cửa/ban công ra phong cảnh, và ảnh mẫu Final được chọn cùng kiểu (ảnh mẫu "bên biển" chỉ đi với kiểu có tầm nhìn xa).
+Ngoài chủ thể, mỗi concept luôn được gán **Kiểu ảnh** (trục bắt buộc `shot`), 11 kiểu: S1 toàn cảnh từ trên cao, S2 nhìn dọc lối đi/dòng nước, S3 ba tầng tiền-trung-hậu cảnh, S4 góc làm việc/chơi đang dùng dở, S5 nhìn từ thấp lên chủ thể cao, S6 bên trong không gian lớn có mái, S7 ngang mặt đất, S8 khoảng trống ngoài trời khép kín, S9 có tầm nhìn xa, S10 nhìn qua khung tiền cảnh tự nhiên, S11 một vật/sinh vật lớn. Mỗi nhóm có tỷ lệ riêng (`shares`), ví dụ bàn sở thích 30% S4, núi rừng 25% S9; tổng cộng khoảng 7% ảnh có tầm nhìn xa. Chỉ S9 có tầm nhìn xa; kiểu khác thì prompt cấm mở cửa sổ/cửa/ban công ra phong cảnh.
 
 Batch đầu tiên sau khi thêm trục cho thấy 15/20 ảnh cùng khuôn "đồ vật trước cửa sổ nhìn ra phong cảnh" và nhiều tổ hợp gượng ép, nên các trục còn lại giờ chỉ là **gợi ý**: mỗi concept nhận 1–2 trục (`per_concept`), model được bỏ trục nào làm cảnh không có thật, và bước duyệt sửa/loại concept gượng ép theo trục.
 
-Các trục gợi ý: ngoài Kiểu ảnh, file có 14 trục gợi ý, 624 giá trị, chắt lọc từ caption 2.204 ảnh Final: góc nhìn và điểm đứng (48), kiểu bố cục và cách bày (46), thời điểm và ánh sáng (37), mùa/thời tiết/vụ mùa (40), dịp và lễ hội (46), vùng và địa danh (57), thời kỳ và phong cách (45), chất liệu (49), bảng màu (45), không gian (50), tình huống (48), điểm nhấn phụ (50), họa tiết (40), hình thức (23, weight thấp vì phần lớn là tranh/mô hình, trong Final chỉ chiếm vài phần trăm). File được sinh bằng tay một lần; sửa trực tiếp trong JSON.
+Các trục gợi ý: ngoài Kiểu ảnh, file có 14 trục gợi ý, 573 giá trị: góc nhìn và điểm đứng (40), kiểu bố cục và cách bày (36), thời điểm và ánh sáng (34), mùa/thời tiết/vụ mùa (39), dịp và lễ hội (38), vùng và địa danh (57), thời kỳ và phong cách (41), chất liệu (49), bảng màu (45), không gian (49), tình huống (39), điểm nhấn phụ (46), họa tiết (38), hình thức (22, weight thấp). Góc nhìn, bố cục, không gian, tình huống và điểm nhấn phụ đã viết lại cho 12 nhóm mới (trước đây chắt từ caption Final nên đẩy về khay, hộp chia ngăn, bếp, phòng khách, mèo/chó cưng); các trục còn lại giữ, bỏ vài giá trị chỉ hợp nhóm cũ. Sửa trực tiếp trong JSON.
 
 - Ngoài Kiểu ảnh, mỗi concept chỉ nhận ngẫu nhiên từ `per_concept.min` đến `per_concept.max` trục gợi ý (mặc định 1–2). Trục không được gán thì model tự chọn, miễn khác các concept còn lại.
 - Trong mỗi trục được gán, ứng dụng chọn giá trị **ít được dùng nhất** trong lịch sử (hòa thì ngẫu nhiên), nên kho ảnh tự trải đều qua các giá trị. Giá trị có `shares` (như Kiểu ảnh) thì chọn theo tỷ lệ của nhóm.
-- `weight` cao thì trục được chọn thường hơn. `categories` / `exclude_categories` (mã nhóm `food`, `interior`, `garden`, `objects`, `facade`, `animal`, `vehicle`, `shop`, `coast`, `drink`) giới hạn trục cho một số nhóm.
+- `weight` cao thì trục được chọn thường hơn. `categories` / `exclude_categories` (mã nhóm `hobby`, `music`, `toys`, `festival`, `nature`, `wildlife`, `farm`, `park`, `discovery`, `outdoor`, `books`, `structure`) giới hạn trục cho một số nhóm.
 - Thêm trục hoặc giá trị bằng cách sửa file; ứng dụng đọc lại khi file đổi, không cần khởi động lại. File sai cấu trúc sẽ dừng batch với lỗi rõ ràng.
 - Context lưu trục đã gán ở trường `axes`; bước duyệt nhận các trục này và phải giữ chúng khi sửa.
 
 Tổ hợp không hợp nhau được khai báo trong `rules`, ứng dụng không bao giờ gán chúng cùng lúc:
 
-- `exclude`: `if` và `then` không được cùng xảy ra, ví dụ tuyết + vùng nóng, góc nhìn ngoài trời + không gian trong nhà, vật liệu vải/giấy + công trình.
-- `require`: khi `if` xảy ra thì `then` phải đúng nếu trục đó được gán, ví dụ Tết Nguyên đán chỉ đi với vùng Đông Á đón Tết âm lịch và đầu xuân, Diwali chỉ ở Ấn Độ, cực quang chỉ ở Na Uy/Scotland.
-- Bộ chọn là `{"axis": "season", "values": [...]}` (bỏ `values` = mọi giá trị của trục) hoặc `{"category": ["coast"]}`. Trục/giá trị/mã nhóm sai tên sẽ báo lỗi khi đọc file.
+- `exclude`: `if` và `then` không được cùng xảy ra, ví dụ tuyết + vùng nóng, góc nhìn ngoài trời + không gian trong nhà, vật liệu vải/giấy + công trình, chim/côn trùng làm điểm nhấn phụ trong nhóm sinh vật hoang dã.
+- `require`: khi `if` xảy ra thì `then` phải đúng nếu trục đó được gán, ví dụ Tết Nguyên đán chỉ đi với vùng Đông Á đón Tết âm lịch và đầu xuân, cực quang chỉ ở Na Uy/Scotland, mỗi không gian (xưởng mộc, nhà thủy cung, bờ suối…) chỉ đi với các nhóm hợp nó, S6 chỉ đặt trong không gian có mái.
+- Bộ chọn là `{"axis": "season", "values": [...]}` (bỏ `values` = mọi giá trị của trục) hoặc `{"category": ["nature"]}`. Trục/giá trị/mã nhóm sai tên sẽ báo lỗi khi đọc file.
 - Nếu một trục không còn giá trị hợp lệ, ứng dụng bỏ trục đó và chọn trục khác.
 
-Luật chỉ áp dụng cho trục được gán. Chủ thể gợi ý từ Final vẫn có thể không hợp trục (ví dụ hải đăng + Alps không còn xảy ra, nhưng gợi ý "cua trên bãi đá" + "trên tàu"): model được yêu cầu đổi chủ thể theo tinh thần gợi ý thay vì bỏ trục, và bước duyệt loại cảnh phi thực tế. Gặp cặp lạ lặp lại thì thêm luật mới.
+Luật chỉ áp dụng cho trục được gán. Chủ thể từ danh mục vẫn có thể không hợp một trục gợi ý: model được bỏ trục gợi ý đó (Kiểu ảnh thì không), và bước duyệt loại cảnh phi thực tế. Gặp cặp lạ lặp lại thì thêm luật mới.
 
 ## Bám phong cách Final
 
@@ -137,8 +139,8 @@ Hai file sinh ra một lần từ toàn bộ 2.204 ảnh trong `Final/` (Chap, D
 
 Cách dùng trong tool:
 
-1. Quy cách ảnh (`_IMAGE_RULES`, prompt lập context và `art-direction.json` v11) mô tả phong cách Final: nắng ấm, màu tươi bão hòa hài hòa, cảnh bày biện nhiều vật cỡ vừa-lớn rõ ràng. Vẫn giữ không người, không chữ, không bùn, không blur, không chi tiết li ti.
-2. Nhóm chủ đề và tỷ lệ mục tiêu lấy từ Final. Mỗi lần lập context, planner nhận gợi ý phân bổ theo nhóm đang thiếu và vài mô tả ảnh Final cùng nhóm làm ví dụ.
+1. Quy cách ảnh (`_IMAGE_RULES`, prompt lập context và `art-direction.json` v12) mô tả phong cách Final: nắng ấm, màu tươi bão hòa hài hòa, cảnh bày biện nhiều vật cỡ vừa-lớn rõ ràng. Vẫn giữ không người, không chữ, không bùn, không blur, không chi tiết li ti.
+2. Final chỉ quyết định bảng màu và phong cách, không còn quyết định nội dung: nhóm chủ đề, chủ thể và Kiểu ảnh lấy từ `studio/themes.py`, `subject-catalogue.json` và `diversity-axes.json`; planner không nhận mô tả ảnh Final làm ví dụ. `final-index.json` vẫn giữ mã nhóm cũ của kho mẫu.
 3. Concept có tiêu đề lặp lại mô tả một ảnh Final bị loại trước khi tạo ảnh. Khi chạy `python3 app.py` trên máy có `Final/`, ảnh mới còn được so pixel với ảnh mẫu; fingerprint lưu ở `data/final-fingerprints.json`, chỉ tính lại khi file đổi. Lần kiểm tra đầu tiên chậm hơn vì phải đọc toàn bộ ảnh mẫu.
 4. Sau khi lưu ảnh, tool đo màu và so với `final-style.json`. Ảnh lệch xa (ví dụ nhạt và lạnh hơn hẳn Final) có dòng "Màu so với Final" trong hộp chi tiết. Đây chỉ là cảnh báo; tool không tự tạo lại. Ngưỡng `warn_score` 0,5 gắn cờ khoảng 13% chính ảnh Final và 29/50 ảnh tool tạo gần nhất.
 

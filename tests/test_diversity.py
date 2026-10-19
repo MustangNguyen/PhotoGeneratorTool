@@ -157,7 +157,7 @@ class DiversityTests(unittest.TestCase):
     def test_swapping_to_another_member_of_a_full_family_is_rejected(self):
         history = [
             concept(title=f"Thú {n}", subject=f"Thú nhỏ {n}", scene=f"Chuồng {n}", story=f"Bữa {n}",
-                    key=f"pet eating greens {n}", main_subject=name)
+                    key=f"pet eating greens {n}", main_subject=name, era=2)
             for n, name in enumerate(["rabbit", "hamster"])
         ]
         new = concept(
@@ -175,7 +175,7 @@ class DiversityTests(unittest.TestCase):
     def test_concept_with_two_overused_props_is_rejected(self):
         history = [
             concept(title=f"Cảnh {n}", subject=f"Vật riêng {n}", scene=f"Nơi {n}", story=f"Chuyện {n}",
-                    key=f"unique subject {n}", main_subject=f"widget{n}", props="woven basket, watering can")
+                    key=f"unique subject {n}", main_subject=f"widget{n}", props="woven basket, watering can", era=2)
             for n in range(2)
         ]
         crowded = concept(main_subject="cello", props="woven basket, watering can, violin bow")
@@ -187,14 +187,18 @@ class DiversityTests(unittest.TestCase):
         self.assertEqual(1, len(accepted), errors)
 
     def test_learned_subjects_and_props_are_written_and_reused(self):
-        import shutil
         import tempfile
         from pathlib import Path
         from unittest.mock import patch
         from studio import diversity
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "subject-families.json"
-            shutil.copy(diversity.FAMILIES_PATH, path)
+            # A minimal fixture keeps the test independent of the self-learned subject-families.json.
+            path.write_text(json.dumps({
+                "version": 1,
+                "families": [{"id": "small_pet", "label": "thú nhỏ ăn cỏ", "members": ["rabbit", "hamster"]}],
+                "props": {"tracked": ["woven basket"], "learned": []},
+            }), encoding="utf-8")
             with patch("studio.diversity.FAMILIES_PATH", path):
                 first = concept(main_subject="capybara", subject_family="large_rodent: thú gặm nhấm lớn", props="hot spring stone, yuzu, wooden tub")
                 accepted, errors = validate_concepts({"concepts": [first]}, [], 1)
@@ -213,6 +217,42 @@ class DiversityTests(unittest.TestCase):
                 # Learning the same subject twice adds nothing.
                 self.assertEqual({"members": 0, "families": 0, "props": 0}, diversity.learn_from(accepted))
 
+    def test_old_era_history_does_not_consume_family_or_prop_quota(self):
+        old_pets = [
+            concept(title=f"Thú {n}", subject=f"Thú nhỏ {n}", scene=f"Chuồng {n}", story=f"Bữa {n}",
+                    key=f"pet eating greens {n}", main_subject=name, props="woven basket, watering can")
+            for n, name in enumerate(["rabbit", "hamster", "gerbil", "chinchilla"])
+        ]
+        self.assertTrue(all("era" not in item for item in old_pets))
+        new = concept(
+            title="Chuột lang gặm cỏ", subject="Chuột lang gặm cọng cỏ", scene="Chuồng nuôi sạch", story="Bữa trưa",
+            key="guinea pig eating grass in a clean hutch", main_subject="guinea pig", props="woven basket, watering can, hay",
+        )
+        accepted, errors = validate_concepts({"concepts": [new]}, old_pets, 1)
+        self.assertEqual(1, len(accepted), errors)
+        # Exact subjects still use the whole history, so an old main_subject cannot come back.
+        again = concept(
+            title="Thỏ trên thảm", subject="Thỏ lùn nằm nghỉ", scene="Phòng khách sáng", story="Giờ nghỉ trưa",
+            key="dwarf rabbit resting on a living room rug", main_subject="rabbit",
+        )
+        history = old_pets + [concept(main_subject="rabbit", key="rabbit again", title="Thỏ nữa")] * 3
+        accepted, errors = validate_concepts({"concepts": [again]}, history, 1)
+        self.assertEqual([], accepted)
+        self.assertTrue(any("chủ thể chính “rabbit”" in error for error in errors), errors)
+
+    def test_old_era_does_not_hide_current_era_family_quota(self):
+        from studio.diversity import family_room
+        old = [concept(main_subject="rabbit", key="old rabbit")]
+        current = [concept(main_subject="hamster", key="new hamster", era=2)]
+        self.assertEqual(family_room(current)["small_pet"], family_room(old + current)["small_pet"])
+        self.assertGreater(family_room(old)["small_pet"], family_room(current)["small_pet"])
+
+    def test_accepted_concepts_carry_the_content_era(self):
+        from studio.diversity import CONTENT_ERA
+        accepted, errors = validate_concepts({"concepts": [concept(main_subject="cello")]}, [], 1)
+        self.assertEqual(CONTENT_ERA, accepted[0]["era"], errors)
+        self.assertEqual(2, accepted[0]["era"])
+
     def test_known_subject_ignores_planner_family_claim(self):
         item = concept(main_subject="guinea pig", subject_family="exotic_pet: thú cưng lạ")
         accepted, errors = validate_concepts({"concepts": [item]}, [], 1)
@@ -222,11 +262,11 @@ class DiversityTests(unittest.TestCase):
     def test_recent_window_spreads_a_family_across_batches(self):
         def filler(n):
             return concept(title=f"Mục lấp {n}", subject=f"Vật q{n}", scene=f"Nơi r{n}", story=f"Chuyện s{n}",
-                           key=f"filler t{n} u{n}", main_subject=f"widget{n}")
+                           key=f"filler t{n} u{n}", main_subject=f"widget{n}", props="hay", era=2)
         rabbit = concept(title="Thỏ trong chuồng", subject="Thỏ ăn rau", scene="Chuồng gỗ", story="Bữa trưa",
-                         key="rabbit eating greens in a hutch", main_subject="rabbit")
+                         key="rabbit eating greens in a hutch", main_subject="rabbit", props="hay", era=2)
         hamster = concept(title="Chuột hamster trong lồng", subject="Hamster chạy bánh xe", scene="Lồng sáng",
-                          story="Giờ chơi", key="hamster running a wheel in a cage", main_subject="hamster")
+                          story="Giờ chơi", key="hamster running a wheel in a cage", main_subject="hamster", props="hay")
         fillers = [filler(n) for n in range(130)]
         accepted, errors = validate_concepts({"concepts": [hamster]}, fillers + [rabbit], 1)
         self.assertEqual([], accepted)
@@ -282,13 +322,22 @@ class DiversityTests(unittest.TestCase):
         accepted, errors = validate_concepts({"concepts": [new]}, [old], 1)
         self.assertEqual(1, len(accepted), errors)
 
-    def test_seed_is_recorded_and_planner_fields_are_kept(self):
-        seeds = [{"id": "F7", "category": CATEGORIES[0], "caption": "bánh", "path": "Chap1/7-4x4.jpg"}]
-        item = concept(main_subject="cello", seed_id="F7")
+    def test_seed_axes_are_recorded_without_final_seed(self):
+        seeds = [{"id": "S1", "category": CATEGORIES[0], "main_subject": "cello", "catalogue": True, "axes": {"season": "mùa sen"}}]
+        item = concept(main_subject="cello", seed_id="S1")
         accepted, errors = validate_concepts({"concepts": [item]}, [], 1, seeds)
-        self.assertEqual("Chap1/7-4x4.jpg", accepted[0]["final_seed"], errors)
+        self.assertEqual({"season": "mùa sen"}, accepted[0]["axes"], errors)
+        self.assertNotIn("final_seed", accepted[0])
         self.assertEqual("cello", accepted[0]["main_subject"])
         self.assertNotIn("seed_id", accepted[0])
+
+    def test_seed_category_overrides_planner_category(self):
+        seeds = [{"id": "S1", "category": CATEGORIES[1], "main_subject": "cello", "catalogue": True, "axes": {"season": "mùa sen"}}]
+        item = concept(main_subject="cello", seed_id="S1", category=CATEGORIES[0])
+        accepted, errors = validate_concepts({"concepts": [item]}, [], 1, seeds)
+        self.assertEqual(CATEGORIES[1], accepted[0]["category"], errors)
+        unseeded = validate_concepts({"concepts": [concept(main_subject="cello", category=CATEGORIES[0])]}, [], 1)[0]
+        self.assertEqual(CATEGORIES[0], unseeded[0]["category"])
 
     def test_within_batch_duplicate_is_rejected(self):
         first = concept()

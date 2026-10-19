@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from studio import axes
+from studio import themes
 from studio.diversity import CATEGORIES, make_planning_prompt, pick_seeds, validate_concepts
 from tests.test_diversity import concept
 
@@ -17,7 +18,7 @@ def catalogue(**changes):
         'per_concept': {'min': 1, 'max': 2},
         'axes': [
             {'id': 'season', 'label': 'Mùa', 'values': ['xuân', 'hạ', 'thu', 'đông']},
-            {'id': 'pet', 'label': 'Thú', 'exclude_categories': ['animal'], 'values': ['mèo', 'chó']},
+            {'id': 'pet', 'label': 'Thú', 'exclude_categories': ['wildlife'], 'values': ['mèo', 'chó']},
         ],
     }
     value.update(changes)
@@ -57,8 +58,8 @@ class AxisTests(unittest.TestCase):
 
     def test_category_exclusion_is_respected(self):
         self.with_catalogue(catalogue(per_concept={'min': 2, 'max': 2}))
-        animal = 'Động vật dễ thương'
-        result = axes.assign_axes([animal] * 20, [], random.Random(5))
+        wildlife = themes.THEMES['wildlife'][0]
+        result = axes.assign_axes([wildlife] * 20, [], random.Random(5))
         self.assertTrue(all('pet' not in item for item in result))
 
     def test_invalid_catalogue_fails_loudly(self):
@@ -85,9 +86,9 @@ class AxisTests(unittest.TestCase):
         self.with_catalogue(catalogue(per_concept={'min': 1, 'max': 1}, axes=[
             {'id': 'season', 'label': 'Mùa', 'values': ['xuân', 'đông']},
         ], rules=[
-            {'type': 'exclude', 'if': {'axis': 'season', 'values': ['đông']}, 'then': {'category': ['coast']}},
+            {'type': 'exclude', 'if': {'axis': 'season', 'values': ['đông']}, 'then': {'category': ['nature']}},
         ]))
-        result = axes.assign_axes(['Biển và nghỉ dưỡng ven biển'] * 30, [], random.Random(9))
+        result = axes.assign_axes([themes.THEMES['nature'][0]] * 30, [], random.Random(9))
         self.assertEqual({'xuân'}, {item['season'] for item in result})
 
     def test_rule_with_unknown_value_fails_loudly(self):
@@ -102,7 +103,7 @@ class AxisTests(unittest.TestCase):
         rng = random.Random(11)
         slots = [rng.choice(CATEGORIES) for _ in range(3000)]
         for category, item in zip(slots, axes.assign_axes(slots, [], rng)):
-            self.assertTrue(axes.compatible(axes.final.CATEGORY_TO_THEME[category], item, catalogue_rules), (category, item))
+            self.assertTrue(axes.compatible(themes.CATEGORY_TO_THEME[category], item, catalogue_rules), (category, item))
 
     def test_axes_flow_from_slot_to_prompt_and_saved_concept(self):
         seeds = pick_seeds(6, [], rng=random.Random(2))
@@ -117,15 +118,15 @@ class AxisTests(unittest.TestCase):
     def test_required_axis_follows_group_shares(self):
         self.with_catalogue(catalogue(per_concept={'min': 0, 'max': 0}, axes=[
             {'id': 'shot', 'label': 'Kiểu ảnh', 'required': True, 'values': [
-                {'value': 'gần', 'shares': {'food': 3}},
-                {'value': 'xa', 'shares': {'food': 1, 'coast': 1}},
-                {'value': 'phòng', 'shares': {'interior': 1}},
+                {'value': 'gần', 'shares': {'hobby': 3}},
+                {'value': 'xa', 'shares': {'hobby': 1, 'nature': 1}},
+                {'value': 'thư viện', 'shares': {'books': 1}},
             ]},
         ]))
-        food = axes.assign_axes(['Ẩm thực và bàn ăn'] * 40, [], random.Random(1))
-        self.assertEqual(Counter({'gần': 30, 'xa': 10}), Counter(item['shot'] for item in food))
-        coast = axes.assign_axes(['Biển và nghỉ dưỡng ven biển'] * 5, [], random.Random(1))
-        self.assertEqual({'xa'}, {item['shot'] for item in coast})
+        hobby = axes.assign_axes([themes.THEMES['hobby'][0]] * 40, [], random.Random(1))
+        self.assertEqual(Counter({'gần': 30, 'xa': 10}), Counter(item['shot'] for item in hobby))
+        nature = axes.assign_axes([themes.THEMES['nature'][0]] * 5, [], random.Random(1))
+        self.assertEqual({'xa'}, {item['shot'] for item in nature})
 
     def test_repo_shot_types_keep_distant_views_rare(self):
         rng = random.Random(6)
@@ -135,17 +136,37 @@ class AxisTests(unittest.TestCase):
         vista = sum(axes.is_vista_shot(item['shot']) for item in result) / len(result)
         self.assertLess(vista, 0.2)
 
-    def test_seed_caption_agrees_with_shot(self):
+    def test_repo_shot_shares_cover_every_theme(self):
+        shot = next(axis for axis in axes.load_axes()['axes'] if axis['id'] == 'shot')
+        self.assertTrue(shot['required'])
+        self.assertEqual(11, len(shot['values']))
+        for theme in themes.THEMES:
+            row = {value: shares[theme] for value, shares in shot['shares'].items() if theme in shares}
+            self.assertEqual(100, sum(row.values()), theme)
+
+    def test_only_s9_is_a_vista_shot(self):
+        shot = next(axis for axis in axes.load_axes()['axes'] if axis['id'] == 'shot')
+        vista = [value for value in shot['values'] if axes.is_vista_shot(value)]
+        self.assertEqual(['cảnh có tầm nhìn xa tới núi, thung lũng, hồ hoặc làng'], vista)
+        self.assertFalse(axes.is_vista_shot(next(value for value in shot['values'] if value.startswith('trung cảnh ngoài trời khép kín'))))
+
+    def test_repo_rules_and_axes_use_only_new_theme_codes(self):
+        raw = json.loads(axes.AXES_PATH.read_text(encoding='utf-8'))
+        text = json.dumps(raw['rules'], ensure_ascii=False)
+        for old in ('food', 'interior', 'garden', 'objects', 'facade', 'animal', 'vehicle', 'shop', 'coast', 'drink'):
+            self.assertNotIn(f'"{old}"', text)
+
+    def test_seeds_never_carry_final_captions(self):
         seeds = pick_seeds(40, [], rng=random.Random(3))
-        vista = __import__('studio.diversity', fromlist=['_VISTA_CAPTION'])._VISTA_CAPTION
-        agree = sum(bool(vista.search(seed['caption'].lower())) == axes.is_vista_shot(seed['axes']['shot']) for seed in seeds)
-        self.assertGreaterEqual(agree, 38)
+        self.assertEqual([f'S{n}' for n in range(1, 41)], [seed['id'] for seed in seeds])
+        self.assertTrue(all('caption' not in seed and 'path' not in seed for seed in seeds))
+        self.assertTrue(all(seed['category'] in CATEGORIES and 'shot' in seed['axes'] for seed in seeds))
 
     def test_slots_exist_without_final_index(self):
         with patch('studio.final.load_index', return_value=()):
             seeds = pick_seeds(4, [], rng=random.Random(1))
         self.assertEqual(4, len(seeds))
-        self.assertTrue(all(seed['id'].startswith('S') and not seed['path'] for seed in seeds))
+        self.assertTrue(all(seed['id'].startswith('S') and 'path' not in seed for seed in seeds))
 
 
 if __name__ == '__main__':

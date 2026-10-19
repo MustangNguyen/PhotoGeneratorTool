@@ -15,10 +15,10 @@ import random
 import threading
 from typing import Any
 
-from . import final
+from . import themes
 
 AXES_PATH = Path(__file__).resolve().parent.parent / 'diversity-axes.json'
-_THEMES = frozenset(final.THEMES)
+_THEMES = frozenset(themes.THEMES)
 
 _LOCK = threading.Lock()
 _CACHE_KEY = None
@@ -192,7 +192,7 @@ def compatible(theme: str | None, assigned: dict[str, str], rules: list[tuple[st
 
 
 def _applies(axis: dict[str, Any], category: str) -> bool:
-    theme = final.CATEGORY_TO_THEME.get(category)
+    theme = themes.CATEGORY_TO_THEME.get(category)
     if axis['categories'] and theme not in axis['categories']:
         return False
     return theme not in axis['exclude']
@@ -203,7 +203,7 @@ def _theme_value_counts(history: list[dict[str, Any]], axis_id: str) -> Counter[
     for item in history:
         assigned = item.get('axes') if isinstance(item, dict) else None
         if isinstance(assigned, dict) and axis_id in assigned:
-            counts[(final.CATEGORY_TO_THEME.get(str(item.get('category', ''))), str(assigned[axis_id]))] += 1
+            counts[(themes.CATEGORY_TO_THEME.get(str(item.get('category', ''))), str(assigned[axis_id]))] += 1
     return counts
 
 
@@ -239,7 +239,7 @@ def assign_axes(
     theme_counts = {axis['id']: _theme_value_counts(history, axis['id']) for axis in catalogue['axes'] if axis['shares']}
     result = []
     for category in categories:
-        theme = final.CATEGORY_TO_THEME.get(category)
+        theme = themes.CATEGORY_TO_THEME.get(category)
         eligible = [axis for axis in catalogue['axes'] if _applies(axis, category)]
         required = [axis for axis in eligible if axis['required']]
         optional = [axis for axis in eligible if not axis['required']]

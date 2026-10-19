@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build subject-catalogue.json: about 500 concrete main subjects for each Final theme.
+"""Build subject-catalogue.json: concrete main subjects for each planner theme (studio/themes.py).
 
-Final only names ~630 distinct subjects, so seeds ran dry after a few batches and the
-planner fell back to its favourites. The catalogue gives pick_seeds a much wider pool.
+pick_seeds takes the least-used open subject of a slot's theme, so the catalogue decides
+what the planner draws; Final only sets palette and style.
 Runs again safely: existing subjects are kept and only the missing count is requested.
 Uses the Codex CLI login like the app, one theme per worker.
 """
@@ -13,7 +13,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from studio import diversity, final
+from studio import diversity
 from studio.providers import CodexProvider
 from studio.store import Store
 
@@ -30,49 +30,45 @@ SCHEMA = {
     }}}, 'required': ['subjects'], 'additionalProperties': False,
 }
 THEMES = {
-    'food': 'dishes, baked goods, desserts, ingredients and table spreads from many world cuisines',
-    'interior': 'rooms, room corners, furniture, fixtures and home features in cosy interiors',
-    'garden': 'flowers, shrubs, trees, fruit and vegetable plants, garden structures and fresh nature spots',
-    'objects': 'nostalgic objects, collectibles, crafts, toys, instruments and keepsakes',
-    'facade': 'buildings, facades, streets, bridges, towers, landmarks types and townscapes',
-    'animal': 'cute animals: pets, farm animals, birds, wildlife and sea creatures shown in natural habitats',
-    'vehicle': 'vintage and travel vehicles: cars, bikes, trains, trams, boats, aircraft, carts and stations',
-    'shop': 'kinds of small shops, market stalls, kiosks, counters and street vendor carts (the shop itself, not a product it sells)',
-    'coast': 'seaside and holiday subjects: beaches, harbours, piers, lighthouses, beach huts and coastal scenes',
-    'drink': 'drinks and tea or coffee settings: teas, coffees, juices, smoothies, mocktails, hot chocolate, drink stands',
+    'hobby': 'hobby benches and craft workshops mid-project: woodcarving, bookbinding, model ships, stained glass, looms, watch repair, calligraphy, terrariums (no kitchen still life)',
+    'music': 'musical instruments as the hero (harp, cello, accordion, gamelan, drum kit, pipe organ, sitar), practice rooms, bandstands, instrument workshops, listening corners',
+    'toys': 'toys, games and models: toy train layouts, dollhouses, kites, board games mid-play, puppet theatres, marble runs, spinning tops, rocking horses',
+    'festival': 'festival decorations and setups without people: lantern festivals, harvest fair stalls (not food-centric), Christmas tree farms, altars, kite festivals, parked carnival floats',
+    'nature': 'mountains, forests, rivers, waterfalls, gorges, meadows and lakes, real places and generic landscapes, clear water and no mud',
+    'wildlife': 'wild birds, insects, reptiles, amphibians, forest mammals, coral reef and tide-pool life, aquariums (not pets)',
+    'farm': 'farms, orchards and countryside: barns, beehives, orchards at harvest, haystacks, sheep pens, vineyards, seedling greenhouses, friendly farm machinery',
+    'park': 'parks and play places: carousels, ferris wheels, playgrounds, park follies, mini golf, splash pads, bandstands, boating ponds (no zoo animals)',
+    'discovery': 'discovery and natural science: globes, maps, inviting natural history cabinets, fossil digs, insect study desks, observatory domes, weather stations, botanical illustration studios',
+    'outdoor': 'sport, camping and outdoor gear and places without people: tents, climbing gear, kayaks, sailing dinghies, ski huts, tennis or croquet lawns, fishing piers, trailheads, surf shacks',
+    'books': 'libraries, bookshops and stationery: reading nooks in public places, stationery shops, printing presses, map shops, warm archives',
+    'structure': 'remarkable structures: bridges, windmills, watermills, castles, treehouses, clock towers, follies, aqueducts, stilt houses, covered bridges',
 }
 # One focus per round: a long EXCLUDED list alone made the model repeat itself or stop.
 SUBTOPICS = {
-    'food': ['European dishes', 'Asian dishes', 'Latin American and African dishes', 'Middle Eastern and South Asian dishes',
-             'breads and savoury bakes', 'cakes, pies and tarts', 'sweets, candies and small desserts', 'fruits and nuts as food',
-             'vegetables, herbs and pantry ingredients', 'breakfast and picnic foods', 'soups, stews and preserves', 'cheeses, cured foods and seafood'],
-    'interior': ['rooms and room types', 'seating and beds', 'tables, desks and storage furniture', 'kitchen fittings and appliances',
-                 'lighting and fireplaces', 'windows, doors, stairs and architectural details', 'textiles and soft furnishings',
-                 'bathroom and laundry fixtures', 'hobby, study and play corners', 'decorative home features'],
-    'garden': ['garden flowers', 'wildflowers and meadow plants', 'flowering shrubs and climbers', 'trees and fruit trees',
-               'vegetable and herb plants', 'succulents, ferns and foliage plants', 'garden structures and features',
-               'water and rock garden features', 'orchard and berry plants', 'tropical and exotic plants'],
-    'objects': ['toys and games', 'musical instruments', 'clocks, cameras and old devices', 'stationery and writing items',
-                'sewing, knitting and craft supplies', 'collectibles and souvenirs', 'kitchenware and tableware antiques',
-                'travel items and luggage', 'sports and outdoor gear', 'decorative ornaments and keepsakes'],
-    'facade': ['house types', 'civic and public buildings', 'religious and historic building types', 'towers, gates and walls',
-               'bridges and waterside structures', 'shopfront and street features', 'rural and farm buildings', 'garden and park structures',
-               'mountain and countryside buildings', 'squares, stairs and street spaces'],
-    'animal': ['pets', 'farm animals', 'garden birds', 'water birds and seabirds', 'forest mammals', 'savanna and grassland animals',
-               'mountain and polar animals', 'rainforest animals', 'reptiles, amphibians and pond life', 'sea creatures', 'baby animals',
-               'friendly insects and small creatures like butterflies and ladybirds'],
-    'vehicle': ['vintage cars', 'trucks, vans and utility vehicles', 'bicycles, scooters and motorbikes', 'trains, trams and rail',
-                'boats and ships', 'aircraft and balloons', 'carts, carriages and wagons', 'stations, ports and travel places',
-                'camping and caravan vehicles', 'toy-like and novelty vehicles'],
-    'shop': ['food shops and bakeries', 'market stalls', 'cafes and food kiosks', 'craft and gift shops', 'flower and garden shops',
-             'book, music and stationery shops', 'clothing and accessory shops', 'household and hardware shops', 'street vendor carts',
-             'service shops like barbers or repair (no people)'],
-    'coast': ['beach features', 'harbour and pier structures', 'seaside buildings', 'boats on the coast', 'beach gear and toys',
-              'rock pools and shore life', 'coastal plants and landscapes', 'seaside food and leisure spots', 'islands and lagoons',
-              'lighthouses and coastal landmarks'],
-    'drink': ['teas of the world', 'coffee drinks', 'juices and smoothies', 'milk drinks and hot chocolate', 'sodas, lemonades and mocktails',
-              'traditional and regional drinks', 'teaware and coffee equipment', 'drink stands, bars and serving vessels',
-              'fermented and sparkling soft drinks', 'frozen and iced drinks'],
+    'hobby': ['woodworking and carving', 'paper crafts and bookbinding', 'model making', 'glass and ceramics crafts', 'textile crafts and weaving',
+              'repair and tinkering benches', 'painting and calligraphy', 'plant and terrarium hobbies', 'jewellery and metal crafts', 'leather and sewing crafts'],
+    'music': ['string instruments', 'wind and brass instruments', 'percussion instruments', 'keyboard instruments', 'folk and world instruments',
+              'music rooms and stages', 'instrument workshops', 'listening and recording gear'],
+    'toys': ['train sets and vehicles', 'dolls and dollhouses', 'outdoor toys and kites', 'board and table games', 'puppets and theatres',
+             'construction and marble toys', 'spinning and mechanical toys', 'ride-on and rocking toys', 'models and miniatures'],
+    'festival': ['lantern and light festivals', 'harvest and fair setups', 'winter holiday decorations', 'spring and colour festivals',
+                 'altars and memorial decorations', 'kite and balloon festivals', 'parades and carnival floats', 'fireworks and boat festivals'],
+    'nature': ['mountains and peaks', 'forests and woods', 'rivers and streams', 'waterfalls and gorges', 'lakes and ponds',
+               'meadows and valleys', 'caves and rock formations', 'famous natural landmarks'],
+    'wildlife': ['garden and forest birds', 'water birds', 'butterflies and friendly insects', 'reptiles and amphibians', 'forest mammals',
+                 'grassland and mountain animals', 'coral reef life', 'tide-pool and shore life', 'aquarium fish'],
+    'farm': ['barns and farm buildings', 'beekeeping', 'orchards and fruit harvest', 'field crops and haystacks', 'farm animals in pens',
+             'vineyards', 'greenhouses and seedlings', 'friendly farm machinery', 'windmill and water features'],
+    'park': ['fairground rides', 'playground equipment', 'park follies and pavilions', 'mini golf and games', 'water play and ponds',
+             'bandstands and stages', 'botanical park features', 'park paths and bridges'],
+    'discovery': ['globes and maps', 'natural history cabinets', 'fossils and geology', 'insect and plant study', 'astronomy places',
+                  'weather and measuring instruments', 'exploration gear', 'botanical illustration and specimens'],
+    'outdoor': ['camping gear and tents', 'climbing and hiking gear', 'paddle and sail boats', 'winter sport huts and gear',
+                'lawn and court sports', 'fishing places and gear', 'surf and beach sport', 'cycling and trail places'],
+    'books': ['library types', 'bookshop types', 'reading nooks', 'stationery and writing items', 'printing and binding equipment',
+              'map and archive rooms', 'book furniture and ladders'],
+    'structure': ['bridges', 'windmills and watermills', 'castles and forts', 'treehouses and stilt houses', 'towers and clock towers',
+                  'follies and pavilions', 'aqueducts and viaducts', 'lighthouses and beacons'],
 }
 PROMPT = '''Return only the requested JSON. Text-only task; do not browse, run commands or modify files.
 
@@ -82,7 +78,7 @@ Focus this round on: {focus}.
 
 Rules for each subject:
 - subject: generic English singular noun, 1-3 words, lowercase, no adjectives, colours, brands or
-  setting (e.g. "paella", "rocking chair", "lighthouse", "hedgehog", "tram").
+  setting (e.g. "harp", "rocking horse", "covered bridge", "kingfisher", "beehive").
 - concrete, real and instantly recognisable; can be the clear hero of a pleasant picture with no people.
 - big enough to be the hero of a medium shot: not a small part or component (pedal, carburetor, door casing),
   sachet, packet or utility infrastructure (drain, spillway, yard).
@@ -99,7 +95,7 @@ FAMILIES (id: label)
 EXCLUDED
 {excluded}
 
-JSON shape: {{"subjects":[{{"subject":"paella","vi":"cơm paella","family":"rice_dish"}}, ...]}}'''
+JSON shape: {{"subjects":[{{"subject":"harp","vi":"đàn hạc","family":""}}, ...]}}'''
 CLEAN_SCHEMA = {
     'type': 'object', 'properties': {'drop': {'type': 'array', 'items': {
         'type': 'object', 'properties': {'index': {'type': 'integer'}, 'reason': {'type': 'string', 'maxLength': 80}},
@@ -110,7 +106,7 @@ CLEAN_PROMPT = '''Return only the requested JSON. Text-only task; do not browse,
 
 We make bright, cosy, near-photoreal jigsaw puzzle pictures without people. Each line is a candidate
 main subject for the theme "{theme}": {description}. Drop a line when ANY of these holds:
-- it does not belong to the theme (e.g. a product such as "jacket" in a shop theme, a room in an objects theme);
+- it does not belong to the theme (e.g. a pet in the wildlife theme, a food dish in the festival theme);
 - too small or a mere part/component to be the hero of a medium shot (pedal, carburetor, eraser, sachet, door casing);
 - utility, industrial or bleak (drain, spillway, workhouse, railway yard, freezer);
 - dangerous, venomous or scary, alcohol, weapons, disease, mud, disgusting creatures, religious objects or rituals;
@@ -135,7 +131,8 @@ def save(raw):
         body = ',\n'.join('    ' + json.dumps(entry, ensure_ascii=False, separators=(',', ':')) for entry in entries)
         lines.append(f'  {json.dumps(theme)}: [\n{body}\n  ]')
     rejected = json.dumps(raw.get('rejected', {}), ensure_ascii=False, separators=(',', ':'))
-    text = '{"version": 1, "themes": {\n' + ',\n'.join(lines) + '\n},\n"rejected": ' + rejected + '\n}\n'
+    note = f'"note": {json.dumps(raw["note"], ensure_ascii=False)},\n' if raw.get('note') else ''
+    text = '{"version": 1, ' + note + '"themes": {\n' + ',\n'.join(lines) + '\n},\n"rejected": ' + rejected + '\n}\n'
     temporary = CATALOGUE_PATH.with_suffix('.json.tmp')
     temporary.write_text(text, encoding='utf-8')
     temporary.replace(CATALOGUE_PATH)

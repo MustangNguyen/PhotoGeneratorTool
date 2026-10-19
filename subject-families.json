@@ -16,7 +16,8 @@
         "chinchilla",
         "ferret",
         "hedgehog"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "cat",
@@ -25,7 +26,8 @@
         "cat",
         "kitten",
         "kitty"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "dog",
@@ -67,11 +69,24 @@
         "pony",
         "foal",
         "alpaca",
-        "llama"
+        "llama",
+        "camel",
+        "yak",
+        "mule",
+        "clydesdale",
+        "merino",
+        "angora",
+        "kunekune",
+        "holstein",
+        "ankole",
+        "haflinger",
+        "percheron"
       ],
       "learned": [
-        "argali"
-      ]
+        "argali",
+        "kunekune pig"
+      ],
+      "weight": 3
     },
     {
       "id": "poultry",
@@ -84,7 +99,10 @@
         "duck",
         "duckling",
         "goose",
-        "swan"
+        "swan",
+        "orpington",
+        "leghorn",
+        "muscovy"
       ],
       "learned": [
         "roast chicken",
@@ -93,7 +111,8 @@
         "emu",
         "pheasant",
         "peafowl"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "songbird",
@@ -109,9 +128,32 @@
         "wren",
         "woodpecker",
         "hummingbird",
-        "tit"
+        "tit",
+        "cardinal",
+        "paradise flycatcher",
+        "barbet",
+        "bowerbird",
+        "dipper",
+        "drongo",
+        "firecrest",
+        "goldcrest",
+        "grosbeak",
+        "skylark",
+        "pitta",
+        "redstart",
+        "sunbird",
+        "treecreeper",
+        "waxwing",
+        "wheatear",
+        "wagtail",
+        "warbler",
+        "jackdaw",
+        "puffbird",
+        "jacamar",
+        "motmot",
+        "nightjar"
       ],
-      "weight": 2,
+      "weight": 3,
       "learned": [
         "koel",
         "mockingbird",
@@ -134,13 +176,17 @@
         "cockatiel",
         "cockatoo",
         "macaw",
-        "lovebird"
+        "lovebird",
+        "kakapo",
+        "kea",
+        "galah"
       ],
       "learned": [
         "eclectus",
         "african grey parrot",
         "lorikeet"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "raptor",
@@ -149,13 +195,17 @@
         "owl",
         "eagle",
         "hawk",
-        "falcon"
+        "falcon",
+        "osprey",
+        "harpy eagle",
+        "goshawk"
       ],
       "learned": [
         "snowy owl",
         "eaglet",
         "barn owl"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "wader",
@@ -166,7 +216,27 @@
         "crane",
         "stork",
         "pelican",
-        "egret"
+        "egret",
+        "shoebill",
+        "tern",
+        "albatross",
+        "sandpiper",
+        "great egret",
+        "frigatebird",
+        "booby",
+        "avocet",
+        "bittern",
+        "eider",
+        "gannet",
+        "godwit",
+        "merganser",
+        "shelduck",
+        "cormorant",
+        "petrel",
+        "shearwater",
+        "woodcock",
+        "hammerkop",
+        "jabiru"
       ],
       "learned": [
         "oystercatcher",
@@ -174,7 +244,8 @@
         "razorbill",
         "curlew",
         "seagull"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "polar",
@@ -221,7 +292,22 @@
         "bear",
         "panda",
         "red panda",
-        "koala"
+        "koala",
+        "marmot",
+        "lynx",
+        "stoat",
+        "numbat",
+        "echidna",
+        "binturong",
+        "bilby",
+        "quoll",
+        "possum",
+        "tarsier",
+        "loris",
+        "hyrax",
+        "macaque",
+        "capuchin",
+        "langur"
       ],
       "learned": [
         "marten",
@@ -229,7 +315,8 @@
         "dhole",
         "lemur",
         "groundhog"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "big_wild",
@@ -244,7 +331,22 @@
         "cheetah",
         "rhino",
         "hippo",
-        "camel"
+        "kangaroo",
+        "anteater",
+        "tapir",
+        "moose",
+        "chamois",
+        "snow leopard",
+        "oryx",
+        "wildebeest",
+        "warthog",
+        "kudu",
+        "gerenuk",
+        "orangutan",
+        "gorilla",
+        "chimpanzee",
+        "bighorn",
+        "takin"
       ],
       "learned": [
         "cougar",
@@ -252,7 +354,8 @@
         "terrapin",
         "bison",
         "gazelle"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "sea_life",
@@ -269,7 +372,30 @@
         "octopus",
         "jellyfish",
         "seahorse",
-        "clownfish"
+        "clownfish",
+        "staghorn coral",
+        "pufferfish",
+        "manta ray",
+        "sea urchin",
+        "cuttlefish",
+        "nautilus",
+        "giant clam",
+        "sea slug",
+        "conch",
+        "blue tang",
+        "boxfish",
+        "garden eel",
+        "sunfish",
+        "angelfish",
+        "parrotfish",
+        "wrasse",
+        "goby",
+        "blenny",
+        "sea sponge",
+        "giant kelp",
+        "sand dollar",
+        "cowrie",
+        "abalone"
       ],
       "learned": [
         "seashell",
@@ -277,7 +403,8 @@
         "guitarfish",
         "shell stand",
         "leafy seadragon"
-      ]
+      ],
+      "weight": 4
     },
     {
       "id": "insect",
@@ -290,13 +417,33 @@
         "dragonfly",
         "moth",
         "beetle",
-        "snail"
+        "snail",
+        "swallowtail",
+        "luna moth",
+        "firefly",
+        "cicada",
+        "grasshopper",
+        "mayfly",
+        "leaf insect",
+        "thorn bug",
+        "treehopper",
+        "katydid",
+        "monarch",
+        "birdwing",
+        "glasswing",
+        "hawkmoth",
+        "honeybee",
+        "lacewing",
+        "water strider",
+        "glowworm",
+        "chrysalis"
       ],
       "learned": [
         "bumblebee",
         "volkswagen beetle",
         "ant"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "bread",
@@ -314,7 +461,8 @@
         "baozi",
         "focaccia",
         "pretzel"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "cake",
@@ -353,7 +501,8 @@
         "crumble",
         "strudel",
         "cobbler"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "pastry_dessert",
@@ -429,7 +578,8 @@
         "paella",
         "dutch oven",
         "cauldron"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "noodle",
@@ -544,7 +694,8 @@
         "kiwi",
         "citrus",
         "berry",
-        "persimmon"
+        "persimmon",
+        "pitaya"
       ],
       "weight": 2,
       "learned": [
@@ -577,9 +728,26 @@
         "mushroom",
         "pepper",
         "zucchini",
-        "cucumber"
+        "cucumber",
+        "gourd",
+        "asparagus",
+        "rhubarb",
+        "kale",
+        "runner bean",
+        "celery",
+        "sugar beet",
+        "turnip",
+        "radish",
+        "kohlrabi",
+        "brussels sprout",
+        "shallot",
+        "onion",
+        "luffa",
+        "watercress",
+        "chicory",
+        "endive"
       ],
-      "weight": 2,
+      "weight": 3,
       "learned": [
         "stuffed pepper",
         "artichoke",
@@ -746,30 +914,30 @@
         "loom",
         "handloom",
         "haberdashery counter",
-        "spool"
-      ]
+        "spool",
+        "pattern table",
+        "wool roving basket"
+      ],
+      "learned": []
     },
     {
       "id": "music",
       "label": "nhạc cụ và máy nghe nhạc",
       "members": [
-        "piano",
-        "guitar",
-        "violin",
-        "cello",
-        "accordion",
-        "flute",
-        "harp",
-        "drum",
-        "ukulele",
         "music box",
         "record player",
         "player",
         "gramophone",
         "jukebox",
         "radio",
-        "cassette"
-      ]
+        "cassette",
+        "music stand",
+        "orchestra pit",
+        "amphitheatre stage",
+        "practice room"
+      ],
+      "weight": 2,
+      "learned": []
     },
     {
       "id": "optics_travel",
@@ -783,8 +951,11 @@
         "kaleidoscope",
         "compass",
         "globe",
-        "map"
-      ]
+        "map",
+        "vintage camera shelf",
+        "map table"
+      ],
+      "learned": []
     },
     {
       "id": "writing",
@@ -801,7 +972,8 @@
         "inkstone",
         "pen",
         "letter",
-        "book"
+        "book",
+        "printer tray"
       ],
       "learned": [
         "stamp album",
@@ -810,7 +982,8 @@
         "paperweight",
         "inkwell",
         "journal"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "clock",
@@ -868,7 +1041,43 @@
         "chess",
         "dollhouse",
         "rocking horse",
-        "marble"
+        "marble",
+        "marble run",
+        "spinning top",
+        "puppet theatre",
+        "wooden blocks tower",
+        "brick city",
+        "pedal car",
+        "zoetrope",
+        "thaumatrope",
+        "pinwheel",
+        "whirligig",
+        "yo-yo",
+        "diabolo",
+        "matryoshka",
+        "doll pram",
+        "teddy bear shelf",
+        "noah's ark",
+        "roly poly",
+        "stacking rings",
+        "abacus",
+        "sand castle set",
+        "paper boat",
+        "cardboard fort",
+        "play tunnel",
+        "bean bag toss",
+        "gyroscope",
+        "push walker",
+        "spirograph",
+        "boomerang",
+        "bubble machine",
+        "kokeshi",
+        "daruma",
+        "gear set",
+        "kendama",
+        "tea party set",
+        "slot car track",
+        "wind spinner garden"
       ],
       "learned": [
         "cloth doll",
@@ -878,8 +1087,11 @@
         "wooden animal",
         "toy bowling set",
         "kite stand",
-        "toy cart"
-      ]
+        "toy cart",
+        "toy zeppelin",
+        "toy treehouse"
+      ],
+      "weight": 7
     },
     {
       "id": "lighting",
@@ -888,7 +1100,8 @@
         "lantern",
         "lamp",
         "candle",
-        "chandelier"
+        "chandelier",
+        "glow garden"
       ],
       "learned": [
         "diya",
@@ -963,7 +1176,8 @@
         "lace collar",
         "rucksack",
         "weekender bag",
-        "doctor bag"
+        "doctor bag",
+        "carnival costume"
       ]
     },
     {
@@ -1236,12 +1450,25 @@
         "cherry tree",
         "olive tree",
         "pomegranate tree",
-        "peach tree"
+        "peach tree",
+        "papaya tree",
+        "date palm",
+        "breadfruit tree",
+        "soursop tree",
+        "sapodilla tree",
+        "jujube tree",
+        "yuzu tree",
+        "pomelo tree",
+        "mandarin tree",
+        "damson",
+        "pistachio",
+        "kumquat tree"
       ],
       "learned": [
         "quince",
         "coffee plant"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "tree",
@@ -1259,7 +1486,7 @@
         "banana plant",
         "birch tree"
       ],
-      "weight": 2,
+      "weight": 3,
       "learned": [
         "maple tree",
         "willow tree",
@@ -1308,14 +1535,21 @@
         "houseplant",
         "bonsai",
         "orchid",
-        "saguaro"
+        "saguaro",
+        "lucky bamboo",
+        "miniature garden",
+        "fairy garden",
+        "bottle garden",
+        "cactus dish garden",
+        "plant propagation shelf"
       ],
       "learned": [
         "air plant",
         "echeveria",
         "japanese aralia",
         "snake plant"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "climbing",
@@ -1472,9 +1706,17 @@
         "tower",
         "cathedral",
         "monastery",
-        "dome"
+        "dome",
+        "belfry",
+        "zytglogge",
+        "galata",
+        "torre de belem",
+        "diaolou",
+        "nuraghe",
+        "broch",
+        "badgir"
       ],
-      "weight": 2,
+      "weight": 3,
       "learned": [
         "clock tower",
         "skyscraper",
@@ -1511,14 +1753,30 @@
       "label": "cầu",
       "members": [
         "bridge",
-        "footbridge"
+        "footbridge",
+        "wooden trestle",
+        "ponte vecchio",
+        "rialto",
+        "pont du gard",
+        "pont neuf",
+        "kintai",
+        "stari most",
+        "rakotzbrucke",
+        "khaju",
+        "bridge of sighs",
+        "kapellbrucke",
+        "puente nuevo",
+        "pont valentre",
+        "sioseh pol",
+        "yatsuhashi"
       ],
       "learned": [
         "arch bridge",
         "causeway",
         "drawbridge",
         "aqueduct"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "waterfront",
@@ -1566,7 +1824,8 @@
         "tidal pool",
         "swimming pool",
         "cascade",
-        "stepwell"
+        "stepwell",
+        "rill"
       ]
     },
     {
@@ -1586,9 +1845,11 @@
         "reef",
         "canyon",
         "dune",
-        "desert"
+        "desert",
+        "cinder cone",
+        "karst tower"
       ],
-      "weight": 2,
+      "weight": 4,
       "learned": [
         "wildflower meadow",
         "sunflower field",
@@ -1603,7 +1864,8 @@
         "sea grotto",
         "coastal heath",
         "city block",
-        "island volcano"
+        "island volcano",
+        "sand cay"
       ]
     },
     {
@@ -1615,9 +1877,14 @@
         "courtyard",
         "atrium",
         "patio",
-        "lawn"
+        "lawn",
+        "palm house",
+        "fern house",
+        "lily house",
+        "butterfly house",
+        "alpine house"
       ],
-      "weight": 2,
+      "weight": 3,
       "learned": [
         "glasshouse",
         "rock garden",
@@ -1640,11 +1907,17 @@
       "members": [
         "windmill",
         "mill",
-        "water wheel"
+        "water wheel",
+        "noria",
+        "kinderdijk",
+        "consuegra",
+        "zaanse schans",
+        "windpump"
       ],
       "learned": [
         "watermill"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "bicycle",
@@ -1653,7 +1926,8 @@
         "bicycle",
         "bike",
         "tricycle"
-      ]
+      ],
+      "learned": []
     },
     {
       "id": "motorbike",
@@ -1741,11 +2015,13 @@
         "wooden boat",
         "canal boat",
         "barge",
-        "vendor boat"
+        "vendor boat",
+        "water taxi"
       ],
       "learned": [
         "lifeboat"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "large_boat",
@@ -1831,7 +2107,9 @@
       "id": "paper_art",
       "label": "tranh thủ công bằng giấy",
       "auto": true,
-      "members": [],
+      "members": [
+        "marbling tray"
+      ],
       "learned": [
         "paper artwork",
         "paper art",
@@ -1845,7 +2123,12 @@
       "id": "amphibian",
       "label": "động vật lưỡng cư",
       "auto": true,
-      "members": [],
+      "members": [
+        "thorny devil",
+        "tokay",
+        "skink",
+        "tuatara"
+      ],
       "learned": [
         "tree frog",
         "axolotl",
@@ -1853,7 +2136,8 @@
         "toad",
         "basilisk",
         "lizard"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "household_appliance",
@@ -2044,11 +2328,21 @@
       "id": "camping_gear",
       "label": "bộ đồ cắm trại",
       "auto": true,
-      "members": [],
+      "members": [
+        "sleeping bag",
+        "hiking boots",
+        "tarp",
+        "camp cot",
+        "chuck box",
+        "cooler box",
+        "backpack",
+        "awning"
+      ],
       "learned": [
         "camping gear",
         "sunshade"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "gift_basket",
@@ -2067,13 +2361,25 @@
       "id": "library",
       "label": "thư viện trong nhà",
       "auto": true,
-      "members": [],
+      "members": [
+        "reading garden",
+        "library garden",
+        "book chair",
+        "book tower",
+        "library tower",
+        "book display table",
+        "archive shelves",
+        "book boat",
+        "toy library"
+      ],
       "learned": [
         "library",
         "bookplate",
         "library room",
-        "storybook"
-      ]
+        "storybook",
+        "library counter"
+      ],
+      "weight": 3
     },
     {
       "id": "harbor_office",
@@ -2110,7 +2416,9 @@
       "id": "pottery",
       "label": "góc làm gốm",
       "auto": true,
-      "members": [],
+      "members": [
+        "glaze shelf"
+      ],
       "learned": [
         "pottery corner",
         "pottery stand",
@@ -2121,7 +2429,9 @@
       "id": "blossom",
       "label": "hoa nở trên cành",
       "auto": true,
-      "members": [],
+      "members": [
+        "apricot blossom tree"
+      ],
       "learned": [
         "cherry blossom",
         "magnolia blossom",
@@ -2221,7 +2531,10 @@
       "id": "music_equipment",
       "label": "thiết bị âm thanh",
       "auto": true,
-      "members": [],
+      "members": [
+        "vinyl shelf",
+        "cassette deck"
+      ],
       "learned": [
         "amplifier",
         "microphone",
@@ -2333,7 +2646,8 @@
       "members": [],
       "learned": [
         "treehouse"
-      ]
+      ],
+      "weight": 2
     },
     {
       "id": "teaparty",
@@ -2359,12 +2673,50 @@
       "id": "castle",
       "label": "lâu đài",
       "auto": true,
-      "members": [],
+      "members": [
+        "keep",
+        "rampart",
+        "motte",
+        "bastion",
+        "gatehouse",
+        "kasbah",
+        "ksar",
+        "alcazar",
+        "neuschwanstein",
+        "himeji",
+        "hohenzollern",
+        "eilean donan",
+        "chambord",
+        "chenonceau",
+        "matsumoto",
+        "conwy",
+        "bodiam",
+        "alnwick",
+        "kronborg",
+        "malbork",
+        "carcassonne",
+        "hohensalzburg",
+        "kremlin",
+        "mehrangarh",
+        "predjama",
+        "bojnice",
+        "corvin",
+        "trakai",
+        "moszna",
+        "peles",
+        "dunnottar",
+        "castell coch",
+        "chillon",
+        "burg eltz",
+        "frontenac",
+        "ice palace"
+      ],
       "learned": [
         "castle",
         "chateau",
         "fortress"
-      ]
+      ],
+      "weight": 3
     },
     {
       "id": "paper_shop_model",
@@ -2537,7 +2889,8 @@
       "members": [],
       "learned": [
         "gearshift",
-        "tractor"
+        "tractor",
+        "model racetrack"
       ]
     },
     {
@@ -2575,7 +2928,9 @@
       "id": "tile_mural",
       "label": "tranh khảm gạch",
       "auto": true,
-      "members": [],
+      "members": [
+        "mosaic table"
+      ],
       "learned": [
         "tile mural"
       ]
@@ -2737,6 +3092,639 @@
       "members": [],
       "learned": [
         "mortar and pestle"
+      ]
+    },
+    {
+      "id": "playground",
+      "label": "sân chơi",
+      "auto": true,
+      "weight": 3,
+      "members": [
+        "seesaw",
+        "sandbox",
+        "spring rider",
+        "merry-go-round",
+        "playhouse",
+        "trampoline",
+        "wooden playship",
+        "spinning cup",
+        "zipline",
+        "jungle gym",
+        "roundabout",
+        "climbing net",
+        "slide tower",
+        "climbing tower",
+        "play boat",
+        "play car",
+        "rocket climber",
+        "swing set",
+        "sand digger",
+        "sand play area",
+        "archimedes screw",
+        "splash pad",
+        "splash zone",
+        "tetherball"
+      ],
+      "learned": []
+    },
+    {
+      "id": "motor_vehicle",
+      "label": "xe cơ giới cổ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "bathing machine"
+      ]
+    },
+    {
+      "id": "gazebo",
+      "label": "chòi hóng mát",
+      "auto": true,
+      "members": [
+        "stone boat"
+      ],
+      "learned": []
+    },
+    {
+      "id": "painting",
+      "label": "tranh vẽ",
+      "auto": true,
+      "members": [],
+      "learned": [
+        "canva"
+      ]
+    },
+    {
+      "id": "string_instrument",
+      "label": "đàn dây",
+      "members": [
+        "harp",
+        "cello",
+        "guitar",
+        "violin",
+        "ukulele",
+        "banjo",
+        "fiddle",
+        "violoncello",
+        "erhu",
+        "sitar",
+        "koto",
+        "guzheng",
+        "pipa",
+        "shamisen",
+        "monochord zither",
+        "mandolin",
+        "lute",
+        "oud",
+        "balalaika",
+        "bouzouki",
+        "dulcimer",
+        "hurdy gurdy",
+        "viola",
+        "rebab",
+        "santur",
+        "qanun",
+        "kora",
+        "berimbau",
+        "charango",
+        "nyckelharpa",
+        "kantele",
+        "cimbalom",
+        "lyre",
+        "psaltery",
+        "banjolele",
+        "dobro",
+        "pedal steel",
+        "autoharp",
+        "bandura",
+        "domra",
+        "gusli",
+        "veena",
+        "sarod",
+        "sarangi",
+        "tanpura",
+        "dan bau",
+        "dan nguyet",
+        "gayageum",
+        "geomungo",
+        "haegeum",
+        "morin khuur",
+        "cuatro",
+        "vihuela",
+        "guitarron",
+        "theorbo",
+        "cittern",
+        "viola da gamba",
+        "rebec",
+        "ngoni",
+        "valiha",
+        "ektara",
+        "sanshin",
+        "dan tranh"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "wind_instrument",
+      "label": "kèn sáo",
+      "members": [
+        "flute",
+        "oboe",
+        "trombone",
+        "panpipes",
+        "ocarina",
+        "recorder",
+        "bagpipes",
+        "trumpet",
+        "french horn",
+        "tuba",
+        "cornet",
+        "euphonium",
+        "saxophone",
+        "clarinet",
+        "bassoon",
+        "piccolo",
+        "alphorn",
+        "didgeridoo",
+        "sheng",
+        "khene",
+        "suona",
+        "quena",
+        "flugelhorn",
+        "sousaphone",
+        "mellophone",
+        "bugle",
+        "cor anglais",
+        "shawm",
+        "crumhorn",
+        "sackbut",
+        "zurna",
+        "duduk",
+        "bansuri",
+        "shakuhachi",
+        "dizi",
+        "hulusi",
+        "fife",
+        "harmonica",
+        "melodica"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "percussion",
+      "label": "nhạc cụ gõ",
+      "members": [
+        "drum",
+        "marimba",
+        "steelpan",
+        "kalimba",
+        "gamelan gong",
+        "bamboo xylophone",
+        "bodhran",
+        "djembe",
+        "bongo",
+        "tabla",
+        "mbira",
+        "glockenspiel",
+        "vibraphone",
+        "timpani",
+        "tambourine",
+        "cymbals",
+        "castanets",
+        "maracas",
+        "handbells",
+        "carillon",
+        "wind chimes",
+        "singing bowl",
+        "lithophone",
+        "angklung",
+        "gender metallophone",
+        "cajon",
+        "taiko",
+        "conga",
+        "timbales",
+        "snare",
+        "balafon",
+        "kulintang",
+        "handpan",
+        "udu",
+        "ghatam",
+        "darbuka",
+        "riq",
+        "dhol",
+        "mridangam",
+        "kendang",
+        "guiro",
+        "cabasa",
+        "rainstick",
+        "shekere",
+        "agogo",
+        "woodblock"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "keyboard_instrument",
+      "label": "đàn phím",
+      "members": [
+        "piano",
+        "accordion",
+        "pipe organ",
+        "celesta",
+        "harpsichord",
+        "clavichord",
+        "spinet",
+        "harmonium",
+        "concertina",
+        "bandoneon",
+        "synthesizer",
+        "theremin",
+        "fortepiano",
+        "pianola",
+        "virginal",
+        "calliope",
+        "orchestrion",
+        "mellotron",
+        "clavinet",
+        "keytar",
+        "bayan",
+        "melodeon"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "board_game",
+      "label": "cờ và trò chơi bàn",
+      "members": [
+        "chess set",
+        "mahjong set",
+        "jigsaw table",
+        "air hockey table",
+        "ludo",
+        "backgammon",
+        "checkers",
+        "go set",
+        "xiangqi",
+        "shogi",
+        "carrom",
+        "mancala",
+        "bagatelle",
+        "crokinole",
+        "tangram",
+        "puzzle cube",
+        "tilt maze",
+        "giant chess",
+        "loteria",
+        "giant dominoes"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "wild_bird",
+      "label": "chim hoang dã cỡ lớn",
+      "members": [
+        "hornbill",
+        "kookaburra",
+        "roadrunner",
+        "brown kiwi",
+        "cassowary",
+        "turaco",
+        "capercaillie",
+        "grouse",
+        "partridge"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "festive_tree",
+      "label": "cây trang trí lễ hội",
+      "members": [
+        "lantern tree",
+        "christmas tree",
+        "red envelope tree",
+        "tanabata tree",
+        "wish tree",
+        "easter egg tree",
+        "tinsel tree",
+        "feather tree",
+        "ribbon tree",
+        "light tree",
+        "ornament tree",
+        "candle tree",
+        "bell tree",
+        "christmas tree farm"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "farm_machine",
+      "label": "máy nông nghiệp",
+      "members": [
+        "combine harvester",
+        "plough",
+        "hay rake",
+        "harrow",
+        "seed drill",
+        "cultivator",
+        "baler",
+        "mower",
+        "thresher",
+        "winnowing machine",
+        "corn sheller",
+        "milking machine",
+        "transplanter",
+        "shaduf"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "farm_building",
+      "label": "nhà và chuồng trại nông trại",
+      "members": [
+        "silo",
+        "hay loft",
+        "dovecote",
+        "henhouse",
+        "sheepfold",
+        "stable",
+        "farmhouse",
+        "corncrib",
+        "cowshed",
+        "springhouse",
+        "hay barrack",
+        "horreo",
+        "stabbur",
+        "tack room",
+        "chicken coop",
+        "kennel",
+        "aviary",
+        "croft",
+        "homestead",
+        "ranch",
+        "hacienda",
+        "chalet",
+        "masseria",
+        "quinta",
+        "izba",
+        "minka",
+        "cortijo",
+        "rondavel",
+        "corral"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "beekeeping",
+      "label": "nuôi ong",
+      "members": [
+        "beehive",
+        "skep",
+        "honey stand",
+        "honey extractor",
+        "honeycomb",
+        "beehouse",
+        "observation hive"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "crop_field",
+      "label": "đồng ruộng và cây lương thực",
+      "members": [
+        "cornfield",
+        "rice paddy",
+        "tea plantation",
+        "wheatfield",
+        "hayfield",
+        "sorghum",
+        "millet",
+        "buckwheat",
+        "rapeseed",
+        "sugarcane",
+        "oat",
+        "rye",
+        "barley",
+        "safflower",
+        "quinoa",
+        "soybean",
+        "clover",
+        "alfalfa",
+        "teff",
+        "lentil",
+        "tea bush",
+        "windrow",
+        "stook",
+        "hay bale",
+        "haystack",
+        "corn shock"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "palace",
+      "label": "cung điện và dinh thự",
+      "members": [
+        "alhambra",
+        "palacio da pena",
+        "hawa mahal",
+        "versailles",
+        "schonbrunn",
+        "peterhof",
+        "zwinger",
+        "linderhof",
+        "biltmore",
+        "manor",
+        "haveli",
+        "baradari"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "vernacular_house",
+      "label": "nhà dân gian độc đáo",
+      "members": [
+        "overwater bungalow",
+        "floating house",
+        "half-timbered house",
+        "cob house",
+        "adobe house",
+        "sod roof house",
+        "hobbit house",
+        "yurt",
+        "roundhouse",
+        "trullo house",
+        "cave dwelling",
+        "crannog",
+        "clochan",
+        "earthship",
+        "blackhouse",
+        "octagon house",
+        "palafito",
+        "bahay kubo",
+        "rumah gadang",
+        "tongkonan",
+        "joglo",
+        "hanok",
+        "machiya",
+        "gassho zukuri",
+        "siheyuan",
+        "tulou",
+        "yaodong",
+        "dammuso",
+        "rorbu",
+        "sassi",
+        "kelong",
+        "hogan",
+        "chickee",
+        "fale",
+        "bure",
+        "casas colgadas",
+        "riad",
+        "pier house",
+        "raised granary"
+      ],
+      "weight": 3
+    },
+    {
+      "id": "landmark",
+      "label": "công trình biểu tượng hiện đại",
+      "members": [
+        "atomium",
+        "casa batllo",
+        "hundertwasserhaus",
+        "kubuswoningen",
+        "fallingwater",
+        "unisphere",
+        "kelpies",
+        "galleria",
+        "selaron",
+        "kursaal",
+        "orloj",
+        "supertree"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "ancient_site",
+      "label": "di tích cổ",
+      "members": [
+        "sphinx",
+        "odeon",
+        "khazneh",
+        "persepolis",
+        "machu picchu",
+        "stoa",
+        "nilometer",
+        "cistern",
+        "step well",
+        "caravanserai",
+        "yakhchal",
+        "hammam",
+        "jantar mantar",
+        "stonehenge",
+        "petroglyph",
+        "geoglyph"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "fairground_ride",
+      "label": "trò chơi cơ giới hội chợ",
+      "members": [
+        "kiddie coaster",
+        "log flume",
+        "chairoplane",
+        "dodgem",
+        "bumper boat",
+        "wave swinger",
+        "skyride",
+        "splash boat",
+        "summer luge",
+        "funhouse",
+        "helter skelter",
+        "swing boat",
+        "waltzer",
+        "cakewalk",
+        "gallopers"
+      ],
+      "weight": 2,
+      "learned": [
+        "steam fair"
+      ]
+    },
+    {
+      "id": "prehistoric",
+      "label": "sinh vật tiền sử",
+      "members": [
+        "dinosaur skeleton",
+        "dinosaur footprint",
+        "dinosaur bone",
+        "tyrannosaurus",
+        "stegosaurus",
+        "pterosaur",
+        "ichthyosaur",
+        "plesiosaur",
+        "archaeopteryx",
+        "glyptodon",
+        "woolly mammoth",
+        "mammoth tusk",
+        "dodo",
+        "brontosaurus",
+        "triceratops",
+        "ammonite",
+        "trilobite",
+        "crinoid",
+        "fossil slab",
+        "amber"
+      ],
+      "weight": 2
+    },
+    {
+      "id": "mineral",
+      "label": "khoáng vật và tinh thể",
+      "members": [
+        "quartz",
+        "fluorite",
+        "malachite",
+        "opal",
+        "agate",
+        "amethyst",
+        "azurite",
+        "labradorite",
+        "rhodochrosite",
+        "calcite",
+        "pyrite",
+        "jasper",
+        "jade",
+        "lapis lazuli",
+        "garnet",
+        "geode",
+        "crystal garden",
+        "salt crystal",
+        "meteorite",
+        "rock tumbler",
+        "sunstone",
+        "lodestone"
+      ],
+      "weight": 2,
+      "learned": [
+        "granite tor"
+      ]
+    },
+    {
+      "id": "space_exhibit",
+      "label": "hiện vật vũ trụ",
+      "members": [
+        "space capsule",
+        "moon lander",
+        "satellite",
+        "space suit",
+        "space probe",
+        "rocket garden"
+      ],
+      "weight": 2,
+      "learned": [
+        "armillary sphere"
       ]
     }
   ],
@@ -5116,7 +6104,41 @@
       "apricot blossom branch",
       "feed basket",
       "metal tray",
-      "tiled step"
+      "tiled step",
+      "flashlight",
+      "moss cushion",
+      "shutter panel",
+      "stucco wall",
+      "bunting strand",
+      "passenger car",
+      "brush jar",
+      "water tower",
+      "glazed ceramic tile",
+      "feathered hat",
+      "rubber safety mat",
+      "path stone",
+      "book cart",
+      "return scanner",
+      "hydrangea cluster",
+      "farm fence",
+      "low barn",
+      "slot car",
+      "track controller",
+      "loose track section",
+      "part tray",
+      "spring flower bed",
+      "padded wooden stand",
+      "bathing robe",
+      "tanzaku strip",
+      "bamboo railing",
+      "reed bundle",
+      "tennis net",
+      "path",
+      "boundary line",
+      "rice planter",
+      "building block",
+      "toy cart",
+      "rope ladder"
     ]
   }
 }

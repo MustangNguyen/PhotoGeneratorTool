@@ -76,6 +76,8 @@ class Engine:
                 return batch
             if self.active == batch_id:
                 self.pause_requested.set()
+                # Wake a loop resting on a source cooldown so pausing never waits out the rest.
+                self.work_ready.set()
                 self.store.set_batch(batch_id, 'pausing')
                 self.store.event(batch_id, 'Ngừng nhận ảnh mới; sẽ tạm dừng khi các ảnh đang tạo hoàn tất.')
             else:
@@ -442,6 +444,7 @@ class Engine:
     def shutdown(self):
         with self.lock:
             self.pause_requested.set()
+            self.work_ready.set()
             providers = set(self.worker_providers)
             if self.provider is not None:
                 providers.add(self.provider)

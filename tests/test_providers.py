@@ -266,6 +266,25 @@ class DigenProviderTests(unittest.TestCase):
         fake, _ = self.run_generate([signed], _jpeg(720, 960), root=root)
         self.assertEqual("digen_send", fake.calls[0][0])
 
+    def test_expired_recovered_task_is_not_recovered_again(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        unsigned = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "s3://bucket/img.jpg"}]}
+        self.run_generate([unsigned] * 13, root=root)
+
+        # Days later Digen has expired the task: polling it reports done with no assets.
+        expired = {"status": "done", "assets": []}
+        fake, error = self.run_generate([expired], root=root)
+        self.assertIsInstance(error, RuntimeError)
+        self.assertEqual([("digen_poll", {"task_id": "task-1"})], fake.calls)
+        self.assertIsNone(DigenProvider.finished_task(root))
+
+        signed = {"status": "done", "assets": [{"type": "image", "name": "x", "url": "https://s3.example/img.jpg"}]}
+        fake, target = self.run_generate([signed], _jpeg(720, 960), root=root)
+        self.assertIsInstance(target, Path, target)
+        self.assertEqual("digen_send", fake.calls[0][0])
+
     def test_unknown_model_is_rejected(self):
         _, error = self.run_generate([], settings={"digen_image_model": "nope"})
         self.assertIn("Model Digen", str(error))

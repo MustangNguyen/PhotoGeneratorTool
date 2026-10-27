@@ -194,6 +194,24 @@ class ParallelEngineTests(unittest.TestCase):
         self.assertEqual(7, len(control.started))
         self.assertEqual("completed", self.store.batch(batch["id"])["status"])
 
+    def test_shutdown_and_pause_do_not_wait_out_a_source_rest(self):
+        for stop in ("shutdown", "pause"):
+            with self.subTest(stop=stop):
+                engine, control, batch = self.make_engine(1, 1)
+                engine.source_cooldown_seconds = 60
+                control.fail_numbers.add(0)
+                engine.start(batch["id"])
+                control.wait_started(1)
+                control.release_all()
+                deadline = time.monotonic() + 5
+                while not engine.cooldown_until and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(engine.cooldown_until, "source did not start resting")
+                started = time.monotonic()
+                engine.shutdown() if stop == "shutdown" else engine.pause(batch["id"])
+                self.join(engine, timeout=5)
+                self.assertLess(time.monotonic() - started, 5)
+
     def test_pause_drains_admitted_images_and_resume_does_not_duplicate_them(self):
         engine, control, batch = self.make_engine(5, 3)
         engine.start(batch["id"])

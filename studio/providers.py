@@ -390,8 +390,13 @@ class DigenProvider(CodexProvider):
                 previous = json.loads(log.read_text(encoding='utf-8'))
             except (OSError, ValueError):
                 continue
-            if previous.get('status') == 'done' and previous.get('task_id') and any(a.get('type') == 'image' for a in previous.get('assets', [])):
+            has_image = any(a.get('type') == 'image' for a in previous.get('assets', []))
+            if previous.get('status') == 'done' and previous.get('task_id') and has_image:
                 return previous['task_id']
+            # Digen expires old tasks: polling one later reports done with no assets. Recovery
+            # already failed, so the next retry must be a new generation, not the same dead task.
+            if previous.get('recovered') and not has_image:
+                return None
         return None
 
     # Digen's agent occasionally returns 1280×720 despite the portrait request (3 of 38 on
